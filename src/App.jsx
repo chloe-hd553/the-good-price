@@ -372,7 +372,7 @@ function IR({ item, idx, on }) {
   return (
     <div className="ir">
       <input className={`ifl${h ? "" : " e"}`} value={item.label} onChange={e => on(idx, "label", e.target.value)} placeholder="Libellé..." />
-      <input className={`ifa${h ? "" : " e"}`} value={item.montant} onChange={e => on(idx, "montant", e.target.value)} placeholder="0" type="number" />
+      <input className={`ifa${h ? "" : " e"}`} value={item.montant} onChange={e => on(idx, "montant", e.target.value)} placeholder="0" type="number" min="0" onWheel={e => e.target.blur()} />
     </div>
   );
 }
@@ -691,11 +691,11 @@ function Tar({ data, on, sal, pro }) {
         {/* Row 1 */}
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <label style={{ color: C.light, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>Semaines de vacances / an</label>
-          <input className="pi" type="number" value={data.sv} onChange={e => uP("sv", e.target.value)} />
+          <input className="pi" type="number" value={data.sv} onChange={e => uP("sv", e.target.value)} min="0" onWheel={e => e.target.blur()} />
         </div>
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <label style={{ color: C.light, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>Heures de travail / semaine</label>
-          <input className="pi" type="number" value={data.hs} onChange={e => uP("hs", e.target.value)} />
+          <input className="pi" type="number" value={data.hs} onChange={e => uP("hs", e.target.value)} min="0" onWheel={e => e.target.blur()} />
         </div>
 
         {/* Row 2 */}
@@ -748,11 +748,11 @@ function Tar({ data, on, sal, pro }) {
               return (
                 <tr key={i}>
                   <td><input className={`ci${bg}`} value={p.n} onChange={e => uPr(i, "n", e.target.value)} placeholder="Prestation..." style={{ width: "100%", fontWeight: h ? 500 : 400 }} /></td>
-                  {["dc","dm","dl"].map(f => <td key={f}><input className={`ci ci-dur${bg}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" step="0.25" placeholder="—" style={{ textAlign: "center", width: 56 }} /></td>)}
+                  {["dc","dm","dl"].map(f => <td key={f}><input className={`ci ci-dur${bg}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" step="0.25" min="0" onWheel={e => e.target.blur()} placeholder="—" style={{ textAlign: "center", width: 56 }} /></td>)}
                   {[["tc", m.c], ["tm", m.m], ["tl", m.l]].map(([f, mn]) => {
                     const v = parseFloat(p[f]) || 0;
                     const cls = mn !== null && v > 0 ? (v >= mn ? " gn" : " rd") : bg;
-                    return <td key={f}><input className={`ci${cls}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" placeholder="—" style={{ textAlign: "center", width: 60 }} /></td>;
+                    return <td key={f}><input className={`ci${cls}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" min="0" onWheel={e => e.target.blur()} placeholder="—" style={{ textAlign: "center", width: 60 }} /></td>;
                   })}
                   {[m.c, m.m, m.l].map((v, j) => <td key={`m${j}`} className="mc">{v !== null ? `${v} €` : ""}</td>)}
                   {[ec.c, ec.m, ec.l].map((e, j) => <td key={`e${j}`} className={e === null ? "" : e >= 0 ? "ep" : "en"}>{e !== null ? `${e >= 0 ? "+" : ""}${e} €` : ""}</td>)}
