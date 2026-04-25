@@ -62,6 +62,7 @@ const styles = `
   font-family:'Instrument Sans',system-ui,sans-serif;
   color:#f4e9d6;
   position:relative;
+  font-size:16px;
 }
 .tgp::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.04;
@@ -84,10 +85,10 @@ const styles = `
   box-shadow:0 0 0 1px rgba(121,90,52,0.4),0 4px 16px rgba(0,0,0,0.3);
   color:#fef4b0;
 }
-.hdr-name{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:22px;color:#fef4b0;letter-spacing:-0.5px}
-.hdr-by{font-size:10px;color:#795A34;letter-spacing:3px;text-transform:uppercase;font-weight:500}
+.hdr-name{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:24px;color:#fef4b0;letter-spacing:-0.5px}
+.hdr-by{font-size:11px;color:#795A34;letter-spacing:3px;text-transform:uppercase;font-weight:500}
 .hdr-save{
-  font-size:11px;color:#795A34;padding:6px 14px;border-radius:20px;
+  font-size:13px;color:#795A34;padding:6px 14px;border-radius:20px;
   border:1px solid rgba(121,90,52,0.15);background:rgba(121,90,52,0.06);
   transition:all 0.4s;display:flex;align-items:center;gap:6px;
 }
@@ -100,7 +101,7 @@ const styles = `
 }
 .nt{
   padding:14px 22px;border:none;background:none;
-  font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:500;
+  font-family:'Instrument Sans',sans-serif;font-size:15px;font-weight:500;
   color:#795A34;cursor:pointer;border-bottom:2px solid transparent;
   transition:all 0.25s;display:flex;align-items:center;gap:8px;white-space:nowrap;
 }
@@ -110,7 +111,7 @@ const styles = `
 .main{padding:32px;max-width:1280px;margin:0 auto}
 
 .tagline{
-  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:22px;font-weight:500;
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:26px;font-weight:500;
   color:#fef4b0;text-align:center;letter-spacing:-0.3px;
   display:flex;align-items:center;justify-content:center;gap:12px;
 }
@@ -134,9 +135,9 @@ const styles = `
 .kpi::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(254,244,176,0.2),transparent)}
 .kpi:hover{border-color:rgba(254,244,176,0.15);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,0.2)}
 .kpi-icon{display:flex;align-items:center;gap:8px;margin-bottom:10px}
-.kpi-label{font-size:10px;font-weight:600;color:#795A34;letter-spacing:2px;text-transform:uppercase}
-.kpi-val{font-family:'Cormorant Garamond',serif;font-size:30px;font-weight:700;color:#fef4b0;line-height:1}
-.kpi-sub{font-size:11px;color:#795A34;margin-top:8px;font-style:italic}
+.kpi-label{font-size:12px;font-weight:600;color:#795A34;letter-spacing:2px;text-transform:uppercase}
+.kpi-val{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:#fef4b0;line-height:1}
+.kpi-sub{font-size:13px;color:#795A34;margin-top:8px;font-style:italic}
 
 /* RESULT BANNER */
 .rb{
@@ -146,26 +147,26 @@ const styles = `
   border:1px solid rgba(121,90,52,0.15);position:relative;overflow:hidden;
 }
 .rb::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(254,244,176,0.2),transparent)}
-.rb-label{color:#795A34;font-size:15px;font-weight:500;display:flex;align-items:center;gap:10px}
-.rb-val{font-family:'Cormorant Garamond',serif;font-size:32px;font-weight:700;color:#fef4b0}
+.rb-label{color:#795A34;font-size:17px;font-weight:500;display:flex;align-items:center;gap:10px}
+.rb-val{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;color:#fef4b0}
 
 /* SECTION HDR */
 .sh{display:flex;align-items:center;gap:10px;padding:10px 0;margin-bottom:8px;border-bottom:1px solid rgba(121,90,52,0.15)}
-.sh-text{font-size:12px;font-weight:600;color:#fef4b0;letter-spacing:1.5px;text-transform:uppercase}
+.sh-text{font-size:14px;font-weight:600;color:#fef4b0;letter-spacing:1.5px;text-transform:uppercase}
 
 /* INPUTS */
 .ir{display:flex;gap:8px;margin-bottom:5px}
 .ifl{
   flex:2;padding:9px 14px;border-radius:8px;
   border:1px solid rgba(121,90,52,0.12);
-  font-family:'Instrument Sans',sans-serif;font-size:13px;
+  font-family:'Instrument Sans',sans-serif;font-size:15px;
   color:#3D2D1A;outline:none;transition:all 0.2s;background:#f4e9d6;
 }
 .ifl.e{background:#FBF5EC}
 .ifa{
-  flex:1;padding:9px 14px;border-radius:8px;
+  flex:1;padding:10px 14px;border-radius:8px;
   border:1px solid rgba(121,90,52,0.12);
-  font-family:'Instrument Sans',sans-serif;font-size:13px;
+  font-family:'Instrument Sans',sans-serif;font-size:15px;
   color:#3D2D1A;outline:none;transition:all 0.2s;
   text-align:right;font-weight:600;background:#f4e9d6;
 }
@@ -179,8 +180,8 @@ const styles = `
   padding:10px 18px;border-radius:10px;margin-top:10px;margin-bottom:20px;
   background:rgba(254,244,176,0.06);border:1px solid rgba(254,244,176,0.1);
 }
-.tr-l{color:#fef4b0;font-weight:600;font-size:12px;letter-spacing:1px;text-transform:uppercase}
-.tr-v{font-family:'Cormorant Garamond',serif;color:#fef4b0;font-weight:700;font-size:18px}
+.tr-l{color:#fef4b0;font-weight:600;font-size:14px;letter-spacing:1px;text-transform:uppercase}
+.tr-v{font-family:'Cormorant Garamond',serif;color:#fef4b0;font-weight:700;font-size:20px}
 
 .sa{
   background:rgba(254,244,176,0.05);border:1px solid rgba(254,244,176,0.12);
@@ -214,23 +215,23 @@ const styles = `
 
 /* TABLE */
 .tt{width:100%;border-collapse:separate;border-spacing:0 4px;min-width:880px}
-.tt thead th{padding:10px 8px;font-size:10px;font-weight:600;text-align:center;letter-spacing:1px;text-transform:uppercase}
+.tt thead th{padding:10px 8px;font-size:12px;font-weight:600;text-align:center;letter-spacing:1px;text-transform:uppercase}
 .tt .th-main{background:linear-gradient(135deg,#553F24,#3D2D1A);color:#f4e9d6}
 .tt .th-min{background:linear-gradient(135deg,#fef4b0,#f4e9d6);color:#3D2D1A}
 .tt .th-ec{background:rgba(44,31,18,0.8);color:#795A34}
 .tt td{padding:2px 3px}
 .ci{
   padding:8px 10px;border-radius:6px;border:1px solid rgba(121,90,52,0.1);
-  font-family:'Instrument Sans',sans-serif;font-size:12px;
+  font-family:'Instrument Sans',sans-serif;font-size:14px;
   color:#3D2D1A;outline:none;transition:all 0.2s;background:#f4e9d6;
 }
 .ci.e{background:#FBF5EC}
 .ci:focus{border-color:#795A34;box-shadow:0 0 0 2px rgba(121,90,52,0.1)}
 .ci.gn{background:#2D3B28 !important;color:#B8DEAB !important;font-weight:700;border-color:rgba(90,125,79,0.3)}
 .ci.rd{background:#3D2519 !important;color:#F4B8A8 !important;font-weight:700;border-color:rgba(181,74,58,0.3)}
-.mc{text-align:center;font-weight:700;font-size:13px;color:#3D2D1A;background:rgba(254,244,176,0.15);border-radius:4px;padding:8px 4px;font-family:'Cormorant Garamond',serif}
-.ep{color:#B8DEAB;font-weight:600;text-align:center;font-size:12px}
-.en{color:#F4B8A8;font-weight:600;text-align:center;font-size:12px}
+.mc{text-align:center;font-weight:700;font-size:15px;color:#3D2D1A;background:rgba(254,244,176,0.15);border-radius:4px;padding:8px 4px;font-family:'Cormorant Garamond',serif}
+.ep{color:#B8DEAB;font-weight:600;text-align:center;font-size:14px}
+.en{color:#F4B8A8;font-weight:600;text-align:center;font-size:14px}
 
 .pi{
   width:100%;padding:14px 18px;border-radius:12px;border:none;
@@ -241,7 +242,7 @@ const styles = `
 }
 .pi:focus{box-shadow:0 4px 20px rgba(0,0,0,0.2),0 0 0 3px rgba(254,244,176,0.2)}
 
-.hint{font-size:12px;font-style:italic;color:#795A34;display:flex;align-items:center;gap:6px;margin-top:8px}
+.hint{font-size:14px;font-style:italic;color:#795A34;display:flex;align-items:center;gap:6px;margin-top:8px}
 .hint-y{color:#fef4b0}
 
 @keyframes fi{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
@@ -261,6 +262,53 @@ input[type=number]{-moz-appearance:textfield}
 .ci-dur::-webkit-inner-spin-button,
 .ci-dur::-webkit-outer-spin-button{-webkit-appearance:auto !important;margin:0}
 .ci-dur{-moz-appearance:spinner-textfield !important}
+
+/* ── RESPONSIVE: TABLETTE ── */
+@media(max-width:1024px){
+  .main{padding:24px 20px}
+  .kpis{gap:12px}
+  .g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px}
+  .g2{gap:24px}
+  .g2>div{min-width:300px}
+}
+
+/* ── RESPONSIVE: MOBILE ── */
+@media(max-width:640px){
+  .hdr{padding:14px 16px}
+  .hdr-name{font-size:20px}
+  .hdr-by{font-size:9px;letter-spacing:2px}
+  .hdr-logo{width:36px;height:36px}
+  .hdr-save{font-size:11px;padding:5px 10px}
+
+  .nav{padding:0 12px;gap:0;overflow-x:auto}
+  .nt{padding:12px 14px;font-size:13px;gap:6px}
+
+  .main{padding:18px 14px}
+  .tagline{font-size:20px}
+
+  .kpis{grid-template-columns:1fr;gap:10px}
+  .kpi{padding:18px 20px}
+  .kpi-val{font-size:28px}
+  .kpi-label{font-size:11px}
+
+  .rb{padding:16px 18px;flex-direction:column;align-items:flex-start;gap:6px}
+  .rb-val{font-size:28px}
+
+  .gc{padding:18px 18px;border-radius:14px}
+  .g3{grid-template-columns:1fr;gap:24px}
+  .g2{flex-direction:column;gap:20px}
+  .g2>div{min-width:unset}
+
+  .sh-text{font-size:12px}
+  .ifl,.ifa{font-size:14px;padding:10px 12px}
+  .tr{padding:10px 14px}
+  .tr-l{font-size:12px}
+  .tr-v{font-size:18px}
+  .hint{font-size:13px}
+
+  .tb{padding:18px 20px;border-radius:14px}
+  .pi{font-size:18px;padding:12px 14px}
+}
 `;
 
 const Ico = ({ icon: Icon, size = 16, color = C.yellow, ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
@@ -287,7 +335,7 @@ function GhostDonut() {
       </div>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 6 }}>
         <CircleDot size={20} color={C.light} strokeWidth={1.5} style={{ opacity: 0.5 }} />
-        <div style={{ color: C.light, fontSize: 12, fontStyle: "italic", maxWidth: 160, lineHeight: 1.4 }}>
+        <div style={{ color: C.light, fontSize: 14, fontStyle: "italic", maxWidth: 160, lineHeight: 1.4 }}>
           Remplis tes budgets pour visualiser ta répartition
         </div>
       </div>
@@ -310,7 +358,7 @@ function GhostBars() {
       </div>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 6 }}>
         <BarChart3 size={20} color={C.light} strokeWidth={1.5} style={{ opacity: 0.4 }} />
-        <div style={{ color: C.light, fontSize: 12, fontStyle: "italic", maxWidth: 180, lineHeight: 1.4 }}>
+        <div style={{ color: C.light, fontSize: 14, fontStyle: "italic", maxWidth: 180, lineHeight: 1.4 }}>
           Remplis ta grille de tarifs pour comparer tes prix
         </div>
       </div>
@@ -406,7 +454,7 @@ function Dash({ sal, pro, tar }) {
           </div>
           <div style={{ flex: 1 }}>
             <div style={{
-              fontSize: 10, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase",
+              fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase",
               color: hasManque ? C.redText : C.greenText, marginBottom: 4,
             }}>
               {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : "Tes tarifs couvrent ton taux horaire"}
@@ -416,14 +464,14 @@ function Dash({ sal, pro, tar }) {
                 <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 30, fontWeight: 700, color: C.redText }}>
                   −{fmt(manqueMensuel)}<span style={{ fontSize: 14, fontWeight: 500 }}> /mois</span>
                 </span>
-                <div style={{ color: C.light, fontSize: 12, fontStyle: "italic" }}>
+                <div style={{ color: C.light, fontSize: 14, fontStyle: "italic" }}>
                   Taux horaire réel : {Math.round(tauxReel)} €/h vs {th} €/h nécessaire
                   <br />
                   {nbSousTarif} tarif{nbSousTarif > 1 ? "s" : ""} sous le minimum
                 </div>
               </div>
             ) : (
-              <div style={{ color: C.beige, fontSize: 13 }}>
+              <div style={{ color: C.beige, fontSize: 15 }}>
                 Ton taux horaire réel ({Math.round(tauxReel)} €/h) couvre ton objectif ({th} €/h).
               </div>
             )}
@@ -442,7 +490,7 @@ function Dash({ sal, pro, tar }) {
             <ArrowRight size={16} color={C.yellow} strokeWidth={2} />
           </div>
           <div>
-            <div style={{ color: C.yellow, fontSize: 13, fontWeight: 600, marginBottom: 2 }}>Par où commencer ?</div>
+            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, marginBottom: 2 }}>Par où commencer ?</div>
             <div style={{ color: C.light, fontSize: 12 }}>
               Commence par l'onglet <strong style={{ color: C.beige }}>Mon Salaire</strong> pour définir tes besoins perso, puis <strong style={{ color: C.beige }}>Mon CA Pro</strong> pour tes charges. Tes tarifs se calculeront automatiquement.
             </div>
@@ -454,7 +502,7 @@ function Dash({ sal, pro, tar }) {
         {/* LEFT: Breakdown + Time */}
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 11, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={TrendingUp} />
               Répartition de ton CA mensuel
             </div>
@@ -462,32 +510,32 @@ function Dash({ sal, pro, tar }) {
               { l: "Charges variables", v: tv, icon: Receipt }, { l: "Charges & taxes", v: tc, icon: Receipt },
               { l: "Trésorerie", v: tt, icon: Vault }].map((r, i) => (
               <div className="bk" key={i}>
-                <span style={{ color: C.beige, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: C.beige, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
                   <Ico icon={r.icon} size={13} color={C.light} />
                   {r.l}
                 </span>
                 <div style={{ display: "flex", gap: 18 }}>
-                  <span style={{ color: C.yellow, fontWeight: 700, fontSize: 13, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(r.v)}</span>
-                  <span style={{ color: C.light, fontSize: 12, width: 40, textAlign: "right" }}>{ca > 0 ? `${Math.round(r.v / ca * 100)}%` : "—"}</span>
+                  <span style={{ color: C.yellow, fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(r.v)}</span>
+                  <span style={{ color: C.light, fontSize: 14, width: 40, textAlign: "right" }}>{ca > 0 ? `${Math.round(r.v / ca * 100)}%` : "—"}</span>
                 </div>
               </div>
             ))}
             <div className="dv" />
             <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 4px 0" }}>
-              <span style={{ color: C.yellow, fontSize: 13, fontWeight: 600 }}>Total CA mensuel</span>
+              <span style={{ color: C.yellow, fontSize: 15, fontWeight: 600 }}>Total CA mensuel</span>
               <span style={{ color: C.yellow, fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ca)}</span>
             </div>
           </div>
 
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 11, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={Clock} />
               Ton temps de travail
             </div>
             {[{ l: "Heures / semaine", v: tar.hs || 0 }, { l: "Semaines travaillées", v: sw },
               { l: "Heures totales / an", v: ha }, { l: "Semaines de vacances", v: tar.sv || 0 }].map((r, i) => (
               <div className="bk" key={i}>
-                <span style={{ color: C.beige, fontSize: 13 }}>{r.l}</span>
+                <span style={{ color: C.beige, fontSize: 15 }}>{r.l}</span>
                 <span style={{ color: C.yellow, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 15 }}>{r.v}</span>
               </div>
             ))}
@@ -497,7 +545,7 @@ function Dash({ sal, pro, tar }) {
         {/* RIGHT: Charts or ghosts */}
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 11, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={TrendingUp} />
               Où part ton CA ?
             </div>
@@ -516,7 +564,7 @@ function Dash({ sal, pro, tar }) {
           </div>
 
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 11, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={BarChart3} />
               Tarifs actuels vs minimum
             </div>
@@ -536,7 +584,7 @@ function Dash({ sal, pro, tar }) {
         </div>
       </div>
 
-      <div style={{ textAlign: "center", color: C.light, fontSize: 12, fontStyle: "italic", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
+      <div style={{ textAlign: "center", color: C.light, fontSize: 14, fontStyle: "italic", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
         <Info size={13} color={C.light} strokeWidth={1.5} />
         Remplis « Mon Salaire » → « Mon CA Pro » → tes tarifs se calculent automatiquement
       </div>
@@ -557,7 +605,7 @@ function Sal({ data, on }) {
         {[["fixes", "Dépenses fixes", data.fixes, ShieldCheck], ["variables", "Dépenses variables", data.variables, Receipt], ["epargnes", "Épargnes", data.epargnes, PiggyBank]].map(([k, title, items, icon]) => (
           <div key={k}>
             <div className="sh"><SectionIcon icon={icon} /><div className="sh-text">{title}</div></div>
-            <div style={{ fontSize: 10, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
+            <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
             {items.map((item, i) => <IR key={i} item={item} idx={i} on={(j, f, v) => up(k, j, f, v)} />)}
             <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(items))}</span></div>
           </div>
@@ -587,19 +635,19 @@ function Pro({ data, on, sal }) {
       <div className="g3">
         <div>
           <div className="sh"><SectionIcon icon={ShieldCheck} /><div className="sh-text">Dépenses fixes</div></div>
-          <div style={{ fontSize: 10, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
+          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
           {data.fixes.map((x, i) => <IR key={i} item={x} idx={i} on={(j, f, v) => up("fixes", j, f, v)} />)}
           <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(data.fixes))}</span></div>
         </div>
         <div>
           <div className="sh"><SectionIcon icon={Receipt} /><div className="sh-text">Dépenses variables</div></div>
-          <div style={{ fontSize: 10, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
+          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
           {data.variables.map((x, i) => <IR key={i} item={x} idx={i} on={(j, f, v) => up("variables", j, f, v)} />)}
           <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(data.variables))}</span></div>
         </div>
         <div>
           <div className="sh"><SectionIcon icon={Receipt} /><div className="sh-text">Charges & taxes</div></div>
-          <div style={{ fontSize: 10, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
+          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
           {data.charges.map((x, i) => <IR key={i} item={x} idx={i} on={(j, f, v) => up("charges", j, f, v)} />)}
           <div className="tr"><span className="tr-l">Total charges</span><span className="tr-v">{fmt(sum(data.charges))}</span></div>
           <div style={{ marginTop: 16 }}>
@@ -641,11 +689,11 @@ function Tar({ data, on, sal, pro }) {
 
         {/* Row 2 */}
         <div className="gc" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ color: C.light, fontSize: 12, fontWeight: 500 }}>CA Annuel</span>
+          <span style={{ color: C.light, fontSize: 14, fontWeight: 500 }}>CA Annuel</span>
           <span style={{ color: C.yellow, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(caA)}</span>
         </div>
         <div className="gc" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <span style={{ color: C.light, fontSize: 12, fontWeight: 500 }}>CA Mensuel</span>
+          <span style={{ color: C.light, fontSize: 14, fontWeight: 500 }}>CA Mensuel</span>
           <span style={{ color: C.yellow, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(ca)}</span>
         </div>
 
@@ -653,7 +701,7 @@ function Tar({ data, on, sal, pro }) {
         <div className="tb" style={{ gridColumn: "1 / -1" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
             <Ico icon={Star} size={22} color={C.dark} />
-            <span style={{ color: C.dark, fontSize: 11, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>Taux horaire</span>
+            <span style={{ color: C.dark, fontSize: 13, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>Taux horaire</span>
             <span style={{ color: C.dark, fontSize: 44, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>{th}<span style={{ fontSize: 20, fontWeight: 500 }}> €/h</span></span>
           </div>
         </div>
