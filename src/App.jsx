@@ -405,6 +405,7 @@ function Dash({ sal, pro, tar }) {
   const tauxReel = totalDurees > 0 ? totalPrix / totalDurees : 0;
   const heuresMois = sw > 0 ? (tar.hs || 0) * sw / 12 : 0;
   const manqueMensuel = tauxReel > 0 && th > 0 && tauxReel < th ? Math.round((th - tauxReel) * heuresMois) : 0;
+  const beneficeMensuel = tauxReel > 0 && th > 0 && tauxReel >= th ? Math.round((tauxReel - th) * heuresMois) : 0;
   const hasManque = manqueMensuel > 0;
 
   return (
@@ -457,7 +458,7 @@ function Dash({ sal, pro, tar }) {
               fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase",
               color: hasManque ? C.redText : C.greenText, marginBottom: 4,
             }}>
-              {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : "Tes tarifs couvrent ton taux horaire"}
+              {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : "Bénéfice généré par tes tarifs actuels"}
             </div>
             {hasManque ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -471,8 +472,13 @@ function Dash({ sal, pro, tar }) {
                 </div>
               </div>
             ) : (
-              <div style={{ color: C.beige, fontSize: 15 }}>
-                Ton taux horaire réel ({Math.round(tauxReel)} €/h) couvre ton objectif ({th} €/h).
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 30, fontWeight: 700, color: C.greenText }}>
+                  +{fmt(beneficeMensuel)}<span style={{ fontSize: 14, fontWeight: 500 }}> /mois</span>
+                </span>
+                <div style={{ color: C.light, fontSize: 14, fontStyle: "italic" }}>
+                  Taux horaire réel : {Math.round(tauxReel)} €/h vs {th} €/h nécessaire
+                </div>
               </div>
             )}
           </div>
