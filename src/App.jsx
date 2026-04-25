@@ -157,14 +157,14 @@ const styles = `
 /* INPUTS */
 .ir{display:flex;gap:8px;margin-bottom:5px}
 .ifl{
-  flex:2;padding:9px 14px;border-radius:8px;
+  flex:3;padding:10px 14px;border-radius:8px;
   border:1px solid rgba(121,90,52,0.12);
   font-family:'Instrument Sans',sans-serif;font-size:15px;
   color:#3D2D1A;outline:none;transition:all 0.2s;background:#f4e9d6;
 }
 .ifl.e{background:#FBF5EC}
 .ifa{
-  flex:1;padding:10px 14px;border-radius:8px;
+  flex:0 0 110px;padding:10px 14px;border-radius:8px;
   border:1px solid rgba(121,90,52,0.12);
   font-family:'Instrument Sans',sans-serif;font-size:15px;
   color:#3D2D1A;outline:none;transition:all 0.2s;
@@ -193,7 +193,7 @@ const styles = `
   border-radius:8px;padding:10px 14px;margin-bottom:10px;
 }
 
-.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:36px}
+.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:48px}
 .g2{display:flex;gap:32px;flex-wrap:wrap}
 .g2>div{flex:1;min-width:340px}
 
@@ -301,6 +301,7 @@ input[type=number]{-moz-appearance:textfield}
 
   .sh-text{font-size:12px}
   .ifl,.ifa{font-size:14px;padding:10px 12px}
+  .ifa{flex:0 0 100px}
   .tr{padding:10px 14px}
   .tr-l{font-size:12px}
   .tr-v{font-size:18px}
