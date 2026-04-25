@@ -108,7 +108,7 @@ const styles = `
 .nt:hover{color:#f4e9d6}
 .nt.on{color:#fef4b0;border-bottom-color:#fef4b0;font-weight:600}
 
-.main{padding:32px;max-width:1280px;margin:0 auto}
+.main{padding:32px;max-width:1280px;margin:0 auto;overflow-x:hidden}
 
 .tagline{
   font-family:'Cormorant Garamond',serif;font-style:italic;font-size:26px;font-weight:500;
@@ -164,7 +164,7 @@ const styles = `
 }
 .ifl.e{background:#FBF5EC}
 .ifa{
-  flex:0 0 110px;padding:10px 14px;border-radius:8px;
+  flex:0 0 30%;max-width:120px;padding:10px 14px;border-radius:8px;
   border:1px solid rgba(121,90,52,0.12);
   font-family:'Instrument Sans',sans-serif;font-size:15px;
   color:#3D2D1A;outline:none;transition:all 0.2s;
@@ -193,7 +193,7 @@ const styles = `
   border-radius:8px;padding:10px 14px;margin-bottom:10px;
 }
 
-.g3{display:grid;grid-template-columns:repeat(auto-fit,minmax(290px,1fr));gap:48px}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}
 .g2{display:flex;gap:32px;flex-wrap:wrap}
 .g2>div{flex:1;min-width:340px}
 
@@ -267,7 +267,7 @@ input[type=number]{-moz-appearance:textfield}
 @media(max-width:1024px){
   .main{padding:24px 20px}
   .kpis{gap:12px}
-  .g3{grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:28px}
+  .g3{grid-template-columns:1fr 1fr;gap:28px}
   .g2{gap:24px}
   .g2>div{min-width:300px}
 }
@@ -301,7 +301,7 @@ input[type=number]{-moz-appearance:textfield}
 
   .sh-text{font-size:12px}
   .ifl,.ifa{font-size:14px;padding:10px 12px}
-  .ifa{flex:0 0 100px}
+  .ifa{flex:0 0 30%;max-width:100px}
   .tr{padding:10px 14px}
   .tr-l{font-size:12px}
   .tr-v{font-size:18px}
