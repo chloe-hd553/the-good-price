@@ -457,8 +457,9 @@ function Dash({ sal, pro, tar }) {
             <div style={{
               fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase",
               color: hasManque ? C.redText : C.greenText, marginBottom: 4,
+              display: "flex", alignItems: "center", gap: 6,
             }}>
-              {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : "Bénéfice généré par tes tarifs actuels"}
+              {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : <><Ico icon={Star} size={14} color={C.greenText} /> Bénéfice généré par tes tarifs actuels</>}
             </div>
             {hasManque ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -478,6 +479,9 @@ function Dash({ sal, pro, tar }) {
                 </span>
                 <div style={{ color: C.light, fontSize: 14, fontStyle: "italic" }}>
                   Taux horaire réel : {Math.round(tauxReel)} €/h vs {th} €/h nécessaire
+                </div>
+                <div style={{ color: C.light, fontSize: 12, fontStyle: "italic", opacity: 0.7 }}>
+                  * Estimation basée sur un planning rempli à 100%
                 </div>
               </div>
             )}
