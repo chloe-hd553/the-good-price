@@ -12,7 +12,7 @@ const C = {
   yellow: "#fef4b0",     /* accent principal - titres, valeurs */
   beige: "#f4e9d6",      /* texte courant */
   cream: "#FBF5EC",      /* inputs vides */
-  white: "#FFFFFF",
+  white: "#f4e9d6",
   green: "#5A7D4F", greenBg: "#2D3B28", greenText: "#B8DEAB",
   red: "#B54A3A", redBg: "#3D2519", redText: "#F4B8A8",
 };
@@ -121,7 +121,7 @@ const styles = `
 .gc{
   background:linear-gradient(160deg,rgba(61,45,26,0.75),rgba(44,31,18,0.6));
   border:1px solid rgba(121,90,52,0.12);border-radius:18px;padding:24px 28px;
-  box-shadow:0 8px 32px rgba(0,0,0,0.2),inset 0 1px 0 rgba(255,255,255,0.015);
+  box-shadow:0 8px 32px rgba(0,0,0,0.2);
   transition:border-color 0.3s;
 }
 .gc:hover{border-color:rgba(121,90,52,0.22)}
@@ -216,11 +216,12 @@ const styles = `
 
 /* TABLE */
 .tt{width:100%;border-collapse:separate;border-spacing:0 4px;min-width:880px}
-.tt thead th{padding:10px 8px;font-size:12px;font-weight:600;text-align:center;letter-spacing:1px;text-transform:uppercase}
-.tt .th-main{background:linear-gradient(135deg,#553F24,#3D2D1A);color:#f4e9d6}
+.tt thead th{padding:10px 8px;font-size:12px;font-weight:600;text-align:center;letter-spacing:1px;text-transform:uppercase;vertical-align:middle;white-space:nowrap}
+.tt .th-main{background:#553F24;color:#f4e9d6}
 .tt .th-min{background:#f4e9d6;color:#3D2D1A}
-.tt .th-ec{background:rgba(44,31,18,0.8);color:#795A34}
-.tt td{padding:2px 3px}
+.tt .th-ec{background:#3D2D1A;color:#795A34}
+.tt td{padding:2px 3px;white-space:nowrap}
+.tt .sep{border-left:6px solid #2C1F12}
 .ci{
   padding:8px 10px;border-radius:6px;border:1px solid rgba(121,90,52,0.1);
   font-family:'Instrument Sans',sans-serif;font-size:14px;
@@ -230,9 +231,9 @@ const styles = `
 .ci:focus{border-color:#795A34;box-shadow:0 0 0 2px rgba(121,90,52,0.1)}
 .ci.gn{background:#2D3B28 !important;color:#B8DEAB !important;font-weight:700;border-color:rgba(90,125,79,0.3)}
 .ci.rd{background:#3D2519 !important;color:#F4B8A8 !important;font-weight:700;border-color:rgba(181,74,58,0.3)}
-.mc{text-align:center;font-weight:700;font-size:15px;color:#3D2D1A;background:rgba(254,244,176,0.15);border-radius:4px;padding:8px 4px;font-family:'Cormorant Garamond',serif}
-.ep{color:#B8DEAB;font-weight:600;text-align:center;font-size:14px}
-.en{color:#F4B8A8;font-weight:600;text-align:center;font-size:14px}
+.mc{text-align:center;font-weight:700;font-size:14px;color:#fef4b0;background:rgba(85,63,36,0.6);border-radius:4px;padding:10px 6px;font-family:'Instrument Sans',sans-serif;white-space:nowrap}
+.ep{color:#B8DEAB;font-weight:600;text-align:center;font-size:14px;white-space:nowrap}
+.en{color:#F4B8A8;font-weight:600;text-align:center;font-size:14px;white-space:nowrap}
 
 .pi{
   width:100%;padding:14px 18px;border-radius:12px;border:none;
@@ -493,7 +494,7 @@ function WelcomePage({ onImport, onSkip }) {
       const buf = await file.arrayBuffer();
       onImport(buf);
     } catch (err) {
-      setError("Impossible de lire ce fichier. Vérifie que c'est bien un fichier Excel (.xlsx).");
+      setError("Impossible de lire ce fichier. Vérifie que c'est bien le bon format (.xlsx).");
       setLoading(false);
     }
   };
@@ -512,7 +513,7 @@ function WelcomePage({ onImport, onSkip }) {
 
           <div className="tagline" style={{ fontSize: 22, marginBottom: 48 }}>
             <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, transparent, ${C.light})`, display: "inline-block" }} />
-            « Travaille moins — facture mieux »
+            Travaille moins — facture mieux
             <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, ${C.light}, transparent)`, display: "inline-block" }} />
           </div>
 
@@ -540,10 +541,10 @@ function WelcomePage({ onImport, onSkip }) {
             </div>
             <div style={{ textAlign: "left" }}>
               <div style={{ color: C.yellow, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>
-                {loading ? "Import en cours..." : "J'ai déjà The Good Price en Excel"}
+                {loading ? "Import en cours..." : "J'ai déjà rempli l'ancienne version"}
               </div>
               <div style={{ color: C.light, fontSize: 13 }}>
-                Importe ton fichier pour remplir automatiquement tes données
+                Importe ton ancien fichier pour tout transférer automatiquement
               </div>
             </div>
           </button>
@@ -579,16 +580,34 @@ function WelcomePage({ onImport, onSkip }) {
             </div>
             <div style={{ textAlign: "left" }}>
               <div style={{ color: C.beige, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>
-                Commencer de zéro
+                C'est ma première fois
               </div>
               <div style={{ color: C.light, fontSize: 13 }}>
-                Je n'ai pas de fichier, je remplis tout moi-même
+                Je remplis tout depuis le début
               </div>
             </div>
           </button>
         </div>
       </div>
     </div>
+  );
+}
+
+function AddRow({ onClick, label = "Ajouter une ligne" }) {
+  return (
+    <button onClick={onClick} style={{
+      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
+      width: "100%", padding: "8px 0", borderRadius: 8, marginTop: 4, marginBottom: 8,
+      border: `1px dashed rgba(121,90,52,0.2)`, background: "transparent",
+      color: C.light, fontSize: 13, cursor: "pointer",
+      fontFamily: "'Instrument Sans', sans-serif",
+      transition: "all 0.2s",
+    }}
+      onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(254,244,176,0.3)"; e.currentTarget.style.color = C.yellow; }}
+      onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.2)"; e.currentTarget.style.color = C.light; }}
+    >
+      <Plus size={14} strokeWidth={2} /> {label}
+    </button>
   );
 }
 
@@ -638,7 +657,7 @@ function Dash({ sal, pro, tar }) {
     <div className="fi" style={{ display: "flex", flexDirection: "column", gap: 28 }}>
       <div className="tagline">
         <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, transparent, ${C.light})`, display: "inline-block" }} />
-        « Travaille moins — facture mieux »
+        Travaille moins — facture mieux
         <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, ${C.light}, transparent)`, display: "inline-block" }} />
       </div>
 
@@ -830,6 +849,7 @@ function Dash({ sal, pro, tar }) {
 
 function Sal({ data, on }) {
   const up = (s, i, f, v) => on({ ...data, [s]: data[s].map((x, j) => j === i ? { ...x, [f]: v } : x) });
+  const addRow = (s) => on({ ...data, [s]: [...data[s], { label: "", montant: "" }] });
   const t = sum(data.fixes) + sum(data.variables) + sum(data.epargnes);
   return (
     <div className="fi">
@@ -843,6 +863,7 @@ function Sal({ data, on }) {
             <div className="sh"><SectionIcon icon={icon} /><div className="sh-text">{title}</div></div>
             <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
             {items.map((item, i) => <IR key={i} item={item} idx={i} on={(j, f, v) => up(k, j, f, v)} />)}
+            <AddRow onClick={() => addRow(k)} />
             <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(items))}</span></div>
           </div>
         ))}
@@ -854,6 +875,7 @@ function Sal({ data, on }) {
 
 function Pro({ data, on, sal }) {
   const up = (s, i, f, v) => on({ ...data, [s]: data[s].map((x, j) => j === i ? { ...x, [f]: v } : x) });
+  const addRow = (s) => on({ ...data, [s]: [...data[s], { label: "", montant: "" }] });
   const ts = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes);
   const ca = ts + sum(data.fixes) + sum(data.variables) + sum(data.charges) + sum(data.tresorerie);
   return (
@@ -873,18 +895,21 @@ function Pro({ data, on, sal }) {
           <div className="sh"><SectionIcon icon={ShieldCheck} /><div className="sh-text">Dépenses fixes</div></div>
           <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
           {data.fixes.map((x, i) => <IR key={i} item={x} idx={i} on={(j, f, v) => up("fixes", j, f, v)} />)}
+          <AddRow onClick={() => addRow("fixes")} />
           <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(data.fixes))}</span></div>
         </div>
         <div>
           <div className="sh"><SectionIcon icon={Receipt} /><div className="sh-text">Dépenses variables</div></div>
           <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
           {data.variables.map((x, i) => <IR key={i} item={x} idx={i} on={(j, f, v) => up("variables", j, f, v)} />)}
+          <AddRow onClick={() => addRow("variables")} />
           <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(data.variables))}</span></div>
         </div>
         <div>
           <div className="sh"><SectionIcon icon={Receipt} /><div className="sh-text">Charges & taxes</div></div>
           <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
           {data.charges.map((x, i) => <IR key={i} item={x} idx={i} on={(j, f, v) => up("charges", j, f, v)} />)}
+          <AddRow onClick={() => addRow("charges")} />
           <div className="tr"><span className="tr-l">Total charges</span><span className="tr-v">{fmt(sum(data.charges))}</span></div>
           <div style={{ marginTop: 16 }}>
             <div className="sh"><SectionIcon icon={Vault} /><div className="sh-text">Trésorerie</div></div>
@@ -895,6 +920,7 @@ function Pro({ data, on, sal }) {
               <div style={{ color: C.light, fontSize: 10, fontStyle: "italic", marginTop: 2 }}>Ce n'est PAS ton solde actuel, mais ce que tu VEUX mettre de côté</div>
             </div>
             {data.tresorerie.map((x, i) => <IR key={i} item={x} idx={i} on={(j, f, v) => up("tresorerie", j, f, v)} />)}
+            <AddRow onClick={() => addRow("tresorerie")} />
             <div className="tr"><span className="tr-l">Total tréso</span><span className="tr-v">{fmt(sum(data.tresorerie))}</span></div>
           </div>
         </div>
@@ -909,6 +935,7 @@ function Tar({ data, on, sal, pro }) {
   const caA = ca * 12, sw = 52 - (data.sv || 0), ha = (data.hs || 0) * sw, th = ha > 0 ? Math.ceil(caA / ha) : 0;
   const uP = (f, v) => on({ ...data, [f]: parseFloat(v) || 0 });
   const uPr = (i, f, v) => on({ ...data, p: data.p.map((x, j) => j === i ? { ...x, [f]: v } : x) });
+  const addPrestation = () => on({ ...data, p: [...data.p, { n:"",dc:"",dm:"",dl:"",tc:"",tm:"",tl:"" }] });
 
   return (
     <div className="fi">
@@ -951,18 +978,25 @@ function Tar({ data, on, sal, pro }) {
         <table className="tt">
           <thead>
             <tr>
-              <th className="th-main" style={{ borderRadius: "10px 0 0 10px", textAlign: "left", paddingLeft: 16 }}>Prestation</th>
-              <th className="th-main">Courte</th><th className="th-main">Moy.</th><th className="th-main">Longue</th>
-              <th className="th-main">Courte</th><th className="th-main">Moy.</th><th className="th-main">Longue</th>
-              <th className="th-min">Courte</th><th className="th-min">Moy.</th><th className="th-min">Longue</th>
-              <th className="th-ec">Courte</th><th className="th-ec">Moy.</th><th className="th-ec" style={{ borderRadius: "0 10px 10px 0" }}>Longue</th>
+              <th className="th-main" rowSpan={2} style={{ borderRadius: "10px 0 0 10px", textAlign: "left", paddingLeft: 16, verticalAlign: "middle" }}>Prestation</th>
+              <th className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Durée</th>
+              <th className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs actuels</th>
+              <th className="th-min" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs minimum</th>
+              <th className="th-ec" colSpan={3} style={{ borderRadius: "0 10px 10px 0", paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Écart</th>
             </tr>
             <tr>
-              <th></th>
-              <th colSpan={3} style={{ fontSize: 9, color: C.light, fontWeight: 400, paddingBottom: 6 }}>Durée (heures)</th>
-              <th colSpan={3} style={{ fontSize: 9, color: C.light, fontWeight: 400, paddingBottom: 6 }}>Tarifs actuels</th>
-              <th colSpan={3} style={{ fontSize: 9, color: C.med, fontWeight: 500, paddingBottom: 6 }}>Tarifs minimum</th>
-              <th colSpan={3} style={{ fontSize: 9, color: C.light, fontWeight: 400, paddingBottom: 6 }}>Écart</th>
+              <th className="th-main" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0, borderLeft: "6px solid #2C1F12" }}>Courte</th>
+              <th className="th-main" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0 }}>Moy.</th>
+              <th className="th-main" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0 }}>Longue</th>
+              <th className="th-main" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0, borderLeft: "6px solid #2C1F12" }}>Courte</th>
+              <th className="th-main" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0 }}>Moy.</th>
+              <th className="th-main" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0 }}>Longue</th>
+              <th className="th-min" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0, borderLeft: "6px solid #2C1F12" }}>Courte</th>
+              <th className="th-min" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0 }}>Moy.</th>
+              <th className="th-min" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0 }}>Longue</th>
+              <th className="th-ec" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0, borderLeft: "6px solid #2C1F12" }}>Courte</th>
+              <th className="th-ec" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0 }}>Moy.</th>
+              <th className="th-ec" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0, borderRadius: "0 0 10px 0" }}>Longue</th>
             </tr>
           </thead>
           <tbody>
@@ -973,19 +1007,20 @@ function Tar({ data, on, sal, pro }) {
               return (
                 <tr key={i}>
                   <td><input className={`ci${bg}`} value={p.n} onChange={e => uPr(i, "n", e.target.value)} placeholder="Prestation..." style={{ width: "100%", fontWeight: h ? 500 : 400 }} /></td>
-                  {["dc","dm","dl"].map(f => <td key={f}><input className={`ci ci-dur${bg}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" step="0.25" min="0" onWheel={e => e.target.blur()} placeholder="—" style={{ textAlign: "center", width: 56 }} /></td>)}
-                  {[["tc", m.c], ["tm", m.m], ["tl", m.l]].map(([f, mn]) => {
+                  {["dc","dm","dl"].map((f, j) => <td key={f} className={j === 0 ? "sep" : ""}><input className={`ci ci-dur${bg}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" step="0.25" min="0" onWheel={e => e.target.blur()} placeholder="—" style={{ textAlign: "center", width: 56 }} /></td>)}
+                  {[["tc", m.c], ["tm", m.m], ["tl", m.l]].map(([f, mn], j) => {
                     const v = parseFloat(p[f]) || 0;
                     const cls = mn !== null && v > 0 ? (v >= mn ? " gn" : " rd") : bg;
-                    return <td key={f}><input className={`ci${cls}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" min="0" onWheel={e => e.target.blur()} placeholder="—" style={{ textAlign: "center", width: 60 }} /></td>;
+                    return <td key={f} className={j === 0 ? "sep" : ""}><input className={`ci${cls}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" min="0" onWheel={e => e.target.blur()} placeholder="—" style={{ textAlign: "center", width: 60 }} /></td>;
                   })}
-                  {[m.c, m.m, m.l].map((v, j) => <td key={`m${j}`} className="mc">{v !== null ? `${v} €` : ""}</td>)}
-                  {[ec.c, ec.m, ec.l].map((e, j) => <td key={`e${j}`} className={e === null ? "" : e >= 0 ? "ep" : "en"}>{e !== null ? `${e >= 0 ? "+" : ""}${e} €` : ""}</td>)}
+                  {[m.c, m.m, m.l].map((v, j) => <td key={`m${j}`} className={`mc${j === 0 ? " sep" : ""}`}>{v !== null ? `${v} €` : ""}</td>)}
+                  {[ec.c, ec.m, ec.l].map((e, j) => <td key={`e${j}`} className={`${e === null ? "" : e >= 0 ? "ep" : "en"}${j === 0 ? " sep" : ""}`}>{e !== null ? `${e >= 0 ? "+" : ""}${e} €` : ""}</td>)}
                 </tr>
               );
             })}
           </tbody>
         </table>
+        <AddRow onClick={addPrestation} label="Ajouter une prestation" />
       </div>
     </div>
   );
@@ -1076,7 +1111,7 @@ export default function App() {
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button
             onClick={() => importRef.current?.click()}
-            title="Importer un fichier Excel"
+            title="Importer depuis l'ancienne version"
             style={{
               display: "flex", alignItems: "center", gap: 6,
               padding: "6px 12px", borderRadius: 20,
@@ -1103,7 +1138,7 @@ export default function App() {
           { id: "pro", icon: Briefcase, l: "Mon CA Pro" }, { id: "tarifs", icon: Scissors, l: "Mes Tarifs" }
         ].map(t => (
           <button key={t.id} className={`nt${tab === t.id ? " on" : ""}`} onClick={() => setTab(t.id)}>
-            <Ico icon={t.icon} size={16} color={tab === t.id ? C.yellow : C.light} />{t.l}
+            <Ico icon={t.icon} size={16} color="currentColor" />{t.l}
           </button>
         ))}
       </nav>
