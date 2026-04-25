@@ -1,6 +1,7 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Scissors, LayoutDashboard, Wallet, Briefcase, Star, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight } from "lucide-react";
+import { Scissors, LayoutDashboard, Wallet, Briefcase, Star, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus } from "lucide-react";
+import * as XLSX from "xlsx";
 
 /* ── PALETTE STRICTE ── */
 const C = {
@@ -361,6 +362,230 @@ function GhostBars() {
         <BarChart3 size={20} color={C.light} strokeWidth={1.5} style={{ opacity: 0.4 }} />
         <div style={{ color: C.light, fontSize: 14, fontStyle: "italic", maxWidth: 180, lineHeight: 1.4 }}>
           Remplis ta grille de tarifs pour comparer tes prix
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── EXCEL V1 PARSER ── */
+function parseV1Excel(buffer, dSal, dPro, dTar) {
+  const wb = XLSX.read(buffer, { type: "array" });
+  const sal = JSON.parse(JSON.stringify(dSal));
+  const pro = JSON.parse(JSON.stringify(dPro));
+  const tar = JSON.parse(JSON.stringify(dTar));
+
+  const cell = (ws, ref) => { const c = ws[ref]; return c ? c.v : null; };
+  const num = (ws, ref) => { const v = cell(ws, ref); return typeof v === "number" ? v : (parseFloat(v) || ""); };
+  const str = (ws, ref) => { const v = cell(ws, ref); return v ? String(v).trim() : ""; };
+
+  // Mon Salaire
+  const s1 = wb.Sheets["Mon Salaire"];
+  if (s1) {
+    for (let r = 12; r <= 28; r++) {
+      const i = r - 12;
+      // Fixes: labels=C, amounts=D (fallback B)
+      if (i < sal.fixes.length) {
+        const lbl = str(s1, `C${r}`);
+        const amt = num(s1, `D${r}`) || num(s1, `B${r}`);
+        if (lbl) sal.fixes[i].label = lbl;
+        if (amt) sal.fixes[i].montant = String(amt);
+      }
+      // Variables: labels=F, amounts=G
+      if (i < sal.variables.length) {
+        const lbl = str(s1, `F${r}`);
+        const amt = num(s1, `G${r}`);
+        if (lbl) sal.variables[i].label = lbl;
+        if (amt) sal.variables[i].montant = String(amt);
+      }
+      // Épargnes: labels=J, amounts=K
+      if (i < sal.epargnes.length) {
+        const lbl = str(s1, `J${r}`);
+        const amt = num(s1, `K${r}`);
+        if (lbl) sal.epargnes[i].label = lbl;
+        if (amt) sal.epargnes[i].montant = String(amt);
+      }
+    }
+  }
+
+  // Mon Chiffre d'affaires
+  const s2 = wb.Sheets["Mon Chiffre daffaires"] || wb.Sheets["Mon Chiffre d'affaires"] || wb.Sheets[wb.SheetNames[1]];
+  if (s2) {
+    for (let r = 13; r <= 27; r++) {
+      const i = r - 13;
+      // Fixes: labels=C, amounts=D (skip row 12 = Salaire auto)
+      if (i < pro.fixes.length) {
+        const lbl = str(s2, `C${r}`);
+        const amt = num(s2, `D${r}`);
+        if (lbl) pro.fixes[i].label = lbl;
+        if (amt) pro.fixes[i].montant = String(amt);
+      }
+    }
+    for (let r = 12; r <= 27; r++) {
+      const i = r - 12;
+      // Variables: labels=F, amounts=G
+      if (i < pro.variables.length) {
+        const lbl = str(s2, `F${r}`);
+        const amt = num(s2, `G${r}`);
+        if (lbl) pro.variables[i].label = lbl;
+        if (amt) pro.variables[i].montant = String(amt);
+      }
+    }
+    // Charges: J12-J15
+    for (let r = 12; r <= 15; r++) {
+      const i = r - 12;
+      if (i < pro.charges.length) {
+        const lbl = str(s2, `J${r}`);
+        const amt = num(s2, `K${r}`);
+        if (lbl && lbl !== "TOTAL ") pro.charges[i].label = lbl;
+        if (amt) pro.charges[i].montant = String(amt);
+      }
+    }
+    // Trésorerie: J19-J27
+    for (let r = 19; r <= 27; r++) {
+      const i = r - 19;
+      if (i < pro.tresorerie.length) {
+        const lbl = str(s2, `J${r}`);
+        const amt = num(s2, `K${r}`);
+        if (lbl && lbl !== "TOTAL ") pro.tresorerie[i].label = lbl;
+        if (amt) pro.tresorerie[i].montant = String(amt);
+      }
+    }
+  }
+
+  // Ma grille de Tarifs
+  const s3 = wb.Sheets["Ma grille de Tarifs"] || wb.Sheets[wb.SheetNames[2]];
+  if (s3) {
+    tar.sv = num(s3, "K3") || 5;
+    tar.hs = num(s3, "K5") || 33;
+    for (let r = 13; r <= 35; r++) {
+      const i = r - 13;
+      if (i < tar.p.length) {
+        const nom = str(s3, `B${r}`);
+        if (nom) tar.p[i].n = nom;
+        // Durées: C, D, E
+        const dc = num(s3, `C${r}`); if (dc) tar.p[i].dc = String(dc);
+        const dm = num(s3, `D${r}`); if (dm) tar.p[i].dm = String(dm);
+        const dl = num(s3, `E${r}`); if (dl) tar.p[i].dl = String(dl);
+        // Tarifs actuels: F, G, H
+        const tc = num(s3, `F${r}`); if (tc) tar.p[i].tc = String(tc);
+        const tm = num(s3, `G${r}`); if (tm) tar.p[i].tm = String(tm);
+        const tl = num(s3, `H${r}`); if (tl) tar.p[i].tl = String(tl);
+      }
+    }
+  }
+
+  return { sal, pro, tar };
+}
+
+/* ── WELCOME PAGE ── */
+function WelcomePage({ onImport, onSkip }) {
+  const fileRef = useRef(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  const handleFile = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setLoading(true);
+    setError(null);
+    try {
+      const buf = await file.arrayBuffer();
+      onImport(buf);
+    } catch (err) {
+      setError("Impossible de lire ce fichier. Vérifie que c'est bien un fichier Excel (.xlsx).");
+      setLoading(false);
+    }
+  };
+
+  return (
+    <div className="tgp" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 32 }}>
+        <div style={{ maxWidth: 520, textAlign: "center" }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
+            <div className="hdr-logo" style={{ width: 64, height: 64 }}>
+              <Scissors size={28} strokeWidth={2} />
+            </div>
+          </div>
+          <div className="hdr-name" style={{ fontSize: 32, marginBottom: 4 }}>The Good Price</div>
+          <div className="hdr-by" style={{ marginBottom: 40 }}>Your Hair Business</div>
+
+          <div className="tagline" style={{ fontSize: 22, marginBottom: 48 }}>
+            <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, transparent, ${C.light})`, display: "inline-block" }} />
+            « Travaille moins — facture mieux »
+            <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, ${C.light}, transparent)`, display: "inline-block" }} />
+          </div>
+
+          {/* Import option */}
+          <button
+            onClick={() => fileRef.current?.click()}
+            disabled={loading}
+            style={{
+              width: "100%", padding: "20px 28px", borderRadius: 16,
+              background: "linear-gradient(160deg, rgba(61,45,26,0.8), rgba(44,31,18,0.65))",
+              border: `1px solid rgba(121,90,52,0.2)`, cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 16,
+              transition: "all 0.3s", marginBottom: 14,
+              color: C.beige,
+            }}
+            onMouseOver={e => e.currentTarget.style.borderColor = "rgba(254,244,176,0.3)"}
+            onMouseOut={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.2)"}
+          >
+            <div style={{
+              width: 48, height: 48, borderRadius: 12,
+              background: "rgba(254,244,176,0.08)", display: "flex",
+              alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}>
+              <FileSpreadsheet size={22} color={C.yellow} strokeWidth={1.8} />
+            </div>
+            <div style={{ textAlign: "left" }}>
+              <div style={{ color: C.yellow, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>
+                {loading ? "Import en cours..." : "J'ai déjà The Good Price en Excel"}
+              </div>
+              <div style={{ color: C.light, fontSize: 13 }}>
+                Importe ton fichier pour remplir automatiquement tes données
+              </div>
+            </div>
+          </button>
+
+          <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFile} style={{ display: "none" }} />
+
+          {error && (
+            <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "8px 12px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>
+              {error}
+            </div>
+          )}
+
+          {/* Start fresh option */}
+          <button
+            onClick={onSkip}
+            style={{
+              width: "100%", padding: "20px 28px", borderRadius: 16,
+              background: "rgba(254,244,176,0.03)",
+              border: `1px solid rgba(121,90,52,0.1)`, cursor: "pointer",
+              display: "flex", alignItems: "center", gap: 16,
+              transition: "all 0.3s",
+              color: C.beige,
+            }}
+            onMouseOver={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.2)"}
+            onMouseOut={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.1)"}
+          >
+            <div style={{
+              width: 48, height: 48, borderRadius: 12,
+              background: "rgba(254,244,176,0.05)", display: "flex",
+              alignItems: "center", justifyContent: "center", flexShrink: 0,
+            }}>
+              <Plus size={22} color={C.light} strokeWidth={1.8} />
+            </div>
+            <div style={{ textAlign: "left" }}>
+              <div style={{ color: C.beige, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>
+                Commencer de zéro
+              </div>
+              <div style={{ color: C.light, fontSize: 13 }}>
+                Je n'ai pas de fichier, je remplis tout moi-même
+              </div>
+            </div>
+          </button>
         </div>
       </div>
     </div>
@@ -773,9 +998,20 @@ export default function App() {
   const [tar, setTar] = useState(dTar);
   const [ok, setOk] = useState(false);
   const [sv, setSv] = useState(false);
+  const [started, setStarted] = useState(false);
+  const importRef = useRef(null);
 
   useEffect(() => {
-    try { const r = localStorage.getItem(KEY); if (r) { const d = JSON.parse(r); if (d.sal) setSal(d.sal); if (d.pro) setPro(d.pro); if (d.tar) setTar(d.tar); } } catch {}
+    try {
+      const r = localStorage.getItem(KEY);
+      if (r) {
+        const d = JSON.parse(r);
+        if (d.sal) setSal(d.sal);
+        if (d.pro) setPro(d.pro);
+        if (d.tar) setTar(d.tar);
+        setStarted(true); // already has data, skip welcome
+      }
+    } catch {}
     setOk(true);
   }, []);
 
@@ -789,6 +1025,43 @@ export default function App() {
     return () => clearTimeout(t);
   }, [sal, pro, tar, ok]);
 
+  const handleImport = (buffer) => {
+    try {
+      const result = parseV1Excel(buffer, dSal, dPro, dTar);
+      setSal(result.sal);
+      setPro(result.pro);
+      setTar(result.tar);
+      setStarted(true);
+      setTab("salaire");
+    } catch (err) {
+      console.error("Import failed:", err);
+    }
+  };
+
+  const handleHeaderImport = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      const buf = await file.arrayBuffer();
+      handleImport(buf);
+    } catch (err) {
+      console.error("Import failed:", err);
+    }
+    e.target.value = "";
+  };
+
+  if (ok && !started) {
+    return (
+      <>
+        <style>{styles}</style>
+        <WelcomePage
+          onImport={(buf) => handleImport(buf)}
+          onSkip={() => setStarted(true)}
+        />
+      </>
+    );
+  }
+
   return (
     <div className="tgp">
       <style>{styles}</style>
@@ -800,8 +1073,28 @@ export default function App() {
             <div className="hdr-by">Your Hair Business</div>
           </div>
         </div>
-        <div className={`hdr-save${sv ? " on" : ""}`}>
-          {sv ? <><Ico icon={Save} size={13} color={C.yellow} /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
+        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            onClick={() => importRef.current?.click()}
+            title="Importer un fichier Excel"
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 12px", borderRadius: 20,
+              border: `1px solid rgba(121,90,52,0.15)`,
+              background: "rgba(121,90,52,0.06)",
+              color: C.light, fontSize: 12, cursor: "pointer",
+              fontFamily: "'Instrument Sans', sans-serif",
+              transition: "all 0.3s",
+            }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(254,244,176,0.25)"; e.currentTarget.style.color = C.yellow; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
+          >
+            <Upload size={13} strokeWidth={2} /> Importer
+          </button>
+          <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleHeaderImport} style={{ display: "none" }} />
+          <div className={`hdr-save${sv ? " on" : ""}`}>
+            {sv ? <><Ico icon={Save} size={13} color={C.yellow} /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
+          </div>
         </div>
       </header>
 
