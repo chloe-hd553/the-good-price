@@ -508,10 +508,10 @@ function WelcomePage({ onImport, onSkip }) {
               <Scissors size={28} strokeWidth={2} />
             </div>
           </div>
-          <div className="hdr-name" style={{ fontSize: 32, marginBottom: 4 }}>The Good Price</div>
+          <div className="hdr-name" style={{ fontSize: 32, marginBottom: 4, color: C.beige }}>The Good Price</div>
           <div className="hdr-by" style={{ marginBottom: 40 }}>Your Hair Business</div>
 
-          <div className="tagline" style={{ fontSize: 22, marginBottom: 48 }}>
+          <div className="tagline" style={{ fontSize: 20, marginBottom: 48, color: C.light, whiteSpace: "nowrap" }}>
             <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, transparent, ${C.light})`, display: "inline-block" }} />
             Travaille moins — facture mieux
             <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, ${C.light}, transparent)`, display: "inline-block" }} />
@@ -529,18 +529,18 @@ function WelcomePage({ onImport, onSkip }) {
               transition: "all 0.3s", marginBottom: 14,
               color: C.beige,
             }}
-            onMouseOver={e => e.currentTarget.style.borderColor = "rgba(254,244,176,0.3)"}
+            onMouseOver={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.35)"}
             onMouseOut={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.2)"}
           >
             <div style={{
               width: 48, height: 48, borderRadius: 12,
-              background: "rgba(254,244,176,0.08)", display: "flex",
+              background: "rgba(121,90,52,0.15)", display: "flex",
               alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
-              <FileSpreadsheet size={22} color={C.yellow} strokeWidth={1.8} />
+              <FileSpreadsheet size={22} color={C.beige} strokeWidth={1.8} />
             </div>
             <div style={{ textAlign: "left" }}>
-              <div style={{ color: C.yellow, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>
+              <div style={{ color: C.beige, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>
                 {loading ? "Import en cours..." : "J'ai déjà rempli l'ancienne version"}
               </div>
               <div style={{ color: C.light, fontSize: 13 }}>
@@ -562,7 +562,7 @@ function WelcomePage({ onImport, onSkip }) {
             onClick={onSkip}
             style={{
               width: "100%", padding: "20px 28px", borderRadius: 16,
-              background: "rgba(254,244,176,0.03)",
+              background: "rgba(121,90,52,0.03)",
               border: `1px solid rgba(121,90,52,0.1)`, cursor: "pointer",
               display: "flex", alignItems: "center", gap: 16,
               transition: "all 0.3s",
@@ -573,7 +573,7 @@ function WelcomePage({ onImport, onSkip }) {
           >
             <div style={{
               width: 48, height: 48, borderRadius: 12,
-              background: "rgba(254,244,176,0.05)", display: "flex",
+              background: "rgba(121,90,52,0.08)", display: "flex",
               alignItems: "center", justifyContent: "center", flexShrink: 0,
             }}>
               <Plus size={22} color={C.light} strokeWidth={1.8} />
