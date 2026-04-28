@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Scissors, LayoutDashboard, Wallet, Briefcase, Star, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw, Lock, LogOut, Mail, KeyRound } from "lucide-react";
+import { Scissors, LayoutDashboard, Wallet, Briefcase, Star, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw, Lock, LogOut, Mail, KeyRound, Eye, EyeOff } from "lucide-react";
 import * as XLSX from "xlsx";
 import { supabase } from "./supabase.js";
 
@@ -541,6 +541,7 @@ function AuthPage({ onAuth }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -553,7 +554,7 @@ function AuthPage({ onAuth }) {
         const { data, error: err } = await supabase.auth.signUp({ email, password });
         if (err) throw err;
         if (data.user && !data.user.email_confirmed_at) {
-          setSuccess("Un email de confirmation a été envoyé. Vérifie ta boîte mail puis connecte-toi.");
+          setSuccess("Un email de confirmation va t'être envoyé par « Supabase Auth ». Pense à vérifier tes spams. Clique sur le lien dans ce mail puis reviens ici pour te connecter.");
           setMode("login");
         } else if (data.user) {
           onAuth(data.user);
@@ -584,14 +585,14 @@ function AuthPage({ onAuth }) {
 
           <div style={{ textAlign: "left" }}>
             <div style={{ color: C.beige, fontSize: 20, fontWeight: 600, marginBottom: 4, fontFamily: "'Cormorant Garamond',serif" }}>
-              {mode === "login" ? "Content de te revoir" : "Crée ton compte"}
+              {mode === "login" ? "Connexion" : "Créer ton compte"}
             </div>
             <div style={{ color: C.light, fontSize: 14, marginBottom: 24 }}>
-              {mode === "login" ? "Connecte-toi pour retrouver tes données" : "Gratuit — commence à calculer tes tarifs"}
+              {mode === "login" ? "Retrouve tes données là où tu les avais laissées" : "Gratuit — commence à calculer tes tarifs"}
             </div>
 
             {error && <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>{error}</div>}
-            {success && <div style={{ color: C.greenText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(45,59,40,0.3)", borderRadius: 8 }}>{success}</div>}
+            {success && <div style={{ color: C.greenText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(45,59,40,0.3)", borderRadius: 8, lineHeight: 1.5 }}>{success}</div>}
 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ position: "relative" }}>
@@ -600,7 +601,10 @@ function AuthPage({ onAuth }) {
               </div>
               <div style={{ position: "relative" }}>
                 <KeyRound size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
-                <input className="auth-input" type="password" placeholder={mode === "signup" ? "Choisis un mot de passe (6 car. min)" : "Ton mot de passe"} value={password} onChange={e => setPassword(e.target.value)} required minLength={6} style={{ paddingLeft: 42 }} />
+                <input className="auth-input" type={showPw ? "text" : "password"} placeholder={mode === "signup" ? "Choisis un mot de passe (6 car. min)" : "Ton mot de passe"} value={password} onChange={e => setPassword(e.target.value)} required minLength={6} style={{ paddingLeft: 42, paddingRight: 42 }} />
+                <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4 }}>
+                  {showPw ? <EyeOff size={16} color={C.light} /> : <Eye size={16} color={C.light} />}
+                </button>
               </div>
               <button className="auth-btn" type="submit" disabled={loading}>
                 {loading ? "Chargement..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
@@ -609,9 +613,9 @@ function AuthPage({ onAuth }) {
 
             <div style={{ textAlign: "center", marginTop: 18 }}>
               {mode === "login" ? (
-                <span style={{ color: C.light, fontSize: 14 }}>Pas encore de compte ? <button className="auth-link" onClick={() => { setMode("signup"); setError(null); }}>Inscris-toi</button></span>
+                <span style={{ color: C.light, fontSize: 14 }}>Pas encore de compte ? <button className="auth-link" onClick={() => { setMode("signup"); setError(null); setSuccess(null); }}>Inscris-toi</button></span>
               ) : (
-                <span style={{ color: C.light, fontSize: 14 }}>Déjà un compte ? <button className="auth-link" onClick={() => { setMode("login"); setError(null); }}>Connecte-toi</button></span>
+                <span style={{ color: C.light, fontSize: 14 }}>Déjà un compte ? <button className="auth-link" onClick={() => { setMode("login"); setError(null); setSuccess(null); }}>Connecte-toi</button></span>
               )}
             </div>
           </div>
@@ -819,9 +823,9 @@ function Dash({ sal, pro, tar, isPaid }) {
             <div className="kpi-icon">
               <Ico icon={k.icon} size={14} color={C.light} />
               <span className="kpi-label">{k.l}</span>
-              {k.lock && !isPaid && <Lock size={12} color={C.light} style={{ marginLeft: 4, opacity: 0.5 }} />}
+              {k.lock && !isPaid && th > 0 && <Lock size={12} color={C.light} style={{ marginLeft: 4, opacity: 0.5 }} />}
             </div>
-            <div className={`kpi-val${k.lock && !isPaid ? " blur-val" : ""}`}>{k.v}</div>
+            <div className={`kpi-val${k.lock && !isPaid && th > 0 ? " blur-val" : ""}`}>{k.v}</div>
             <div className="kpi-sub">{k.s}</div>
           </div>
         ))}
@@ -1139,8 +1143,8 @@ function Tar({ data, on, sal, pro, isPaid }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
             <Ico icon={Star} size={22} color={C.dark} />
             <span style={{ color: C.dark, fontSize: 13, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>Taux horaire</span>
-            <span className={isPaid ? "" : "blur-val"} style={{ color: C.dark, fontSize: 44, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>{th}<span style={{ fontSize: 20, fontWeight: 500 }}> €/h</span></span>
-            {!isPaid && <Lock size={16} color={C.dark} style={{ opacity: 0.4 }} />}
+            <span className={!isPaid && th > 0 ? "blur-val" : ""} style={{ color: C.dark, fontSize: 44, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>{th}<span style={{ fontSize: 20, fontWeight: 500 }}> €/h</span></span>
+            {!isPaid && th > 0 && <Lock size={16} color={C.dark} style={{ opacity: 0.4 }} />}
           </div>
         </div>
       </div>
@@ -1196,8 +1200,8 @@ function Tar({ data, on, sal, pro, isPaid }) {
                     const cls = mn !== null && v > 0 ? (v >= mn ? " gn" : " rd") : bg;
                     return <td key={f} className={j === 0 ? "sep" : ""}><input className={`ci${cls}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" min="0" onWheel={e => e.target.blur()} placeholder="—" style={{ textAlign: "center", width: 60 }} /></td>;
                   })}
-                  {[m.c, m.m, m.l].map((v, j) => <td key={`m${j}`} className={`mc${j === 0 ? " sep" : ""}`}><span className={isPaid ? "" : "blur-val"}>{v !== null ? `${v} €` : ""}</span></td>)}
-                  {[ec.c, ec.m, ec.l].map((e, j) => <td key={`e${j}`} className={`${e === null ? "" : e >= 0 ? "ep" : "en"}${j === 0 ? " sep" : ""}`}><span className={isPaid ? "" : "blur-val"}>{e !== null ? `${e >= 0 ? "+" : ""}${e} €` : ""}</span></td>)}
+                  {[m.c, m.m, m.l].map((v, j) => <td key={`m${j}`} className={`mc${j === 0 ? " sep" : ""}`}><span className={!isPaid && th > 0 ? "blur-val" : ""}>{v !== null ? `${v} €` : ""}</span></td>)}
+                  {[ec.c, ec.m, ec.l].map((e, j) => <td key={`e${j}`} className={`${e === null ? "" : e >= 0 ? "ep" : "en"}${j === 0 ? " sep" : ""}`}><span className={!isPaid && th > 0 ? "blur-val" : ""}>{e !== null ? `${e >= 0 ? "+" : ""}${e} €` : ""}</span></td>)}
                 </tr>
               );
             })}
@@ -1431,18 +1435,21 @@ export default function App() {
         ))}
       </nav>
 
-      <main className="main" style={{ paddingBottom: isPaid ? 32 : 100 }}>
+      <main className="main" style={{ paddingBottom: !isPaid ? 100 : 32 }}>
         {tab === "dashboard" && <Dash sal={sal} pro={pro} tar={tar} isPaid={isPaid} />}
         {tab === "salaire" && <Sal data={sal} on={setSal} />}
         {tab === "pro" && <Pro data={pro} on={setPro} sal={sal} />}
         {tab === "tarifs" && <Tar data={tar} on={setTar} sal={sal} pro={pro} isPaid={isPaid} />}
       </main>
 
-      {/* Unlock CTA — fixed bottom bar when not paid */}
-      {!isPaid && (
+      {/* Unlock CTA — fixed bottom bar when not paid and has data */}
+      {!isPaid && (() => {
+        const totalAny = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes) + sum(pro.fixes) + sum(pro.variables) + sum(pro.charges) + sum(pro.tresorerie);
+        return totalAny > 0;
+      })() && (
         <div className="unlock-bar">
-          <button className="unlock-btn" onClick={() => alert("Le paiement Stripe sera bientôt disponible.")}>
-            <Lock size={18} /> Débloquer mes tarifs minimum
+          <button className="unlock-btn" onClick={() => alert("Le paiement sera bientôt disponible.")}>
+            <Lock size={18} /> Débloquer mes tarifs sur mesure
           </button>
         </div>
       )}
