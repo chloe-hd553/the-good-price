@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Scissors, LayoutDashboard, Wallet, Briefcase, Star, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw } from "lucide-react";
+import { Scissors, LayoutDashboard, Wallet, Briefcase, Star, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw, Lock, LogOut, Mail, KeyRound } from "lucide-react";
 import * as XLSX from "xlsx";
+import { supabase } from "./supabase.js";
 
 /* ── PALETTE STRICTE ── */
 const C = {
@@ -321,6 +322,53 @@ input[type=number]{-moz-appearance:textfield}
   .tb{padding:18px 20px;border-radius:14px}
   .pi{font-size:18px;padding:12px 14px}
 }
+
+/* ── BLUR LOCK ── */
+.blur-val{filter:blur(8px);user-select:none;pointer-events:none}
+.blur-wrap{position:relative;display:inline-block}
+.blur-wrap .lock-ico{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;opacity:0.5}
+
+/* ── UNLOCK CTA ── */
+.unlock-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:200;
+  padding:16px 24px;
+  background:linear-gradient(180deg,rgba(44,31,18,0) 0%,rgba(44,31,18,0.95) 30%,#2C1F12 100%);
+  display:flex;justify-content:center;padding-top:32px;
+}
+.unlock-btn{
+  padding:14px 36px;border-radius:14px;border:none;
+  background:#fef4b0;color:#3D2D1A;
+  font-family:'Instrument Sans',sans-serif;font-size:16px;font-weight:700;
+  cursor:pointer;transition:all 0.3s;
+  box-shadow:0 4px 20px rgba(254,244,176,0.2);
+  display:flex;align-items:center;gap:10px;
+}
+.unlock-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(254,244,176,0.3)}
+
+/* ── AUTH PAGE ── */
+.auth-input{
+  width:100%;padding:14px 18px;border-radius:10px;
+  border:1px solid rgba(121,90,52,0.2);
+  background:rgba(61,45,26,0.6);
+  color:#f4e9d6;font-family:'Instrument Sans',sans-serif;font-size:15px;
+  outline:none;transition:all 0.2s;
+}
+.auth-input:focus{border-color:rgba(254,244,176,0.3);box-shadow:0 0 0 3px rgba(254,244,176,0.06)}
+.auth-input::placeholder{color:#795A34}
+.auth-btn{
+  width:100%;padding:14px;border-radius:10px;border:none;
+  background:#fef4b0;color:#3D2D1A;
+  font-family:'Instrument Sans',sans-serif;font-size:16px;font-weight:700;
+  cursor:pointer;transition:all 0.2s;
+}
+.auth-btn:hover{opacity:0.9}
+.auth-btn:disabled{opacity:0.5;cursor:not-allowed}
+.auth-link{
+  color:#795A34;font-size:14px;cursor:pointer;
+  border:none;background:none;font-family:'Instrument Sans',sans-serif;
+  text-decoration:underline;transition:color 0.2s;
+}
+.auth-link:hover{color:#f4e9d6}
 `;
 
 const Ico = ({ icon: Icon, size = 16, color = C.yellow, ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
@@ -488,6 +536,91 @@ function parseV1Excel(buffer, dSal, dPro, dTar) {
   return { sal, pro, tar };
 }
 
+/* ── AUTH PAGE ── */
+function AuthPage({ onAuth }) {
+  const [mode, setMode] = useState("login");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(null);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setLoading(true); setError(null); setSuccess(null);
+    try {
+      if (mode === "signup") {
+        const { data, error: err } = await supabase.auth.signUp({ email, password });
+        if (err) throw err;
+        if (data.user && !data.user.email_confirmed_at) {
+          setSuccess("Un email de confirmation a été envoyé. Vérifie ta boîte mail puis connecte-toi.");
+          setMode("login");
+        } else if (data.user) {
+          onAuth(data.user);
+        }
+      } else {
+        const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
+        if (err) throw err;
+        onAuth(data.user);
+      }
+    } catch (err) {
+      setError(mode === "login" ? "Email ou mot de passe incorrect." : err.message.includes("already") ? "Cet email est déjà utilisé. Connecte-toi." : "Erreur lors de l'inscription. Réessaie.");
+    }
+    setLoading(false);
+  };
+
+  return (
+    <div className="tgp" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <style>{styles}</style>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ maxWidth: 400, width: "100%", textAlign: "center" }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+            <div className="hdr-logo" style={{ width: 56, height: 56 }}>
+              <Scissors size={24} strokeWidth={2} />
+            </div>
+          </div>
+          <div className="hdr-name" style={{ fontSize: 28, marginBottom: 4, color: C.beige }}>The Good Price</div>
+          <div className="hdr-by" style={{ marginBottom: 36 }}>Your Hair Business</div>
+
+          <div style={{ textAlign: "left" }}>
+            <div style={{ color: C.beige, fontSize: 20, fontWeight: 600, marginBottom: 4, fontFamily: "'Cormorant Garamond',serif" }}>
+              {mode === "login" ? "Content de te revoir" : "Crée ton compte"}
+            </div>
+            <div style={{ color: C.light, fontSize: 14, marginBottom: 24 }}>
+              {mode === "login" ? "Connecte-toi pour retrouver tes données" : "Gratuit — commence à calculer tes tarifs"}
+            </div>
+
+            {error && <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>{error}</div>}
+            {success && <div style={{ color: C.greenText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(45,59,40,0.3)", borderRadius: 8 }}>{success}</div>}
+
+            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ position: "relative" }}>
+                <Mail size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+                <input className="auth-input" type="email" placeholder="Ton email" value={email} onChange={e => setEmail(e.target.value)} required style={{ paddingLeft: 42 }} />
+              </div>
+              <div style={{ position: "relative" }}>
+                <KeyRound size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+                <input className="auth-input" type="password" placeholder={mode === "signup" ? "Choisis un mot de passe (6 car. min)" : "Ton mot de passe"} value={password} onChange={e => setPassword(e.target.value)} required minLength={6} style={{ paddingLeft: 42 }} />
+              </div>
+              <button className="auth-btn" type="submit" disabled={loading}>
+                {loading ? "Chargement..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
+              </button>
+            </form>
+
+            <div style={{ textAlign: "center", marginTop: 18 }}>
+              {mode === "login" ? (
+                <span style={{ color: C.light, fontSize: 14 }}>Pas encore de compte ? <button className="auth-link" onClick={() => { setMode("signup"); setError(null); }}>Inscris-toi</button></span>
+              ) : (
+                <span style={{ color: C.light, fontSize: 14 }}>Déjà un compte ? <button className="auth-link" onClick={() => { setMode("login"); setError(null); }}>Connecte-toi</button></span>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /* ── WELCOME PAGE ── */
 function WelcomePage({ onImport, onSkip }) {
   const fileRef = useRef(null);
@@ -635,7 +768,7 @@ function IR({ item, idx, on, onDelete, onUp, onDown, canUp, canDown }) {
   );
 }
 
-function Dash({ sal, pro, tar }) {
+function Dash({ sal, pro, tar, isPaid }) {
   const ts = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes);
   const tf = sum(pro.fixes), tv = sum(pro.variables), tc = sum(pro.charges), tt = sum(pro.tresorerie);
   const ca = ts + tf + tv + tc + tt, caA = ca * 12;
@@ -677,17 +810,18 @@ function Dash({ sal, pro, tar }) {
 
       {/* KPI 2x2 — always balanced */}
       <div className="kpis">
-        {[{ icon: Wallet, l: "Salaire net", v: fmt(ts), s: "Ce que tu te verses / mois" },
-          { icon: Briefcase, l: "CA nécessaire", v: fmt(ca), s: "Ton objectif de CA / mois" },
-          { icon: Star, l: "Taux horaire", v: `${th} €/h`, s: "Ta valeur / heure" },
-          { icon: Calendar, l: "CA annuel", v: fmt(caA), s: "Objectif annuel" }
+        {[{ icon: Wallet, l: "Salaire net", v: fmt(ts), s: "Ce que tu te verses / mois", lock: false },
+          { icon: Briefcase, l: "CA nécessaire", v: fmt(ca), s: "Ton objectif de CA / mois", lock: false },
+          { icon: Star, l: "Taux horaire", v: `${th} €/h`, s: "Ta valeur / heure", lock: true },
+          { icon: Calendar, l: "CA annuel", v: fmt(caA), s: "Objectif annuel", lock: false }
         ].map((k, i) => (
           <div className="kpi" key={i}>
             <div className="kpi-icon">
               <Ico icon={k.icon} size={14} color={C.light} />
               <span className="kpi-label">{k.l}</span>
+              {k.lock && !isPaid && <Lock size={12} color={C.light} style={{ marginLeft: 4, opacity: 0.5 }} />}
             </div>
-            <div className="kpi-val">{k.v}</div>
+            <div className={`kpi-val${k.lock && !isPaid ? " blur-val" : ""}`}>{k.v}</div>
             <div className="kpi-sub">{k.s}</div>
           </div>
         ))}
@@ -962,7 +1096,7 @@ function Pro({ data, on, sal }) {
   );
 }
 
-function Tar({ data, on, sal, pro }) {
+function Tar({ data, on, sal, pro, isPaid }) {
   const ts = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes);
   const ca = ts + sum(pro.fixes) + sum(pro.variables) + sum(pro.charges) + sum(pro.tresorerie);
   const caA = ca * 12, sw = 52 - (data.sv || 0), ha = (data.hs || 0) * sw, th = ha > 0 ? Math.ceil(caA / ha) : 0;
@@ -1005,7 +1139,8 @@ function Tar({ data, on, sal, pro }) {
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
             <Ico icon={Star} size={22} color={C.dark} />
             <span style={{ color: C.dark, fontSize: 13, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>Taux horaire</span>
-            <span style={{ color: C.dark, fontSize: 44, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>{th}<span style={{ fontSize: 20, fontWeight: 500 }}> €/h</span></span>
+            <span className={isPaid ? "" : "blur-val"} style={{ color: C.dark, fontSize: 44, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>{th}<span style={{ fontSize: 20, fontWeight: 500 }}> €/h</span></span>
+            {!isPaid && <Lock size={16} color={C.dark} style={{ opacity: 0.4 }} />}
           </div>
         </div>
       </div>
@@ -1061,8 +1196,8 @@ function Tar({ data, on, sal, pro }) {
                     const cls = mn !== null && v > 0 ? (v >= mn ? " gn" : " rd") : bg;
                     return <td key={f} className={j === 0 ? "sep" : ""}><input className={`ci${cls}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" min="0" onWheel={e => e.target.blur()} placeholder="—" style={{ textAlign: "center", width: 60 }} /></td>;
                   })}
-                  {[m.c, m.m, m.l].map((v, j) => <td key={`m${j}`} className={`mc${j === 0 ? " sep" : ""}`}>{v !== null ? `${v} €` : ""}</td>)}
-                  {[ec.c, ec.m, ec.l].map((e, j) => <td key={`e${j}`} className={`${e === null ? "" : e >= 0 ? "ep" : "en"}${j === 0 ? " sep" : ""}`}>{e !== null ? `${e >= 0 ? "+" : ""}${e} €` : ""}</td>)}
+                  {[m.c, m.m, m.l].map((v, j) => <td key={`m${j}`} className={`mc${j === 0 ? " sep" : ""}`}><span className={isPaid ? "" : "blur-val"}>{v !== null ? `${v} €` : ""}</span></td>)}
+                  {[ec.c, ec.m, ec.l].map((e, j) => <td key={`e${j}`} className={`${e === null ? "" : e >= 0 ? "ep" : "en"}${j === 0 ? " sep" : ""}`}><span className={isPaid ? "" : "blur-val"}>{e !== null ? `${e >= 0 ? "+" : ""}${e} €` : ""}</span></td>)}
                 </tr>
               );
             })}
@@ -1082,31 +1217,63 @@ export default function App() {
   const [ok, setOk] = useState(false);
   const [sv, setSv] = useState(false);
   const [started, setStarted] = useState(false);
+  const [user, setUser] = useState(null);
+  const [authLoading, setAuthLoading] = useState(true);
+  const [isPaid, setIsPaid] = useState(false);
   const importRef = useRef(null);
 
+  // Check auth session on mount
   useEffect(() => {
-    try {
-      const r = localStorage.getItem(KEY);
-      if (r) {
-        const d = JSON.parse(r);
-        if (d.sal) setSal(d.sal);
-        if (d.pro) setPro(d.pro);
-        if (d.tar) setTar(d.tar);
-        setStarted(true); // already has data, skip welcome
-      }
-    } catch {}
-    setOk(true);
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user || null);
+      setAuthLoading(false);
+    });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user || null);
+    });
+    return () => subscription.unsubscribe();
   }, []);
 
+  // Load data from Supabase when user logs in
   useEffect(() => {
-    if (!ok) return;
-    const t = setTimeout(() => {
+    if (!user) { setOk(true); return; }
+    (async () => {
+      try {
+        const { data } = await supabase.from("user_data").select("*").eq("id", user.id).single();
+        if (data) {
+          if (data.sal) setSal(data.sal);
+          if (data.pro) setPro(data.pro);
+          if (data.tar) setTar(data.tar);
+          setStarted(true);
+          // Check payment status
+          if (data.paid && data.expires_at) {
+            setIsPaid(new Date(data.expires_at) > new Date());
+          } else {
+            setIsPaid(data.paid || false);
+          }
+        }
+      } catch {} // No data yet = new user
+      setOk(true);
+    })();
+  }, [user]);
+
+  // Save to Supabase on change (debounced)
+  useEffect(() => {
+    if (!ok || !user) return;
+    const t = setTimeout(async () => {
       setSv(true);
-      try { localStorage.setItem(KEY, JSON.stringify({ sal, pro, tar })); } catch {}
+      try {
+        await supabase.from("user_data").upsert({
+          id: user.id,
+          email: user.email,
+          sal, pro, tar,
+          updated_at: new Date().toISOString(),
+        });
+      } catch (err) { console.error("Save error:", err); }
       setTimeout(() => setSv(false), 800);
-    }, 1000);
+    }, 1500);
     return () => clearTimeout(t);
-  }, [sal, pro, tar, ok]);
+  }, [sal, pro, tar, ok, user]);
 
   const handleImport = (buffer) => {
     try {
@@ -1142,6 +1309,36 @@ export default function App() {
     }
   };
 
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    setUser(null);
+    setSal(JSON.parse(JSON.stringify(dSal)));
+    setPro(JSON.parse(JSON.stringify(dPro)));
+    setTar(JSON.parse(JSON.stringify(dTar)));
+    setStarted(false);
+    setIsPaid(false);
+    setOk(false);
+  };
+
+  // Loading state
+  if (authLoading) {
+    return (
+      <div className="tgp" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
+        <style>{styles}</style>
+        <div style={{ textAlign: "center" }}>
+          <div className="hdr-logo" style={{ width: 56, height: 56, margin: "0 auto 16px" }}><Scissors size={24} strokeWidth={2} /></div>
+          <div style={{ color: C.light, fontSize: 14 }}>Chargement...</div>
+        </div>
+      </div>
+    );
+  }
+
+  // Not logged in → Auth page
+  if (!user) {
+    return <AuthPage onAuth={(u) => setUser(u)} />;
+  }
+
+  // Logged in but no data → Welcome page
   if (ok && !started) {
     return (
       <>
@@ -1201,6 +1398,23 @@ export default function App() {
           >
             <RotateCcw size={13} strokeWidth={2} /> Réinitialiser
           </button>
+          <button
+            onClick={handleLogout}
+            title="Se déconnecter"
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 12px", borderRadius: 20,
+              border: `1px solid rgba(121,90,52,0.15)`,
+              background: "rgba(121,90,52,0.06)",
+              color: C.light, fontSize: 12, cursor: "pointer",
+              fontFamily: "'Instrument Sans', sans-serif",
+              transition: "all 0.3s",
+            }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.25)"; e.currentTarget.style.color = C.beige; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
+          >
+            <LogOut size={13} strokeWidth={2} />
+          </button>
           <div className={`hdr-save${sv ? " on" : ""}`}>
             {sv ? <><Ico icon={Save} size={13} color={C.yellow} /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
           </div>
@@ -1217,12 +1431,21 @@ export default function App() {
         ))}
       </nav>
 
-      <main className="main">
-        {tab === "dashboard" && <Dash sal={sal} pro={pro} tar={tar} />}
+      <main className="main" style={{ paddingBottom: isPaid ? 32 : 100 }}>
+        {tab === "dashboard" && <Dash sal={sal} pro={pro} tar={tar} isPaid={isPaid} />}
         {tab === "salaire" && <Sal data={sal} on={setSal} />}
         {tab === "pro" && <Pro data={pro} on={setPro} sal={sal} />}
-        {tab === "tarifs" && <Tar data={tar} on={setTar} sal={sal} pro={pro} />}
+        {tab === "tarifs" && <Tar data={tar} on={setTar} sal={sal} pro={pro} isPaid={isPaid} />}
       </main>
+
+      {/* Unlock CTA — fixed bottom bar when not paid */}
+      {!isPaid && (
+        <div className="unlock-bar">
+          <button className="unlock-btn" onClick={() => alert("Le paiement Stripe sera bientôt disponible.")}>
+            <Lock size={18} /> Débloquer mes tarifs minimum
+          </button>
+        </div>
+      )}
     </div>
   );
 }
