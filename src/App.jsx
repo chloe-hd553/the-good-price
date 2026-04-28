@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Scissors, LayoutDashboard, Wallet, Briefcase, Star, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus } from "lucide-react";
+import { Scissors, LayoutDashboard, Wallet, Briefcase, Star, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw } from "lucide-react";
 import * as XLSX from "xlsx";
 
 /* ── PALETTE STRICTE ── */
@@ -156,7 +156,14 @@ const styles = `
 .sh-text{font-size:14px;font-weight:600;color:#fef4b0;letter-spacing:1.5px;text-transform:uppercase}
 
 /* INPUTS */
-.ir{display:flex;gap:8px;margin-bottom:5px}
+.ir{display:flex;gap:8px;margin-bottom:5px;align-items:center}
+.row-actions{display:flex;gap:2px;opacity:0;transition:opacity 0.2s;flex-shrink:0}
+.ir:hover .row-actions{opacity:1}
+.row-btn{
+  border:none;background:none;cursor:pointer;padding:2px;
+  color:#795A34;transition:color 0.2s;display:flex;align-items:center;
+}
+.row-btn:hover{color:#fef4b0}
 .ifl{
   flex:3;padding:10px 14px;border-radius:8px;
   border:1px solid rgba(121,90,52,0.12);
@@ -308,6 +315,8 @@ input[type=number]{-moz-appearance:textfield}
   .tr-l{font-size:12px}
   .tr-v{font-size:18px}
   .hint{font-size:13px}
+
+  .row-actions{opacity:0.6}
 
   .tb{padding:18px 20px;border-radius:14px}
   .pi{font-size:18px;padding:12px 14px}
@@ -611,12 +620,17 @@ function AddRow({ onClick, label = "Ajouter une ligne" }) {
   );
 }
 
-function IR({ item, idx, on }) {
+function IR({ item, idx, on, onDelete, onUp, onDown, canUp, canDown }) {
   const h = item.label || item.montant;
   return (
     <div className="ir">
+      <div className="row-actions">
+        <button className="row-btn" onClick={onUp} disabled={!canUp} style={{ opacity: canUp ? 1 : 0.2 }}><ChevronUp size={14} /></button>
+        <button className="row-btn" onClick={onDown} disabled={!canDown} style={{ opacity: canDown ? 1 : 0.2 }}><ChevronDown size={14} /></button>
+      </div>
       <input className={`ifl${h ? "" : " e"}`} value={item.label} onChange={e => on(idx, "label", e.target.value)} placeholder="Libellé..." />
       <input className={`ifa${h ? "" : " e"}`} value={item.montant} onChange={e => on(idx, "montant", e.target.value)} placeholder="0" type="number" min="0" onWheel={e => e.target.blur()} />
+      <button className="row-btn" onClick={onDelete} style={{ opacity: h ? 0.5 : 0.2 }}><X size={14} /></button>
     </div>
   );
 }
@@ -850,6 +864,13 @@ function Dash({ sal, pro, tar }) {
 function Sal({ data, on }) {
   const up = (s, i, f, v) => on({ ...data, [s]: data[s].map((x, j) => j === i ? { ...x, [f]: v } : x) });
   const addRow = (s) => on({ ...data, [s]: [...data[s], { label: "", montant: "" }] });
+  const delRow = (s, i) => { if (data[s].length > 1) on({ ...data, [s]: data[s].filter((_, j) => j !== i) }); };
+  const moveRow = (s, i, dir) => {
+    const arr = [...data[s]]; const ni = i + dir;
+    if (ni < 0 || ni >= arr.length) return;
+    [arr[i], arr[ni]] = [arr[ni], arr[i]];
+    on({ ...data, [s]: arr });
+  };
   const t = sum(data.fixes) + sum(data.variables) + sum(data.epargnes);
   return (
     <div className="fi">
@@ -861,8 +882,8 @@ function Sal({ data, on }) {
         {[["fixes", "Dépenses fixes", data.fixes, ShieldCheck], ["variables", "Dépenses variables", data.variables, Receipt], ["epargnes", "Épargnes", data.epargnes, PiggyBank]].map(([k, title, items, icon]) => (
           <div key={k}>
             <div className="sh"><SectionIcon icon={icon} /><div className="sh-text">{title}</div></div>
-            <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
-            {items.map((item, i) => <IR key={i} item={item} idx={i} on={(j, f, v) => up(k, j, f, v)} />)}
+            <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px 0 40px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
+            {items.map((item, i) => <IR key={i} item={item} idx={i} on={(j, f, v) => up(k, j, f, v)} onDelete={() => delRow(k, i)} onUp={() => moveRow(k, i, -1)} onDown={() => moveRow(k, i, 1)} canUp={i > 0} canDown={i < items.length - 1} />)}
             <AddRow onClick={() => addRow(k)} />
             <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(items))}</span></div>
           </div>
@@ -876,8 +897,20 @@ function Sal({ data, on }) {
 function Pro({ data, on, sal }) {
   const up = (s, i, f, v) => on({ ...data, [s]: data[s].map((x, j) => j === i ? { ...x, [f]: v } : x) });
   const addRow = (s) => on({ ...data, [s]: [...data[s], { label: "", montant: "" }] });
+  const delRow = (s, i) => { if (data[s].length > 1) on({ ...data, [s]: data[s].filter((_, j) => j !== i) }); };
+  const moveRow = (s, i, dir) => {
+    const arr = [...data[s]]; const ni = i + dir;
+    if (ni < 0 || ni >= arr.length) return;
+    [arr[i], arr[ni]] = [arr[ni], arr[i]];
+    on({ ...data, [s]: arr });
+  };
   const ts = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes);
   const ca = ts + sum(data.fixes) + sum(data.variables) + sum(data.charges) + sum(data.tresorerie);
+  const irProps = (k, items) => (i) => ({
+    item: items[i], idx: i, on: (j, f, v) => up(k, j, f, v),
+    onDelete: () => delRow(k, i), onUp: () => moveRow(k, i, -1), onDown: () => moveRow(k, i, 1),
+    canUp: i > 0, canDown: i < items.length - 1,
+  });
   return (
     <div className="fi">
       <div className="rb">
@@ -893,22 +926,22 @@ function Pro({ data, on, sal }) {
       <div className="g3">
         <div>
           <div className="sh"><SectionIcon icon={ShieldCheck} /><div className="sh-text">Dépenses fixes</div></div>
-          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
-          {data.fixes.map((x, i) => <IR key={i} item={x} idx={i} on={(j, f, v) => up("fixes", j, f, v)} />)}
+          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px 0 40px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
+          {data.fixes.map((x, i) => <IR key={i} {...irProps("fixes", data.fixes)(i)} />)}
           <AddRow onClick={() => addRow("fixes")} />
           <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(data.fixes))}</span></div>
         </div>
         <div>
           <div className="sh"><SectionIcon icon={Receipt} /><div className="sh-text">Dépenses variables</div></div>
-          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
-          {data.variables.map((x, i) => <IR key={i} item={x} idx={i} on={(j, f, v) => up("variables", j, f, v)} />)}
+          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px 0 40px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
+          {data.variables.map((x, i) => <IR key={i} {...irProps("variables", data.variables)(i)} />)}
           <AddRow onClick={() => addRow("variables")} />
           <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(data.variables))}</span></div>
         </div>
         <div>
           <div className="sh"><SectionIcon icon={Receipt} /><div className="sh-text">Charges & taxes</div></div>
-          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px", marginBottom: 6 }}><span>Libellé</span><span>Montant / mois</span></div>
-          {data.charges.map((x, i) => <IR key={i} item={x} idx={i} on={(j, f, v) => up("charges", j, f, v)} />)}
+          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px 0 40px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
+          {data.charges.map((x, i) => <IR key={i} {...irProps("charges", data.charges)(i)} />)}
           <AddRow onClick={() => addRow("charges")} />
           <div className="tr"><span className="tr-l">Total charges</span><span className="tr-v">{fmt(sum(data.charges))}</span></div>
           <div style={{ marginTop: 16 }}>
@@ -919,7 +952,7 @@ function Pro({ data, on, sal }) {
               </div>
               <div style={{ color: C.light, fontSize: 10, fontStyle: "italic", marginTop: 2 }}>Ce n'est PAS ton solde actuel, mais ce que tu VEUX mettre de côté</div>
             </div>
-            {data.tresorerie.map((x, i) => <IR key={i} item={x} idx={i} on={(j, f, v) => up("tresorerie", j, f, v)} />)}
+            {data.tresorerie.map((x, i) => <IR key={i} {...irProps("tresorerie", data.tresorerie)(i)} />)}
             <AddRow onClick={() => addRow("tresorerie")} />
             <div className="tr"><span className="tr-l">Total tréso</span><span className="tr-v">{fmt(sum(data.tresorerie))}</span></div>
           </div>
@@ -936,6 +969,13 @@ function Tar({ data, on, sal, pro }) {
   const uP = (f, v) => on({ ...data, [f]: parseFloat(v) || 0 });
   const uPr = (i, f, v) => on({ ...data, p: data.p.map((x, j) => j === i ? { ...x, [f]: v } : x) });
   const addPrestation = () => on({ ...data, p: [...data.p, { n:"",dc:"",dm:"",dl:"",tc:"",tm:"",tl:"" }] });
+  const delPrestation = (i) => { if (data.p.length > 1) on({ ...data, p: data.p.filter((_, j) => j !== i) }); };
+  const movePrestation = (i, dir) => {
+    const arr = [...data.p]; const ni = i + dir;
+    if (ni < 0 || ni >= arr.length) return;
+    [arr[i], arr[ni]] = [arr[ni], arr[i]];
+    on({ ...data, p: arr });
+  };
 
   return (
     <div className="fi">
@@ -978,7 +1018,8 @@ function Tar({ data, on, sal, pro }) {
         <table className="tt">
           <thead>
             <tr>
-              <th className="th-main" rowSpan={2} style={{ borderRadius: "10px 0 0 10px", textAlign: "left", paddingLeft: 16, verticalAlign: "middle" }}>Prestation</th>
+              <th className="th-main" rowSpan={2} style={{ borderRadius: "10px 0 0 10px", width: 40 }}></th>
+              <th className="th-main" rowSpan={2} style={{ textAlign: "left", paddingLeft: 16, verticalAlign: "middle" }}>Prestation</th>
               <th className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Durée</th>
               <th className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs actuels</th>
               <th className="th-min" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs minimum</th>
@@ -1006,6 +1047,13 @@ function Tar({ data, on, sal, pro }) {
               const h = !!p.n; const bg = h ? "" : " e";
               return (
                 <tr key={i}>
+                  <td style={{ padding: "2px 0" }}>
+                    <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 0 }}>
+                      <button className="row-btn" onClick={() => movePrestation(i, -1)} disabled={i === 0} style={{ opacity: i > 0 ? 1 : 0.2 }}><ChevronUp size={12} /></button>
+                      <button className="row-btn" onClick={() => delPrestation(i)}><X size={12} /></button>
+                      <button className="row-btn" onClick={() => movePrestation(i, 1)} disabled={i === data.p.length - 1} style={{ opacity: i < data.p.length - 1 ? 1 : 0.2 }}><ChevronDown size={12} /></button>
+                    </div>
+                  </td>
                   <td><input className={`ci${bg}`} value={p.n} onChange={e => uPr(i, "n", e.target.value)} placeholder="Prestation..." style={{ width: "100%", fontWeight: h ? 500 : 400 }} /></td>
                   {["dc","dm","dl"].map((f, j) => <td key={f} className={j === 0 ? "sep" : ""}><input className={`ci ci-dur${bg}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" step="0.25" min="0" onWheel={e => e.target.blur()} placeholder="—" style={{ textAlign: "center", width: 56 }} /></td>)}
                   {[["tc", m.c], ["tm", m.m], ["tl", m.l]].map(([f, mn], j) => {
@@ -1085,6 +1133,15 @@ export default function App() {
     e.target.value = "";
   };
 
+  const handleReset = () => {
+    if (window.confirm("Repartir à zéro ? Toutes tes données seront effacées.")) {
+      setSal(JSON.parse(JSON.stringify(dSal)));
+      setPro(JSON.parse(JSON.stringify(dPro)));
+      setTar(JSON.parse(JSON.stringify(dTar)));
+      setTab("dashboard");
+    }
+  };
+
   if (ok && !started) {
     return (
       <>
@@ -1127,6 +1184,23 @@ export default function App() {
             <Upload size={13} strokeWidth={2} /> Importer
           </button>
           <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleHeaderImport} style={{ display: "none" }} />
+          <button
+            onClick={handleReset}
+            title="Repartir à zéro"
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 12px", borderRadius: 20,
+              border: `1px solid rgba(121,90,52,0.15)`,
+              background: "rgba(121,90,52,0.06)",
+              color: C.light, fontSize: 12, cursor: "pointer",
+              fontFamily: "'Instrument Sans', sans-serif",
+              transition: "all 0.3s",
+            }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(181,74,58,0.3)"; e.currentTarget.style.color = C.redText; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
+          >
+            <RotateCcw size={13} strokeWidth={2} /> Réinitialiser
+          </button>
           <div className={`hdr-save${sv ? " on" : ""}`}>
             {sv ? <><Ico icon={Save} size={13} color={C.yellow} /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
           </div>
