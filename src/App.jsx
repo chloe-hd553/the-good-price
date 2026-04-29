@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Scissors, LayoutDashboard, Wallet, Briefcase, Target, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw, Lock, LogOut, Mail, KeyRound, Eye, EyeOff } from "lucide-react";
+import { Scissors, LayoutDashboard, Wallet, Briefcase, Crosshair, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw, Lock, LogOut, Mail, KeyRound, Eye, EyeOff, Sun, Moon } from "lucide-react";
 import * as XLSX from "xlsx";
 import { supabase } from "./supabase.js";
 
@@ -65,12 +65,57 @@ const styles = `
   color:#f4e9d6;
   position:relative;
   font-size:16px;
+  transition:background 0.4s, color 0.4s;
 }
 .tgp::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.04;
   background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
-.tgp>*{position:relative;z-index:1}
+
+/* LIGHT MODE */
+.tgp.light{
+  background:#fef4b0;
+  color:#3D2D1A;
+}
+.tgp.light .hdr{
+  background:rgba(244,233,214,0.95);
+  border-bottom:1px solid rgba(121,90,52,0.2);
+}
+.tgp.light .hdr-name{color:#3D2D1A}
+.tgp.light .hdr-by{color:#795A34}
+.tgp.light .hdr-save{color:#795A34;border-color:rgba(121,90,52,0.2);background:rgba(121,90,52,0.06)}
+.tgp.light .hdr-save.on{color:#553F24;border-color:rgba(85,63,36,0.3)}
+.tgp.light .nav{background:rgba(254,244,176,0.7);border-bottom:1px solid rgba(121,90,52,0.15)}
+.tgp.light .nt{color:#795A34}
+.tgp.light .nt:hover{color:#3D2D1A}
+.tgp.light .nt.on{color:#3D2D1A;border-bottom-color:#3D2D1A}
+.tgp.light .gc{
+  background:rgba(244,233,214,0.7);
+  border:1px solid rgba(121,90,52,0.15);
+  box-shadow:0 2px 16px rgba(121,90,52,0.08);
+}
+.tgp.light .kpi{
+  background:rgba(244,233,214,0.8);
+  border:1px solid rgba(121,90,52,0.12);
+}
+.tgp.light .kpi-val{color:#3D2D1A}
+.tgp.light .kpi-label,.tgp.light .kpi-sub{color:#795A34}
+.tgp.light .rb{background:rgba(244,233,214,0.8);border-color:rgba(121,90,52,0.2)}
+.tgp.light .rb-label{color:#795A34}
+.tgp.light .rb-val{color:#3D2D1A}
+.tgp.light .sh-text{color:#3D2D1A}
+.tgp.light .tr{background:rgba(121,90,52,0.08);border-color:rgba(121,90,52,0.15)}
+.tgp.light .tr-l,.tgp.light .tr-v{color:#3D2D1A}
+.tgp.light .sa{background:rgba(121,90,52,0.06);border-color:rgba(121,90,52,0.15)}
+.tgp.light .bk{border-bottom-color:rgba(121,90,52,0.12)}
+.tgp.light .dv{background:linear-gradient(90deg,transparent,rgba(121,90,52,0.15),transparent)}
+.tgp.light .tw{background:rgba(121,90,52,0.05);border-color:rgba(121,90,52,0.12)}
+.tgp.light .tt .th-main{background:#553F24}
+.tgp.light .tt .th-ec{background:#795A34;color:#f4e9d6}
+.tgp.light .mc{color:#3D2D1A;background:rgba(121,90,52,0.15)}
+.tgp.light .tagline{color:#3D2D1A}
+.tgp.light .tgp::before{opacity:0.02}
+
 
 /* HEADER */
 .hdr{
@@ -817,7 +862,7 @@ function Dash({ sal, pro, tar, isPaid }) {
       <div className="kpis">
         {[{ icon: Wallet, l: "Salaire net", v: fmt(ts), s: "Ce que tu te verses / mois", lock: false },
           { icon: Briefcase, l: "CA nécessaire", v: fmt(ca), s: "Ton objectif de CA / mois", lock: false },
-          { icon: Target, l: "Taux horaire", v: `${th} €/h`, s: "Ta valeur / heure", lock: true },
+          { icon: Crosshair, l: "Taux horaire", v: `${th} €/h`, s: "Ta valeur / heure", lock: true },
           { icon: Calendar, l: "CA annuel", v: fmt(caA), s: "Objectif annuel", lock: false }
         ].map((k, i) => (
           <div className="kpi" key={i}>
@@ -857,7 +902,7 @@ function Dash({ sal, pro, tar, isPaid }) {
               color: hasManque ? C.redText : C.greenText, marginBottom: 4,
               display: "flex", alignItems: "center", gap: 6,
             }}>
-              {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : <><Ico icon={Target} size={14} color={C.greenText} /> Bénéfice généré par tes tarifs actuels</>}
+              {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : <><Ico icon={Crosshair} size={14} color={C.greenText} /> Bénéfice généré par tes tarifs actuels</>}
             </div>
             {hasManque ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -1146,7 +1191,7 @@ function Tar({ data, on, sal, pro, isPaid }) {
         {/* Row 3: Taux horaire — full width */}
         <div className="tb" style={{ gridColumn: "1 / -1" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
-            <Ico icon={Target} size={22} color={C.dark} />
+            <Ico icon={Crosshair} size={22} color={C.dark} />
             <span style={{ color: C.dark, fontSize: 13, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>Taux horaire</span>
             <span className={!isPaid && th > 0 ? "blur-val" : ""} style={{ color: C.dark, fontSize: 44, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>{th}<span style={{ fontSize: 20, fontWeight: 500 }}> €/h</span></span>
             {!isPaid && th > 0 && <Lock size={16} color={C.dark} style={{ opacity: 0.4 }} />}
@@ -1245,6 +1290,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [isPaid, setIsPaid] = useState(false);
+  const [theme, setTheme] = useState(() => localStorage.getItem("tgp-theme") || "dark");
   const importRef = useRef(null);
 
   // Check auth session on mount
@@ -1334,8 +1380,13 @@ export default function App() {
     }
   };
 
-  const handleLogout = async () => {
-    await supabase.auth.signOut();
+  const toggleTheme = () => {
+    const next = theme === "dark" ? "light" : "dark";
+    setTheme(next);
+    localStorage.setItem("tgp-theme", next);
+  };
+
+  const handleLogout = async () => {    await supabase.auth.signOut();
     setUser(null);
     setSal(JSON.parse(JSON.stringify(dSal)));
     setPro(JSON.parse(JSON.stringify(dPro)));
@@ -1348,7 +1399,7 @@ export default function App() {
   // Loading state
   if (authLoading) {
     return (
-      <div className="tgp" style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
+      <div className={`tgp${theme === "light" ? " light" : ""}`} style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
         <style>{styles}</style>
         <div style={{ textAlign: "center" }}>
           <div className="hdr-logo" style={{ width: 56, height: 56, margin: "0 auto 16px" }}><Scissors size={24} strokeWidth={2} /></div>
@@ -1377,7 +1428,7 @@ export default function App() {
   }
 
   return (
-    <div className="tgp">
+    <div className={`tgp${theme === "light" ? " light" : ""}`}>
       <style>{styles}</style>
       <header className="hdr">
         <div className="hdr-left">
@@ -1389,7 +1440,22 @@ export default function App() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button
-            onClick={() => importRef.current?.click()}
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Mode clair" : "Mode sombre"}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 12px", borderRadius: 20,
+              border: `1px solid rgba(121,90,52,0.15)`,
+              background: "rgba(121,90,52,0.06)",
+              color: C.light, fontSize: 12, cursor: "pointer",
+              fontFamily: "'Instrument Sans', sans-serif",
+              transition: "all 0.3s",
+            }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(254,244,176,0.25)"; e.currentTarget.style.color = C.yellow; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
+          >
+            {theme === "dark" ? <Sun size={13} strokeWidth={2} /> : <Moon size={13} strokeWidth={2} />}
+          </button>
             title="Importer depuis l'ancienne version"
             style={{
               display: "flex", alignItems: "center", gap: 6,
