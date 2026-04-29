@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Scissors, LayoutDashboard, Wallet, Briefcase, Star, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw, Lock, LogOut, Mail, KeyRound, Eye, EyeOff } from "lucide-react";
+import { Scissors, LayoutDashboard, Wallet, Briefcase, Target, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw, Lock, LogOut, Mail, KeyRound, Eye, EyeOff } from "lucide-react";
 import * as XLSX from "xlsx";
 import { supabase } from "./supabase.js";
 
@@ -817,7 +817,7 @@ function Dash({ sal, pro, tar, isPaid }) {
       <div className="kpis">
         {[{ icon: Wallet, l: "Salaire net", v: fmt(ts), s: "Ce que tu te verses / mois", lock: false },
           { icon: Briefcase, l: "CA nécessaire", v: fmt(ca), s: "Ton objectif de CA / mois", lock: false },
-          { icon: Star, l: "Taux horaire", v: `${th} €/h`, s: "Ta valeur / heure", lock: true },
+          { icon: Target, l: "Taux horaire", v: `${th} €/h`, s: "Ta valeur / heure", lock: true },
           { icon: Calendar, l: "CA annuel", v: fmt(caA), s: "Objectif annuel", lock: false }
         ].map((k, i) => (
           <div className="kpi" key={i}>
@@ -857,7 +857,7 @@ function Dash({ sal, pro, tar, isPaid }) {
               color: hasManque ? C.redText : C.greenText, marginBottom: 4,
               display: "flex", alignItems: "center", gap: 6,
             }}>
-              {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : <><Ico icon={Star} size={14} color={C.greenText} /> Bénéfice généré par tes tarifs actuels</>}
+              {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : <><Ico icon={Target} size={14} color={C.greenText} /> Bénéfice généré par tes tarifs actuels</>}
             </div>
             {hasManque ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
@@ -867,7 +867,7 @@ function Dash({ sal, pro, tar, isPaid }) {
                 <div style={{ color: C.light, fontSize: 14, fontStyle: "italic" }}>
                   Taux horaire réel : {Math.round(tauxReel)} €/h vs {th} €/h nécessaire
                   <br />
-                  {nbSousTarif} tarif{nbSousTarif > 1 ? "s" : ""} sous le minimum
+                  {nbSousTarif} tarif{nbSousTarif > 1 ? "s" : ""} en dessous du tarif recommandé
                 </div>
               </div>
             ) : (
@@ -974,7 +974,7 @@ function Dash({ sal, pro, tar, isPaid }) {
           <div className="gc">
             <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={BarChart3} />
-              Tarifs actuels vs minimum
+              Tarifs actuels vs sur mesure
             </div>
             {bars.length > 0 ? (
               <ResponsiveContainer width="100%" height={220}>
@@ -984,7 +984,7 @@ function Dash({ sal, pro, tar, isPaid }) {
                   <Tooltip formatter={v => fmt(v)} contentStyle={ttStyle} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Bar dataKey="actuel" name="Actuel" fill={C.light} radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="minimum" name="Minimum" fill={C.yellow} radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="minimum" name="Sur mesure" fill={C.yellow} radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : <GhostBars />}
@@ -1127,10 +1127,10 @@ function Tar({ data, on, sal, pro, isPaid }) {
           <input className="pi" type="number" value={data.hs || ""} onChange={e => uP("hs", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" style={data.hs === 0 ? { border: `2px solid ${C.redText}` } : {}} />
         </div>
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <label style={{ color: data.sv > 0 ? C.light : C.redText, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
-            Semaines de vacances / an {data.sv === 0 && "*"}
+          <label style={{ color: C.light, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
+            Semaines de vacances / an
           </label>
-          <input className="pi" type="number" value={data.sv || ""} onChange={e => uP("sv", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" style={data.sv === 0 ? { border: `2px solid ${C.redText}` } : {}} />
+          <input className="pi" type="number" value={data.sv || ""} onChange={e => uP("sv", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" />
         </div>
 
         {/* Row 2 */}
@@ -1146,7 +1146,7 @@ function Tar({ data, on, sal, pro, isPaid }) {
         {/* Row 3: Taux horaire — full width */}
         <div className="tb" style={{ gridColumn: "1 / -1" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
-            <Ico icon={Star} size={22} color={C.dark} />
+            <Ico icon={Target} size={22} color={C.dark} />
             <span style={{ color: C.dark, fontSize: 13, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>Taux horaire</span>
             <span className={!isPaid && th > 0 ? "blur-val" : ""} style={{ color: C.dark, fontSize: 44, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>{th}<span style={{ fontSize: 20, fontWeight: 500 }}> €/h</span></span>
             {!isPaid && th > 0 && <Lock size={16} color={C.dark} style={{ opacity: 0.4 }} />}
@@ -1154,9 +1154,9 @@ function Tar({ data, on, sal, pro, isPaid }) {
         </div>
       </div>
 
-      {(data.hs === 0 || data.sv === 0) && (
+      {data.hs === 0 && (
         <div style={{ color: C.redText, fontSize: 14, fontWeight: 600, marginBottom: 16, padding: "10px 16px", background: "rgba(181,74,58,0.08)", borderRadius: 10, border: `1px solid rgba(181,74,58,0.15)` }}>
-          Remplis tes heures de travail et tes semaines de vacances pour calculer tes tarifs
+          Remplis tes heures de travail par semaine pour calculer tes tarifs sur mesure
         </div>
       )}
 
@@ -1164,7 +1164,6 @@ function Tar({ data, on, sal, pro, isPaid }) {
 
       <div className="hint hint-y" style={{ marginBottom: 16 }}><Ico icon={Clock} size={13} color={C.light} /> Comment remplir les durées : 30 min = 0.5 · 45 min = 0.75 · 1h = 1 · 1h30 = 1.5 · 2h = 2</div>
 
-      {data.hs > 0 ? (
       <div style={{ overflowX: "auto" }}>
         <table className="tt">
           <thead>
@@ -1173,7 +1172,7 @@ function Tar({ data, on, sal, pro, isPaid }) {
               <th className="th-main" rowSpan={2} style={{ textAlign: "left", paddingLeft: 16, verticalAlign: "middle" }}>Prestation</th>
               <th className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Durée</th>
               <th className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs actuels</th>
-              <th className="th-min" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs minimum</th>
+              <th className="th-min" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs sur mesure</th>
               <th className="th-ec" colSpan={3} style={{ borderRadius: "0 10px 10px 0", paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Écart</th>
             </tr>
             <tr>
@@ -1212,8 +1211,18 @@ function Tar({ data, on, sal, pro, isPaid }) {
                     const cls = mn !== null && v > 0 ? (v >= mn ? " gn" : " rd") : bg;
                     return <td key={f} className={j === 0 ? "sep" : ""}><input className={`ci${cls}`} value={p[f]} onChange={e => uPr(i, f, e.target.value)} type="number" min="0" onWheel={e => e.target.blur()} placeholder="—" style={{ textAlign: "center", width: 60 }} /></td>;
                   })}
-                  {[m.c, m.m, m.l].map((v, j) => <td key={`m${j}`} className={`mc${j === 0 ? " sep" : ""}`}><span className={!isPaid && th > 0 ? "blur-val" : ""}>{v !== null ? `${v} €` : ""}</span></td>)}
-                  {[ec.c, ec.m, ec.l].map((e, j) => <td key={`e${j}`} className={`${e === null ? "" : e >= 0 ? "ep" : "en"}${j === 0 ? " sep" : ""}`}><span className={!isPaid && th > 0 ? "blur-val" : ""}>{e !== null ? `${e >= 0 ? "+" : ""}${e} €` : ""}</span></td>)}
+                  {[m.c, m.m, m.l].map((v, j) => (
+                    <td key={`m${j}`} className={`mc${j === 0 ? " sep" : ""}`}
+                      onClick={th === 0 && h ? () => alert("Remplis d'abord tes heures de travail par semaine (en haut) pour voir tes tarifs sur mesure.") : undefined}
+                      style={th === 0 && h ? { cursor: "pointer", opacity: 0.5 } : {}}>
+                      {th > 0 ? <span className={!isPaid ? "blur-val" : ""}>{v !== null ? `${v} €` : ""}</span> : (h ? "—" : "")}
+                    </td>
+                  ))}
+                  {[ec.c, ec.m, ec.l].map((e, j) => (
+                    <td key={`e${j}`} className={`${th > 0 && e !== null ? (e >= 0 ? "ep" : "en") : ""}${j === 0 ? " sep" : ""}`}>
+                      {th > 0 ? <span className={!isPaid ? "blur-val" : ""}>{e !== null ? `${e >= 0 ? "+" : ""}${e} €` : ""}</span> : ""}
+                    </td>
+                  ))}
                 </tr>
               );
             })}
@@ -1221,7 +1230,6 @@ function Tar({ data, on, sal, pro, isPaid }) {
         </table>
         <AddRow onClick={addPrestation} label="Ajouter une prestation" />
       </div>
-      ) : null}
     </div>
   );
 }
@@ -1448,7 +1456,7 @@ export default function App() {
         ))}
       </nav>
 
-      <main className="main" style={{ paddingBottom: (!isPaid && tab === "tarifs" && tar.hs > 0 && tar.sv > 0) ? 100 : 32 }}>
+      <main className="main" style={{ paddingBottom: (!isPaid && tab === "tarifs" && tar.hs > 0) ? 100 : 32 }}>
         {tab === "dashboard" && <Dash sal={sal} pro={pro} tar={tar} isPaid={isPaid} />}
         {tab === "salaire" && <Sal data={sal} on={setSal} />}
         {tab === "pro" && <Pro data={pro} on={setPro} sal={sal} />}
@@ -1456,7 +1464,7 @@ export default function App() {
       </main>
 
       {/* Unlock CTA — only on tarifs tab when both params filled */}
-      {!isPaid && tab === "tarifs" && tar.hs > 0 && tar.sv > 0 && (() => {
+      {!isPaid && tab === "tarifs" && tar.hs > 0 && (() => {
         const totalAny = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes) + sum(pro.fixes) + sum(pro.variables) + sum(pro.charges) + sum(pro.tresorerie);
         return totalAny > 0;
       })() && (
