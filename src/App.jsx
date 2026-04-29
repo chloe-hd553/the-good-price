@@ -488,21 +488,18 @@ function parseV1Excel(buffer, dSal, dPro, dTar) {
   if (s1) {
     for (let r = 12; r <= 28; r++) {
       const i = r - 12;
-      // Fixes: labels=C, amounts=D (fallback B)
       if (i < sal.fixes.length) {
         const lbl = str(s1, `C${r}`);
         const amt = num(s1, `D${r}`) || num(s1, `B${r}`);
         if (lbl) sal.fixes[i].label = lbl;
         if (amt) sal.fixes[i].montant = String(amt);
       }
-      // Variables: labels=F, amounts=G
       if (i < sal.variables.length) {
         const lbl = str(s1, `F${r}`);
         const amt = num(s1, `G${r}`);
         if (lbl) sal.variables[i].label = lbl;
         if (amt) sal.variables[i].montant = String(amt);
       }
-      // Épargnes: labels=J, amounts=K
       if (i < sal.epargnes.length) {
         const lbl = str(s1, `J${r}`);
         const amt = num(s1, `K${r}`);
@@ -517,7 +514,6 @@ function parseV1Excel(buffer, dSal, dPro, dTar) {
   if (s2) {
     for (let r = 13; r <= 27; r++) {
       const i = r - 13;
-      // Fixes: labels=C, amounts=D (skip row 12 = Salaire auto)
       if (i < pro.fixes.length) {
         const lbl = str(s2, `C${r}`);
         const amt = num(s2, `D${r}`);
@@ -527,7 +523,6 @@ function parseV1Excel(buffer, dSal, dPro, dTar) {
     }
     for (let r = 12; r <= 27; r++) {
       const i = r - 12;
-      // Variables: labels=F, amounts=G
       if (i < pro.variables.length) {
         const lbl = str(s2, `F${r}`);
         const amt = num(s2, `G${r}`);
@@ -535,7 +530,6 @@ function parseV1Excel(buffer, dSal, dPro, dTar) {
         if (amt) pro.variables[i].montant = String(amt);
       }
     }
-    // Charges: J12-J15
     for (let r = 12; r <= 15; r++) {
       const i = r - 12;
       if (i < pro.charges.length) {
@@ -545,7 +539,6 @@ function parseV1Excel(buffer, dSal, dPro, dTar) {
         if (amt) pro.charges[i].montant = String(amt);
       }
     }
-    // Trésorerie: J19-J27
     for (let r = 19; r <= 27; r++) {
       const i = r - 19;
       if (i < pro.tresorerie.length) {
@@ -567,11 +560,9 @@ function parseV1Excel(buffer, dSal, dPro, dTar) {
       if (i < tar.p.length) {
         const nom = str(s3, `B${r}`);
         if (nom) tar.p[i].n = nom;
-        // Durées: C, D, E
         const dc = num(s3, `C${r}`); if (dc) tar.p[i].dc = String(dc);
         const dm = num(s3, `D${r}`); if (dm) tar.p[i].dm = String(dm);
         const dl = num(s3, `E${r}`); if (dl) tar.p[i].dl = String(dl);
-        // Tarifs actuels: F, G, H
         const tc = num(s3, `F${r}`); if (tc) tar.p[i].tc = String(tc);
         const tm = num(s3, `G${r}`); if (tm) tar.p[i].tm = String(tm);
         const tl = num(s3, `H${r}`); if (tl) tar.p[i].tl = String(tl);
@@ -709,7 +700,6 @@ function WelcomePage({ onImport, onSkip }) {
             <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, ${C.light}, transparent)`, display: "inline-block" }} />
           </div>
 
-          {/* Import option */}
           <button
             onClick={() => fileRef.current?.click()}
             disabled={loading}
@@ -749,7 +739,6 @@ function WelcomePage({ onImport, onSkip }) {
             </div>
           )}
 
-          {/* Start fresh option */}
           <button
             onClick={onSkip}
             style={{
@@ -829,7 +818,6 @@ function Dash({ sal, pro, tar, isPaid }) {
   const hasPie = pie.length > 0;
   const ttStyle = { background: C.dark, border: `1px solid ${C.med}`, borderRadius: 8, fontSize: 12, color: C.beige };
 
-  /* Manque à gagner mensuel : écart entre taux horaire réel moyen et taux horaire nécessaire × heures/mois */
   let totalPrix = 0, totalDurees = 0, nbSousTarif = 0;
   tar.p.forEach(p => {
     if (!p.n) return;
@@ -858,7 +846,6 @@ function Dash({ sal, pro, tar, isPaid }) {
         <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, ${C.light}, transparent)`, display: "inline-block" }} />
       </div>
 
-      {/* KPI 2x2 — always balanced */}
       <div className="kpis">
         {[{ icon: Wallet, l: "Salaire net", v: fmt(ts), s: "Ce que tu te verses / mois", lock: false },
           { icon: Briefcase, l: "CA nécessaire", v: fmt(ca), s: "Ton objectif de CA / mois", lock: false },
@@ -877,7 +864,6 @@ function Dash({ sal, pro, tar, isPaid }) {
         ))}
       </div>
 
-      {/* Manque à gagner mensuel */}
       {th > 0 && totalDurees > 0 && (
         <div style={{
           display: "flex", alignItems: "center", gap: 18,
@@ -907,7 +893,7 @@ function Dash({ sal, pro, tar, isPaid }) {
             {hasManque ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
                 <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 30, fontWeight: 700, color: C.redText }}>
-                  −{fmt(manqueMensuel)}<span style={{ fontSize: 14, fontWeight: 500 }}> /mois</span>
+                  -{fmt(manqueMensuel)}<span style={{ fontSize: 14, fontWeight: 500 }}> /mois</span>
                 </span>
                 <div style={{ color: C.light, fontSize: 14, fontStyle: "italic" }}>
                   Taux horaire réel : {Math.round(tauxReel)} €/h vs {th} €/h nécessaire
@@ -932,7 +918,6 @@ function Dash({ sal, pro, tar, isPaid }) {
         </div>
       )}
 
-      {/* Quick start guide — visible when no data */}
       {ca === 0 && (
         <div style={{
           display: "flex", alignItems: "center", gap: 16,
@@ -952,7 +937,6 @@ function Dash({ sal, pro, tar, isPaid }) {
       )}
 
       <div className="g2">
-        {/* LEFT: Breakdown + Time */}
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="gc">
             <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
@@ -995,7 +979,6 @@ function Dash({ sal, pro, tar, isPaid }) {
           </div>
         </div>
 
-        {/* RIGHT: Charts or ghosts */}
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="gc">
             <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
@@ -1039,7 +1022,7 @@ function Dash({ sal, pro, tar, isPaid }) {
 
       <div style={{ textAlign: "center", color: C.light, fontSize: 14, fontStyle: "italic", display: "flex", alignItems: "center", justifyContent: "center", gap: 6 }}>
         <Info size={13} color={C.light} strokeWidth={1.5} />
-        Remplis « Mon Salaire » → « Mon CA Pro » → tes tarifs se calculent automatiquement
+        Remplis « Mon Salaire » puis « Mon CA Pro » — tes tarifs se calculent automatiquement
       </div>
     </div>
   );
@@ -1164,7 +1147,6 @@ function Tar({ data, on, sal, pro, isPaid }) {
   return (
     <div className="fi">
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 28 }}>
-        {/* Row 1: Hours first, then vacation */}
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <label style={{ color: data.hs > 0 ? C.light : C.redText, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
             Heures de travail / semaine {data.hs === 0 && "*"}
@@ -1178,7 +1160,6 @@ function Tar({ data, on, sal, pro, isPaid }) {
           <input className="pi" type="number" value={data.sv || ""} onChange={e => uP("sv", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" />
         </div>
 
-        {/* Row 2 */}
         <div className="gc" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ color: C.light, fontSize: 14, fontWeight: 500 }}>CA Annuel</span>
           <span style={{ color: C.yellow, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(caA)}</span>
@@ -1188,7 +1169,6 @@ function Tar({ data, on, sal, pro, isPaid }) {
           <span style={{ color: C.yellow, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(ca)}</span>
         </div>
 
-        {/* Row 3: Taux horaire — full width */}
         <div className="tb" style={{ gridColumn: "1 / -1" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
             <Ico icon={Crosshair} size={22} color={C.dark} />
@@ -1293,7 +1273,6 @@ export default function App() {
   const [theme, setTheme] = useState(() => localStorage.getItem("tgp-theme") || "dark");
   const importRef = useRef(null);
 
-  // Check auth session on mount
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user || null);
@@ -1305,7 +1284,6 @@ export default function App() {
     return () => subscription.unsubscribe();
   }, []);
 
-  // Load data from Supabase when user logs in
   useEffect(() => {
     if (!user) { setOk(true); return; }
     (async () => {
@@ -1316,19 +1294,17 @@ export default function App() {
           if (data.pro) setPro(data.pro);
           if (data.tar) setTar(data.tar);
           setStarted(true);
-          // Check payment status
           if (data.paid && data.expires_at) {
             setIsPaid(new Date(data.expires_at) > new Date());
           } else {
             setIsPaid(data.paid || false);
           }
         }
-      } catch {} // No data yet = new user
+      } catch {}
       setOk(true);
     })();
   }, [user]);
 
-  // Save to Supabase on change (debounced)
   useEffect(() => {
     if (!ok || !user) return;
     const t = setTimeout(async () => {
@@ -1386,7 +1362,8 @@ export default function App() {
     localStorage.setItem("tgp-theme", next);
   };
 
-  const handleLogout = async () => {    await supabase.auth.signOut();
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
     setUser(null);
     setSal(JSON.parse(JSON.stringify(dSal)));
     setPro(JSON.parse(JSON.stringify(dPro)));
@@ -1396,7 +1373,6 @@ export default function App() {
     setOk(false);
   };
 
-  // Loading state
   if (authLoading) {
     return (
       <div className={`tgp${theme === "light" ? " light" : ""}`} style={{ display: "flex", alignItems: "center", justifyContent: "center", minHeight: "100vh" }}>
@@ -1409,12 +1385,10 @@ export default function App() {
     );
   }
 
-  // Not logged in → Auth page
   if (!user) {
     return <AuthPage onAuth={(u) => setUser(u)} />;
   }
 
-  // Logged in but no data → Welcome page
   if (ok && !started) {
     return (
       <>
@@ -1456,6 +1430,8 @@ export default function App() {
           >
             {theme === "dark" ? <Sun size={13} strokeWidth={2} /> : <Moon size={13} strokeWidth={2} />}
           </button>
+          <button
+            onClick={() => importRef.current?.click()}
             title="Importer depuis l'ancienne version"
             style={{
               display: "flex", alignItems: "center", gap: 6,
@@ -1529,7 +1505,6 @@ export default function App() {
         {tab === "tarifs" && <Tar data={tar} on={setTar} sal={sal} pro={pro} isPaid={isPaid} />}
       </main>
 
-      {/* Unlock CTA — only on tarifs tab when both params filled */}
       {!isPaid && tab === "tarifs" && tar.hs > 0 && (() => {
         const totalAny = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes) + sum(pro.fixes) + sum(pro.variables) + sum(pro.charges) + sum(pro.tresorerie);
         return totalAny > 0;
