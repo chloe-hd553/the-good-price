@@ -6,19 +6,19 @@ import { supabase } from "./supabase.js";
 
 /* ── PALETTE STRICTE ── */
 const C = {
-  bg: "#2C1F12",        /* fond principal - plus sombre que dark */
-  dark: "#3D2D1A",      /* cartes, panels */
-  med: "#553F24",        /* headers, accents secondaires */
-  light: "#795A34",      /* textes secondaires, bordures */
-  yellow: "#fef4b0",     /* accent principal - titres, valeurs */
-  beige: "#f4e9d6",      /* texte courant */
-  cream: "#FBF5EC",      /* inputs vides */
+  bg: "#2C1F12",
+  dark: "#3D2D1A",
+  med: "#553F24",
+  light: "#795A34",
+  yellow: "#fef4b0",   /* réservé : hdr-name, tagline, taux horaire badge, CTA unlock */
+  beige: "#f4e9d6",    /* texte courant + valeurs UI */
+  cream: "#FBF5EC",
   white: "#f4e9d6",
   green: "#5A7D4F", greenBg: "#2D3B28", greenText: "#B8DEAB",
   red: "#B54A3A", redBg: "#3D2519", redText: "#F4B8A8",
 };
 
-const PIE = [C.light, C.med, C.dark, C.yellow, C.beige];
+const PIE = [C.light, C.med, C.dark, C.beige, "#a08060"];
 const KEY = "tgp-v5";
 
 const sum = a => a.reduce((s, x) => s + (parseFloat(x.montant) || 0), 0);
@@ -73,14 +73,8 @@ const styles = `
 }
 
 /* LIGHT MODE */
-.tgp.light{
-  background:#fef4b0;
-  color:#3D2D1A;
-}
-.tgp.light .hdr{
-  background:rgba(244,233,214,0.95);
-  border-bottom:1px solid rgba(121,90,52,0.2);
-}
+.tgp.light{ background:#fef4b0; color:#3D2D1A; }
+.tgp.light .hdr{ background:rgba(244,233,214,0.95); border-bottom:1px solid rgba(121,90,52,0.2); }
 .tgp.light .hdr-name{color:#3D2D1A}
 .tgp.light .hdr-by{color:#795A34}
 .tgp.light .hdr-save{color:#795A34;border-color:rgba(121,90,52,0.2);background:rgba(121,90,52,0.06)}
@@ -89,15 +83,8 @@ const styles = `
 .tgp.light .nt{color:#795A34}
 .tgp.light .nt:hover{color:#3D2D1A}
 .tgp.light .nt.on{color:#3D2D1A;border-bottom-color:#3D2D1A}
-.tgp.light .gc{
-  background:rgba(244,233,214,0.7);
-  border:1px solid rgba(121,90,52,0.15);
-  box-shadow:0 2px 16px rgba(121,90,52,0.08);
-}
-.tgp.light .kpi{
-  background:rgba(244,233,214,0.8);
-  border:1px solid rgba(121,90,52,0.12);
-}
+.tgp.light .gc{ background:rgba(244,233,214,0.7); border:1px solid rgba(121,90,52,0.15); box-shadow:0 2px 16px rgba(121,90,52,0.08); }
+.tgp.light .kpi{ background:rgba(244,233,214,0.8); border:1px solid rgba(121,90,52,0.12); }
 .tgp.light .kpi-val{color:#3D2D1A}
 .tgp.light .kpi-label,.tgp.light .kpi-sub{color:#795A34}
 .tgp.light .rb{background:rgba(244,233,214,0.8);border-color:rgba(121,90,52,0.2)}
@@ -116,7 +103,6 @@ const styles = `
 .tgp.light .tagline{color:#3D2D1A}
 .tgp.light .tgp::before{opacity:0.02}
 
-
 /* HEADER */
 .hdr{
   padding:16px 28px;display:flex;justify-content:space-between;align-items:center;
@@ -132,6 +118,7 @@ const styles = `
   box-shadow:0 0 0 1px rgba(121,90,52,0.4),0 4px 16px rgba(0,0,0,0.3);
   color:#fef4b0;
 }
+/* yellow conservé : identité de marque */
 .hdr-name{font-family:'Cormorant Garamond',serif;font-weight:600;font-size:24px;color:#fef4b0;letter-spacing:-0.5px}
 .hdr-by{font-size:11px;color:#795A34;letter-spacing:3px;text-transform:uppercase;font-weight:500}
 .hdr-save{
@@ -139,7 +126,7 @@ const styles = `
   border:1px solid rgba(121,90,52,0.15);background:rgba(121,90,52,0.06);
   transition:all 0.4s;display:flex;align-items:center;gap:6px;
 }
-.hdr-save.on{color:#fef4b0;border-color:rgba(254,244,176,0.25);background:rgba(254,244,176,0.08)}
+.hdr-save.on{color:#f4e9d6;border-color:rgba(244,233,214,0.2);background:rgba(244,233,214,0.06)}
 
 /* NAV */
 .nav{
@@ -153,10 +140,11 @@ const styles = `
   transition:all 0.25s;display:flex;align-items:center;gap:8px;white-space:nowrap;
 }
 .nt:hover{color:#f4e9d6}
-.nt.on{color:#fef4b0;border-bottom-color:#fef4b0;font-weight:600}
+.nt.on{color:#f4e9d6;border-bottom-color:#f4e9d6;font-weight:600}
 
 .main{padding:32px;max-width:1280px;margin:0 auto;overflow-x:hidden}
 
+/* yellow conservé : signature de marque */
 .tagline{
   font-family:'Cormorant Garamond',serif;font-style:italic;font-size:26px;font-weight:500;
   color:#fef4b0;text-align:center;letter-spacing:-0.3px;
@@ -172,18 +160,18 @@ const styles = `
 }
 .gc:hover{border-color:rgba(121,90,52,0.22)}
 
-/* KPI — 2x2 grid toujours */
+/* KPI */
 .kpis{display:grid;grid-template-columns:1fr 1fr;gap:14px}
 .kpi{
   background:linear-gradient(160deg,rgba(61,45,26,0.8),rgba(44,31,18,0.65));
   border:1px solid rgba(121,90,52,0.12);border-radius:16px;
   padding:22px 26px;position:relative;overflow:hidden;transition:all 0.3s;
 }
-.kpi::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(254,244,176,0.2),transparent)}
-.kpi:hover{border-color:rgba(254,244,176,0.15);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,0.2)}
+.kpi::before{content:'';position:absolute;top:0;left:20%;right:20%;height:1px;background:linear-gradient(90deg,transparent,rgba(244,233,214,0.15),transparent)}
+.kpi:hover{border-color:rgba(244,233,214,0.12);transform:translateY(-2px);box-shadow:0 12px 40px rgba(0,0,0,0.2)}
 .kpi-icon{display:flex;align-items:center;gap:8px;margin-bottom:10px}
 .kpi-label{font-size:12px;font-weight:600;color:#795A34;letter-spacing:2px;text-transform:uppercase}
-.kpi-val{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:#fef4b0;line-height:1}
+.kpi-val{font-family:'Cormorant Garamond',serif;font-size:34px;font-weight:700;color:#f4e9d6;line-height:1}
 .kpi-sub{font-size:13px;color:#795A34;margin-top:8px;font-style:italic}
 
 /* RESULT BANNER */
@@ -193,38 +181,23 @@ const styles = `
   background:linear-gradient(135deg,rgba(61,45,26,0.85),rgba(44,31,18,0.65));
   border:1px solid rgba(121,90,52,0.15);position:relative;overflow:hidden;
 }
-.rb::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(254,244,176,0.2),transparent)}
+.rb::after{content:'';position:absolute;bottom:0;left:10%;right:10%;height:1px;background:linear-gradient(90deg,transparent,rgba(244,233,214,0.12),transparent)}
 .rb-label{color:#795A34;font-size:17px;font-weight:500;display:flex;align-items:center;gap:10px}
-.rb-val{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;color:#fef4b0}
+.rb-val{font-family:'Cormorant Garamond',serif;font-size:36px;font-weight:700;color:#f4e9d6}
 
 /* SECTION HDR */
 .sh{display:flex;align-items:center;gap:10px;padding:10px 0;margin-bottom:8px;border-bottom:1px solid rgba(121,90,52,0.15)}
-.sh-text{font-size:14px;font-weight:600;color:#fef4b0;letter-spacing:1.5px;text-transform:uppercase}
+.sh-text{font-size:14px;font-weight:600;color:#f4e9d6;letter-spacing:1.5px;text-transform:uppercase}
 
 /* INPUTS */
 .ir{display:flex;gap:4px;margin-bottom:5px;align-items:center}
 .row-actions{display:flex;gap:0;opacity:0;transition:opacity 0.2s;flex-shrink:0}
 .ir:hover .row-actions{opacity:1}
-.row-btn{
-  border:none;background:none;cursor:pointer;padding:1px;
-  color:#795A34;transition:color 0.2s;display:flex;align-items:center;
-}
-.row-btn:hover{color:#fef4b0}
-.ifl{
-  flex:1;min-width:0;padding:10px 12px;border-radius:8px;
-  border:1px solid rgba(121,90,52,0.12);
-  font-family:'Instrument Sans',sans-serif;font-size:15px;
-  color:#3D2D1A;outline:none;transition:all 0.2s;background:#f4e9d6;
-  overflow:hidden;text-overflow:ellipsis;
-}
+.row-btn{border:none;background:none;cursor:pointer;padding:1px;color:#795A34;transition:color 0.2s;display:flex;align-items:center;}
+.row-btn:hover{color:#f4e9d6}
+.ifl{flex:1;min-width:0;padding:10px 12px;border-radius:8px;border:1px solid rgba(121,90,52,0.12);font-family:'Instrument Sans',sans-serif;font-size:15px;color:#3D2D1A;outline:none;transition:all 0.2s;background:#f4e9d6;overflow:hidden;text-overflow:ellipsis;}
 .ifl.e{background:#f4e9d6}
-.ifa{
-  flex:0 0 80px;padding:10px 10px;border-radius:8px;
-  border:1px solid rgba(121,90,52,0.12);
-  font-family:'Instrument Sans',sans-serif;font-size:15px;
-  color:#3D2D1A;outline:none;transition:all 0.2s;
-  text-align:right;font-weight:600;background:#f4e9d6;
-}
+.ifa{flex:0 0 80px;padding:10px 10px;border-radius:8px;border:1px solid rgba(121,90,52,0.12);font-family:'Instrument Sans',sans-serif;font-size:15px;color:#3D2D1A;outline:none;transition:all 0.2s;text-align:right;font-weight:600;background:#f4e9d6;}
 .ifa.e{background:#f4e9d6;font-weight:400}
 .ifl:focus,.ifa:focus{border-color:#795A34;box-shadow:0 0 0 3px rgba(121,90,52,0.12)}
 .ifl::placeholder,.ifa::placeholder{color:rgba(61,45,26,0.3)}
@@ -233,39 +206,26 @@ const styles = `
 .tr{
   display:flex;justify-content:space-between;align-items:center;
   padding:10px 18px;border-radius:10px;margin-top:10px;margin-bottom:20px;
-  background:rgba(254,244,176,0.06);border:1px solid rgba(254,244,176,0.1);
+  background:rgba(244,233,214,0.05);border:1px solid rgba(244,233,214,0.08);
 }
-.tr-l{color:#fef4b0;font-weight:600;font-size:14px;letter-spacing:1px;text-transform:uppercase}
-.tr-v{font-family:'Cormorant Garamond',serif;color:#fef4b0;font-weight:700;font-size:20px}
+.tr-l{color:#f4e9d6;font-weight:600;font-size:14px;letter-spacing:1px;text-transform:uppercase}
+.tr-v{font-family:'Cormorant Garamond',serif;color:#f4e9d6;font-weight:700;font-size:20px}
 
-.sa{
-  background:rgba(254,244,176,0.05);border:1px solid rgba(254,244,176,0.12);
-  border-radius:12px;padding:14px 20px;
-  display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;
-}
-.tw{
-  background:rgba(254,244,176,0.04);border:1px solid rgba(254,244,176,0.1);
-  border-radius:8px;padding:10px 14px;margin-bottom:10px;
-}
+.sa{background:rgba(244,233,214,0.04);border:1px solid rgba(244,233,214,0.1);border-radius:12px;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;margin-bottom:24px;}
+.tw{background:rgba(244,233,214,0.03);border:1px solid rgba(244,233,214,0.08);border-radius:8px;padding:10px 14px;margin-bottom:10px;}
 
 .g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}
 .g2{display:flex;gap:32px;flex-wrap:wrap}
 .g2>div{flex:1;min-width:340px}
 
 .bk{display:flex;justify-content:space-between;padding:9px 4px;border-bottom:1px solid rgba(85,63,36,0.25);transition:background 0.2s}
-.bk:hover{background:rgba(254,244,176,0.02)}
+.bk:hover{background:rgba(244,233,214,0.02)}
 .bk:last-child{border-bottom:none}
 
 .dv{height:1px;margin:18px 0;background:linear-gradient(90deg,transparent,rgba(121,90,52,0.2),transparent)}
 
-/* TAUX BADGE */
-.tb{
-  background:#f4e9d6;
-  border-radius:18px;padding:24px 32px;min-width:180;
-  display:flex;flex-direction:column;align-items:center;justify-content:center;
-  box-shadow:0 8px 28px rgba(0,0,0,0.2);
-  position:relative;overflow:hidden;
-}
+/* TAUX BADGE — sur fond beige, le dark ressort bien */
+.tb{background:#f4e9d6;border-radius:18px;padding:24px 32px;min-width:180;display:flex;flex-direction:column;align-items:center;justify-content:center;box-shadow:0 8px 28px rgba(0,0,0,0.2);position:relative;overflow:hidden;}
 .tb::before{content:none}
 
 /* TABLE */
@@ -276,30 +236,20 @@ const styles = `
 .tt .th-ec{background:#3D2D1A;color:#795A34}
 .tt td{padding:2px 3px;white-space:nowrap}
 .tt .sep{border-left:6px solid #2C1F12}
-.ci{
-  padding:8px 10px;border-radius:6px;border:1px solid rgba(121,90,52,0.1);
-  font-family:'Instrument Sans',sans-serif;font-size:14px;
-  color:#3D2D1A;outline:none;transition:all 0.2s;background:#f4e9d6;
-}
+.ci{padding:8px 10px;border-radius:6px;border:1px solid rgba(121,90,52,0.1);font-family:'Instrument Sans',sans-serif;font-size:14px;color:#3D2D1A;outline:none;transition:all 0.2s;background:#f4e9d6;}
 .ci.e{background:#f4e9d6}
 .ci:focus{border-color:#795A34;box-shadow:0 0 0 2px rgba(121,90,52,0.1)}
 .ci.gn{background:#2D3B28 !important;color:#B8DEAB !important;font-weight:700;border-color:rgba(90,125,79,0.3)}
 .ci.rd{background:#3D2519 !important;color:#F4B8A8 !important;font-weight:700;border-color:rgba(181,74,58,0.3)}
-.mc{text-align:center;font-weight:700;font-size:14px;color:#fef4b0;background:rgba(85,63,36,0.6);border-radius:4px;padding:10px 6px;font-family:'Instrument Sans',sans-serif;white-space:nowrap}
+.mc{text-align:center;font-weight:700;font-size:14px;color:#f4e9d6;background:rgba(85,63,36,0.6);border-radius:4px;padding:10px 6px;font-family:'Instrument Sans',sans-serif;white-space:nowrap}
 .ep{color:#B8DEAB;font-weight:600;text-align:center;font-size:14px;white-space:nowrap}
 .en{color:#F4B8A8;font-weight:600;text-align:center;font-size:14px;white-space:nowrap}
 
-.pi{
-  width:100%;padding:14px 18px;border-radius:12px;border:none;
-  background:#f4e9d6;
-  color:#3D2D1A;font-size:20px;font-weight:700;
-  font-family:'Cormorant Garamond',serif;text-align:center;outline:none;
-  box-shadow:0 4px 16px rgba(0,0,0,0.15);
-}
-.pi:focus{box-shadow:0 4px 20px rgba(0,0,0,0.2),0 0 0 3px rgba(254,244,176,0.2)}
+.pi{width:100%;padding:14px 18px;border-radius:12px;border:none;background:#f4e9d6;color:#3D2D1A;font-size:20px;font-weight:700;font-family:'Cormorant Garamond',serif;text-align:center;outline:none;box-shadow:0 4px 16px rgba(0,0,0,0.15);}
+.pi:focus{box-shadow:0 4px 20px rgba(0,0,0,0.2),0 0 0 3px rgba(244,233,214,0.15)}
 
 .hint{font-size:14px;font-style:italic;color:#795A34;display:flex;align-items:center;gap:6px;margin-top:8px}
-.hint-y{color:#fef4b0}
+.hint-y{color:#f4e9d6}
 
 @keyframes fi{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
 .fi{animation:fi 0.45s ease-out forwards}
@@ -312,121 +262,57 @@ const styles = `
 ::-webkit-scrollbar-thumb{background:#553F24;border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:#795A34}
 
-input[type=number]::-webkit-inner-spin-button,
-input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
+input[type=number]::-webkit-inner-spin-button,input[type=number]::-webkit-outer-spin-button{-webkit-appearance:none;margin:0}
 input[type=number]{-moz-appearance:textfield}
-.ci-dur::-webkit-inner-spin-button,
-.ci-dur::-webkit-outer-spin-button{-webkit-appearance:auto !important;margin:0}
+.ci-dur::-webkit-inner-spin-button,.ci-dur::-webkit-outer-spin-button{-webkit-appearance:auto !important;margin:0}
 .ci-dur{-moz-appearance:spinner-textfield !important}
 
 /* ── RESPONSIVE: TABLETTE ── */
 @media(max-width:1024px){
-  .main{padding:24px 20px}
-  .kpis{gap:12px}
-  .g3{grid-template-columns:1fr 1fr;gap:28px}
-  .g2{gap:24px}
-  .g2>div{min-width:300px}
+  .main{padding:24px 20px}.kpis{gap:12px}.g3{grid-template-columns:1fr 1fr;gap:28px}.g2{gap:24px}.g2>div{min-width:300px}
 }
 
 /* ── RESPONSIVE: MOBILE ── */
 @media(max-width:640px){
-  .hdr{padding:14px 16px}
-  .hdr-name{font-size:20px}
-  .hdr-by{font-size:9px;letter-spacing:2px}
-  .hdr-logo{width:36px;height:36px}
-  .hdr-save{font-size:11px;padding:5px 10px}
-
-  .nav{padding:0 12px;gap:0;overflow-x:auto}
-  .nt{padding:12px 14px;font-size:13px;gap:6px}
-
-  .main{padding:18px 14px}
-  .tagline{font-size:20px}
-
-  .kpis{grid-template-columns:1fr;gap:10px}
-  .kpi{padding:18px 20px}
-  .kpi-val{font-size:28px}
-  .kpi-label{font-size:11px}
-
-  .rb{padding:16px 18px;flex-direction:column;align-items:flex-start;gap:6px}
-  .rb-val{font-size:28px}
-
-  .gc{padding:18px 18px;border-radius:14px}
-  .g3{grid-template-columns:1fr;gap:24px}
-  .g2{flex-direction:column;gap:20px}
-  .g2>div{min-width:unset}
-
-  .sh-text{font-size:12px}
-  .ifl,.ifa{font-size:14px;padding:10px 12px}
-  .ifa{flex:0 0 80px}
-  .tr{padding:10px 14px}
-  .tr-l{font-size:12px}
-  .tr-v{font-size:18px}
-  .hint{font-size:13px}
-
-  .row-actions{opacity:0.6}
-
-  .tb{padding:18px 20px;border-radius:14px}
-  .pi{font-size:18px;padding:12px 14px}
+  .hdr{padding:14px 16px}.hdr-name{font-size:20px}.hdr-by{font-size:9px;letter-spacing:2px}.hdr-logo{width:36px;height:36px}.hdr-save{font-size:11px;padding:5px 10px}
+  .nav{padding:0 12px;gap:0;overflow-x:auto}.nt{padding:12px 14px;font-size:13px;gap:6px}
+  .main{padding:18px 14px}.tagline{font-size:20px}
+  .kpis{grid-template-columns:1fr;gap:10px}.kpi{padding:18px 20px}.kpi-val{font-size:28px}.kpi-label{font-size:11px}
+  .rb{padding:16px 18px;flex-direction:column;align-items:flex-start;gap:6px}.rb-val{font-size:28px}
+  .gc{padding:18px 18px;border-radius:14px}.g3{grid-template-columns:1fr;gap:24px}.g2{flex-direction:column;gap:20px}.g2>div{min-width:unset}
+  .sh-text{font-size:12px}.ifl,.ifa{font-size:14px;padding:10px 12px}.ifa{flex:0 0 80px}.tr{padding:10px 14px}.tr-l{font-size:12px}.tr-v{font-size:18px}.hint{font-size:13px}
+  .row-actions{opacity:0.6}.tb{padding:18px 20px;border-radius:14px}.pi{font-size:18px;padding:12px 14px}
 }
 
 /* ── BLUR LOCK ── */
 .blur-val{filter:blur(8px);user-select:none;pointer-events:none}
-.blur-wrap{position:relative;display:inline-block}
-.blur-wrap .lock-ico{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);z-index:2;opacity:0.5}
 
-/* ── UNLOCK CTA ── */
-.unlock-bar{
-  position:fixed;bottom:0;left:0;right:0;z-index:200;
-  padding:16px 24px;
-  background:linear-gradient(180deg,rgba(44,31,18,0) 0%,rgba(44,31,18,0.95) 30%,#2C1F12 100%);
-  display:flex;justify-content:center;padding-top:32px;
-}
-.unlock-btn{
-  padding:14px 36px;border-radius:14px;border:none;
-  background:#fef4b0;color:#3D2D1A;
-  font-family:'Instrument Sans',sans-serif;font-size:16px;font-weight:700;
-  cursor:pointer;transition:all 0.3s;
-  box-shadow:0 4px 20px rgba(254,244,176,0.2);
-  display:flex;align-items:center;gap:10px;
-}
+/* ── UNLOCK CTA — yellow conservé : seul vrai CTA ── */
+.unlock-bar{position:fixed;bottom:0;left:0;right:0;z-index:200;padding:16px 24px;background:linear-gradient(180deg,rgba(44,31,18,0) 0%,rgba(44,31,18,0.95) 30%,#2C1F12 100%);display:flex;justify-content:center;padding-top:32px;}
+.unlock-btn{padding:14px 36px;border-radius:14px;border:none;background:#fef4b0;color:#3D2D1A;font-family:'Instrument Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.3s;box-shadow:0 4px 20px rgba(254,244,176,0.2);display:flex;align-items:center;gap:10px;}
 .unlock-btn:hover{transform:translateY(-2px);box-shadow:0 8px 30px rgba(254,244,176,0.3)}
 
 /* ── AUTH PAGE ── */
-.auth-input{
-  width:100%;padding:14px 18px;border-radius:10px;
-  border:1px solid rgba(121,90,52,0.2);
-  background:rgba(61,45,26,0.6);
-  color:#f4e9d6;font-family:'Instrument Sans',sans-serif;font-size:15px;
-  outline:none;transition:all 0.2s;
-}
-.auth-input:focus{border-color:rgba(254,244,176,0.3);box-shadow:0 0 0 3px rgba(254,244,176,0.06)}
+.auth-input{width:100%;padding:14px 18px;border-radius:10px;border:1px solid rgba(121,90,52,0.2);background:rgba(61,45,26,0.6);color:#f4e9d6;font-family:'Instrument Sans',sans-serif;font-size:15px;outline:none;transition:all 0.2s;}
+.auth-input:focus{border-color:rgba(244,233,214,0.25);box-shadow:0 0 0 3px rgba(244,233,214,0.05)}
 .auth-input::placeholder{color:#795A34}
-.auth-btn{
-  width:100%;padding:14px;border-radius:10px;border:none;
-  background:#fef4b0;color:#3D2D1A;
-  font-family:'Instrument Sans',sans-serif;font-size:16px;font-weight:700;
-  cursor:pointer;transition:all 0.2s;
-}
+.auth-btn{width:100%;padding:14px;border-radius:10px;border:none;background:#fef4b0;color:#3D2D1A;font-family:'Instrument Sans',sans-serif;font-size:16px;font-weight:700;cursor:pointer;transition:all 0.2s;}
 .auth-btn:hover{opacity:0.9}
 .auth-btn:disabled{opacity:0.5;cursor:not-allowed}
-.auth-link{
-  color:#795A34;font-size:14px;cursor:pointer;
-  border:none;background:none;font-family:'Instrument Sans',sans-serif;
-  text-decoration:underline;transition:color 0.2s;
-}
+.auth-link{color:#795A34;font-size:14px;cursor:pointer;border:none;background:none;font-family:'Instrument Sans',sans-serif;text-decoration:underline;transition:color 0.2s;}
 .auth-link:hover{color:#f4e9d6}
 `;
 
-const Ico = ({ icon: Icon, size = 16, color = C.yellow, ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
+const Ico = ({ icon: Icon, size = 16, color = C.beige, ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
 
 const SectionIcon = ({ icon: Icon }) => (
-  <div style={{ width: 22, height: 22, borderRadius: 6, background: `rgba(254,244,176,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-    <Icon size={12} color={C.yellow} strokeWidth={2} />
+  <div style={{ width: 22, height: 22, borderRadius: 6, background: `rgba(244,233,214,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+    <Icon size={12} color={C.beige} strokeWidth={2} />
   </div>
 );
 
 function GhostDonut() {
-  const gc = ["rgba(121,90,52,0.2)", "rgba(85,63,36,0.18)", "rgba(61,45,26,0.22)", "rgba(254,244,176,0.1)", "rgba(244,233,214,0.08)"];
+  const gc = ["rgba(121,90,52,0.2)", "rgba(85,63,36,0.18)", "rgba(61,45,26,0.22)", "rgba(244,233,214,0.1)", "rgba(244,233,214,0.06)"];
   return (
     <div style={{ position: "relative" }}>
       <div className="ghost">
@@ -441,9 +327,7 @@ function GhostDonut() {
       </div>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 6 }}>
         <CircleDot size={20} color={C.light} strokeWidth={1.5} style={{ opacity: 0.5 }} />
-        <div style={{ color: C.light, fontSize: 14, fontStyle: "italic", maxWidth: 160, lineHeight: 1.4 }}>
-          Remplis tes budgets pour visualiser ta répartition
-        </div>
+        <div style={{ color: C.light, fontSize: 14, fontStyle: "italic", maxWidth: 160, lineHeight: 1.4 }}>Remplis tes budgets pour visualiser ta répartition</div>
       </div>
     </div>
   );
@@ -458,15 +342,13 @@ function GhostBars() {
             <XAxis dataKey="nom" tick={{ fill: "rgba(121,90,52,0.25)", fontSize: 9 }} axisLine={{ stroke: "rgba(85,63,36,0.12)" }} tickLine={false} />
             <YAxis tick={{ fill: "rgba(121,90,52,0.15)", fontSize: 10 }} axisLine={{ stroke: "rgba(85,63,36,0.12)" }} tickLine={false} />
             <Bar dataKey="a" fill="rgba(121,90,52,0.12)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
-            <Bar dataKey="m" fill="rgba(254,244,176,0.08)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
+            <Bar dataKey="m" fill="rgba(244,233,214,0.08)" radius={[4, 4, 0, 0]} isAnimationActive={false} />
           </BarChart>
         </ResponsiveContainer>
       </div>
       <div style={{ position: "absolute", inset: 0, display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center", textAlign: "center", gap: 6 }}>
         <BarChart3 size={20} color={C.light} strokeWidth={1.5} style={{ opacity: 0.4 }} />
-        <div style={{ color: C.light, fontSize: 14, fontStyle: "italic", maxWidth: 180, lineHeight: 1.4 }}>
-          Remplis ta grille de tarifs pour comparer tes prix
-        </div>
+        <div style={{ color: C.light, fontSize: 14, fontStyle: "italic", maxWidth: 180, lineHeight: 1.4 }}>Remplis ta grille de tarifs pour comparer tes prix</div>
       </div>
     </div>
   );
@@ -478,88 +360,32 @@ function parseV1Excel(buffer, dSal, dPro, dTar) {
   const sal = JSON.parse(JSON.stringify(dSal));
   const pro = JSON.parse(JSON.stringify(dPro));
   const tar = JSON.parse(JSON.stringify(dTar));
-
   const cell = (ws, ref) => { const c = ws[ref]; return c ? c.v : null; };
   const num = (ws, ref) => { const v = cell(ws, ref); return typeof v === "number" ? v : (parseFloat(v) || ""); };
   const str = (ws, ref) => { const v = cell(ws, ref); return v ? String(v).trim() : ""; };
-
-  // Mon Salaire
   const s1 = wb.Sheets["Mon Salaire"];
   if (s1) {
     for (let r = 12; r <= 28; r++) {
       const i = r - 12;
-      if (i < sal.fixes.length) {
-        const lbl = str(s1, `C${r}`);
-        const amt = num(s1, `D${r}`) || num(s1, `B${r}`);
-        if (lbl) sal.fixes[i].label = lbl;
-        if (amt) sal.fixes[i].montant = String(amt);
-      }
-      if (i < sal.variables.length) {
-        const lbl = str(s1, `F${r}`);
-        const amt = num(s1, `G${r}`);
-        if (lbl) sal.variables[i].label = lbl;
-        if (amt) sal.variables[i].montant = String(amt);
-      }
-      if (i < sal.epargnes.length) {
-        const lbl = str(s1, `J${r}`);
-        const amt = num(s1, `K${r}`);
-        if (lbl) sal.epargnes[i].label = lbl;
-        if (amt) sal.epargnes[i].montant = String(amt);
-      }
+      if (i < sal.fixes.length) { const lbl = str(s1, `C${r}`); const amt = num(s1, `D${r}`) || num(s1, `B${r}`); if (lbl) sal.fixes[i].label = lbl; if (amt) sal.fixes[i].montant = String(amt); }
+      if (i < sal.variables.length) { const lbl = str(s1, `F${r}`); const amt = num(s1, `G${r}`); if (lbl) sal.variables[i].label = lbl; if (amt) sal.variables[i].montant = String(amt); }
+      if (i < sal.epargnes.length) { const lbl = str(s1, `J${r}`); const amt = num(s1, `K${r}`); if (lbl) sal.epargnes[i].label = lbl; if (amt) sal.epargnes[i].montant = String(amt); }
     }
   }
-
-  // Mon Chiffre d'affaires
   const s2 = wb.Sheets["Mon Chiffre daffaires"] || wb.Sheets["Mon Chiffre d'affaires"] || wb.Sheets[wb.SheetNames[1]];
   if (s2) {
-    for (let r = 13; r <= 27; r++) {
-      const i = r - 13;
-      if (i < pro.fixes.length) {
-        const lbl = str(s2, `C${r}`);
-        const amt = num(s2, `D${r}`);
-        if (lbl) pro.fixes[i].label = lbl;
-        if (amt) pro.fixes[i].montant = String(amt);
-      }
-    }
-    for (let r = 12; r <= 27; r++) {
-      const i = r - 12;
-      if (i < pro.variables.length) {
-        const lbl = str(s2, `F${r}`);
-        const amt = num(s2, `G${r}`);
-        if (lbl) pro.variables[i].label = lbl;
-        if (amt) pro.variables[i].montant = String(amt);
-      }
-    }
-    for (let r = 12; r <= 15; r++) {
-      const i = r - 12;
-      if (i < pro.charges.length) {
-        const lbl = str(s2, `J${r}`);
-        const amt = num(s2, `K${r}`);
-        if (lbl && lbl !== "TOTAL ") pro.charges[i].label = lbl;
-        if (amt) pro.charges[i].montant = String(amt);
-      }
-    }
-    for (let r = 19; r <= 27; r++) {
-      const i = r - 19;
-      if (i < pro.tresorerie.length) {
-        const lbl = str(s2, `J${r}`);
-        const amt = num(s2, `K${r}`);
-        if (lbl && lbl !== "TOTAL ") pro.tresorerie[i].label = lbl;
-        if (amt) pro.tresorerie[i].montant = String(amt);
-      }
-    }
+    for (let r = 13; r <= 27; r++) { const i = r - 13; if (i < pro.fixes.length) { const lbl = str(s2, `C${r}`); const amt = num(s2, `D${r}`); if (lbl) pro.fixes[i].label = lbl; if (amt) pro.fixes[i].montant = String(amt); } }
+    for (let r = 12; r <= 27; r++) { const i = r - 12; if (i < pro.variables.length) { const lbl = str(s2, `F${r}`); const amt = num(s2, `G${r}`); if (lbl) pro.variables[i].label = lbl; if (amt) pro.variables[i].montant = String(amt); } }
+    for (let r = 12; r <= 15; r++) { const i = r - 12; if (i < pro.charges.length) { const lbl = str(s2, `J${r}`); const amt = num(s2, `K${r}`); if (lbl && lbl !== "TOTAL ") pro.charges[i].label = lbl; if (amt) pro.charges[i].montant = String(amt); } }
+    for (let r = 19; r <= 27; r++) { const i = r - 19; if (i < pro.tresorerie.length) { const lbl = str(s2, `J${r}`); const amt = num(s2, `K${r}`); if (lbl && lbl !== "TOTAL ") pro.tresorerie[i].label = lbl; if (amt) pro.tresorerie[i].montant = String(amt); } }
   }
-
-  // Ma grille de Tarifs
   const s3 = wb.Sheets["Ma grille de Tarifs"] || wb.Sheets[wb.SheetNames[2]];
   if (s3) {
-    tar.sv = num(s3, "K3") || 5;
-    tar.hs = num(s3, "K5") || 33;
+    tar.sv = num(s3, "K3") || 5; tar.hs = num(s3, "K5") || 33;
     for (let r = 13; r <= 35; r++) {
       const i = r - 13;
       if (i < tar.p.length) {
-        const nom = str(s3, `B${r}`);
-        if (nom) tar.p[i].n = nom;
+        const nom = str(s3, `B${r}`); if (nom) tar.p[i].n = nom;
         const dc = num(s3, `C${r}`); if (dc) tar.p[i].dc = String(dc);
         const dm = num(s3, `D${r}`); if (dm) tar.p[i].dm = String(dm);
         const dl = num(s3, `E${r}`); if (dl) tar.p[i].dl = String(dl);
@@ -569,7 +395,6 @@ function parseV1Excel(buffer, dSal, dPro, dTar) {
       }
     }
   }
-
   return { sal, pro, tar };
 }
 
@@ -593,9 +418,7 @@ function AuthPage({ onAuth }) {
         if (data.user && !data.user.email_confirmed_at) {
           setSuccess("Un email de confirmation va t'être envoyé par « Supabase Auth ». Pense à vérifier tes spams. Clique sur le lien dans ce mail puis reviens ici pour te connecter.");
           setMode("login");
-        } else if (data.user) {
-          onAuth(data.user);
-        }
+        } else if (data.user) { onAuth(data.user); }
       } else {
         const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) throw err;
@@ -613,13 +436,10 @@ function AuthPage({ onAuth }) {
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
         <div style={{ maxWidth: 400, width: "100%", textAlign: "center" }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
-            <div className="hdr-logo" style={{ width: 56, height: 56 }}>
-              <Scissors size={24} strokeWidth={2} />
-            </div>
+            <div className="hdr-logo" style={{ width: 56, height: 56 }}><Scissors size={24} strokeWidth={2} /></div>
           </div>
           <div className="hdr-name" style={{ fontSize: 28, marginBottom: 4, color: C.beige }}>The Good Price</div>
           <div className="hdr-by" style={{ marginBottom: 36 }}>Your Hair Business</div>
-
           <div style={{ textAlign: "left" }}>
             <div style={{ color: C.beige, fontSize: 20, fontWeight: 600, marginBottom: 4, fontFamily: "'Cormorant Garamond',serif" }}>
               {mode === "login" ? "Connexion" : "Créer ton compte"}
@@ -627,10 +447,8 @@ function AuthPage({ onAuth }) {
             <div style={{ color: C.light, fontSize: 14, marginBottom: 24 }}>
               {mode === "login" ? "Retrouve tes données là où tu les avais laissées" : "Gratuit — commence à calculer tes tarifs"}
             </div>
-
             {error && <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>{error}</div>}
             {success && <div style={{ color: C.greenText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(45,59,40,0.3)", borderRadius: 8, lineHeight: 1.5 }}>{success}</div>}
-
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
               <div style={{ position: "relative" }}>
                 <Mail size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
@@ -647,13 +465,11 @@ function AuthPage({ onAuth }) {
                 {loading ? "Chargement..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
               </button>
             </form>
-
             <div style={{ textAlign: "center", marginTop: 18 }}>
-              {mode === "login" ? (
-                <span style={{ color: C.light, fontSize: 14 }}>Pas encore de compte ? <button className="auth-link" onClick={() => { setMode("signup"); setError(null); setSuccess(null); }}>Inscris-toi</button></span>
-              ) : (
-                <span style={{ color: C.light, fontSize: 14 }}>Déjà un compte ? <button className="auth-link" onClick={() => { setMode("login"); setError(null); setSuccess(null); }}>Connecte-toi</button></span>
-              )}
+              {mode === "login"
+                ? <span style={{ color: C.light, fontSize: 14 }}>Pas encore de compte ? <button className="auth-link" onClick={() => { setMode("signup"); setError(null); setSuccess(null); }}>Inscris-toi</button></span>
+                : <span style={{ color: C.light, fontSize: 14 }}>Déjà un compte ? <button className="auth-link" onClick={() => { setMode("login"); setError(null); setSuccess(null); }}>Connecte-toi</button></span>
+              }
             </div>
           </div>
         </div>
@@ -671,15 +487,9 @@ function WelcomePage({ onImport, onSkip }) {
   const handleFile = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setLoading(true);
-    setError(null);
-    try {
-      const buf = await file.arrayBuffer();
-      onImport(buf);
-    } catch (err) {
-      setError("Impossible de lire ce fichier. Vérifie que c'est bien le bon format (.xlsx).");
-      setLoading(false);
-    }
+    setLoading(true); setError(null);
+    try { const buf = await file.arrayBuffer(); onImport(buf); }
+    catch (err) { setError("Impossible de lire ce fichier. Vérifie que c'est bien le bon format (.xlsx)."); setLoading(false); }
   };
 
   return (
@@ -687,85 +497,41 @@ function WelcomePage({ onImport, onSkip }) {
       <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 32 }}>
         <div style={{ maxWidth: 520, textAlign: "center" }}>
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
-            <div className="hdr-logo" style={{ width: 64, height: 64 }}>
-              <Scissors size={28} strokeWidth={2} />
-            </div>
+            <div className="hdr-logo" style={{ width: 64, height: 64 }}><Scissors size={28} strokeWidth={2} /></div>
           </div>
           <div className="hdr-name" style={{ fontSize: 32, marginBottom: 4, color: C.beige }}>The Good Price</div>
           <div className="hdr-by" style={{ marginBottom: 40 }}>Your Hair Business</div>
-
           <div className="tagline" style={{ fontSize: 20, marginBottom: 48, color: C.light, whiteSpace: "nowrap" }}>
             <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, transparent, ${C.light})`, display: "inline-block" }} />
             Travaille moins — facture mieux
             <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, ${C.light}, transparent)`, display: "inline-block" }} />
           </div>
-
-          <button
-            onClick={() => fileRef.current?.click()}
-            disabled={loading}
-            style={{
-              width: "100%", padding: "20px 28px", borderRadius: 16,
-              background: "linear-gradient(160deg, rgba(61,45,26,0.8), rgba(44,31,18,0.65))",
-              border: `1px solid rgba(121,90,52,0.2)`, cursor: "pointer",
-              display: "flex", alignItems: "center", gap: 16,
-              transition: "all 0.3s", marginBottom: 14,
-              color: C.beige,
-            }}
+          <button onClick={() => fileRef.current?.click()} disabled={loading}
+            style={{ width: "100%", padding: "20px 28px", borderRadius: 16, background: "linear-gradient(160deg, rgba(61,45,26,0.8), rgba(44,31,18,0.65))", border: `1px solid rgba(121,90,52,0.2)`, cursor: "pointer", display: "flex", alignItems: "center", gap: 16, transition: "all 0.3s", marginBottom: 14, color: C.beige }}
             onMouseOver={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.35)"}
             onMouseOut={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.2)"}
           >
-            <div style={{
-              width: 48, height: 48, borderRadius: 12,
-              background: "rgba(121,90,52,0.15)", display: "flex",
-              alignItems: "center", justifyContent: "center", flexShrink: 0,
-            }}>
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(121,90,52,0.15)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <FileSpreadsheet size={22} color={C.beige} strokeWidth={1.8} />
             </div>
             <div style={{ textAlign: "left" }}>
-              <div style={{ color: C.beige, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>
-                {loading ? "Import en cours..." : "J'ai déjà rempli l'ancienne version"}
-              </div>
-              <div style={{ color: C.light, fontSize: 13 }}>
-                Importe ton ancien fichier pour tout transférer automatiquement
-              </div>
+              <div style={{ color: C.beige, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>{loading ? "Import en cours..." : "J'ai déjà rempli l'ancienne version"}</div>
+              <div style={{ color: C.light, fontSize: 13 }}>Importe ton ancien fichier pour tout transférer automatiquement</div>
             </div>
           </button>
-
           <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFile} style={{ display: "none" }} />
-
-          {error && (
-            <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "8px 12px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>
-              {error}
-            </div>
-          )}
-
-          <button
-            onClick={onSkip}
-            style={{
-              width: "100%", padding: "20px 28px", borderRadius: 16,
-              background: "rgba(121,90,52,0.03)",
-              border: `1px solid rgba(121,90,52,0.1)`, cursor: "pointer",
-              display: "flex", alignItems: "center", gap: 16,
-              transition: "all 0.3s",
-              color: C.beige,
-            }}
+          {error && <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "8px 12px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>{error}</div>}
+          <button onClick={onSkip}
+            style={{ width: "100%", padding: "20px 28px", borderRadius: 16, background: "rgba(121,90,52,0.03)", border: `1px solid rgba(121,90,52,0.1)`, cursor: "pointer", display: "flex", alignItems: "center", gap: 16, transition: "all 0.3s", color: C.beige }}
             onMouseOver={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.2)"}
             onMouseOut={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.1)"}
           >
-            <div style={{
-              width: 48, height: 48, borderRadius: 12,
-              background: "rgba(121,90,52,0.08)", display: "flex",
-              alignItems: "center", justifyContent: "center", flexShrink: 0,
-            }}>
+            <div style={{ width: 48, height: 48, borderRadius: 12, background: "rgba(121,90,52,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
               <Plus size={22} color={C.light} strokeWidth={1.8} />
             </div>
             <div style={{ textAlign: "left" }}>
-              <div style={{ color: C.beige, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>
-                C'est ma première fois
-              </div>
-              <div style={{ color: C.light, fontSize: 13 }}>
-                Je remplis tout depuis le début
-              </div>
+              <div style={{ color: C.beige, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>C'est ma première fois</div>
+              <div style={{ color: C.light, fontSize: 13 }}>Je remplis tout depuis le début</div>
             </div>
           </button>
         </div>
@@ -776,15 +542,8 @@ function WelcomePage({ onImport, onSkip }) {
 
 function AddRow({ onClick, label = "Ajouter une ligne" }) {
   return (
-    <button onClick={onClick} style={{
-      display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
-      width: "100%", padding: "8px 0", borderRadius: 8, marginTop: 4, marginBottom: 8,
-      border: `1px dashed rgba(121,90,52,0.2)`, background: "transparent",
-      color: C.light, fontSize: 13, cursor: "pointer",
-      fontFamily: "'Instrument Sans', sans-serif",
-      transition: "all 0.2s",
-    }}
-      onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(254,244,176,0.3)"; e.currentTarget.style.color = C.yellow; }}
+    <button onClick={onClick} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", padding: "8px 0", borderRadius: 8, marginTop: 4, marginBottom: 8, border: `1px dashed rgba(121,90,52,0.2)`, background: "transparent", color: C.light, fontSize: 13, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif", transition: "all 0.2s" }}
+      onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(244,233,214,0.25)"; e.currentTarget.style.color = C.beige; }}
       onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.2)"; e.currentTarget.style.color = C.light; }}
     >
       <Plus size={14} strokeWidth={2} /> {label}
@@ -822,14 +581,8 @@ function Dash({ sal, pro, tar, isPaid }) {
   tar.p.forEach(p => {
     if (!p.n) return;
     [["dc","tc"],["dm","tm"],["dl","tl"]].forEach(([df,tf]) => {
-      const dur = parseFloat(p[df]) || 0;
-      const prix = parseFloat(p[tf]) || 0;
-      if (dur > 0 && prix > 0) {
-        totalPrix += prix;
-        totalDurees += dur;
-        const min = Math.ceil(dur * th);
-        if (prix < min) nbSousTarif++;
-      }
+      const dur = parseFloat(p[df]) || 0; const prix = parseFloat(p[tf]) || 0;
+      if (dur > 0 && prix > 0) { totalPrix += prix; totalDurees += dur; if (prix < Math.ceil(dur * th)) nbSousTarif++; }
     });
   });
   const tauxReel = totalDurees > 0 ? totalPrix / totalDurees : 0;
@@ -865,29 +618,12 @@ function Dash({ sal, pro, tar, isPaid }) {
       </div>
 
       {th > 0 && totalDurees > 0 && (
-        <div style={{
-          display: "flex", alignItems: "center", gap: 18,
-          padding: "18px 28px", borderRadius: 16,
-          background: hasManque
-            ? "linear-gradient(135deg, rgba(61,37,25,0.85), rgba(44,31,18,0.7))"
-            : "linear-gradient(135deg, rgba(45,59,40,0.6), rgba(44,31,18,0.5))",
-          border: `1px solid ${hasManque ? "rgba(181,74,58,0.2)" : "rgba(90,125,79,0.2)"}`,
-          position: "relative", overflow: "hidden",
-        }}>
-          <div style={{
-            width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-            background: hasManque ? "rgba(181,74,58,0.15)" : "rgba(90,125,79,0.15)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-          }}>
-            <TrendingDown size={20} color={hasManque ? C.redText : C.greenText} strokeWidth={2}
-              style={hasManque ? {} : { transform: "scaleY(-1)" }} />
+        <div style={{ display: "flex", alignItems: "center", gap: 18, padding: "18px 28px", borderRadius: 16, background: hasManque ? "linear-gradient(135deg, rgba(61,37,25,0.85), rgba(44,31,18,0.7))" : "linear-gradient(135deg, rgba(45,59,40,0.6), rgba(44,31,18,0.5))", border: `1px solid ${hasManque ? "rgba(181,74,58,0.2)" : "rgba(90,125,79,0.2)"}`, position: "relative", overflow: "hidden" }}>
+          <div style={{ width: 44, height: 44, borderRadius: 12, flexShrink: 0, background: hasManque ? "rgba(181,74,58,0.15)" : "rgba(90,125,79,0.15)", display: "flex", alignItems: "center", justifyContent: "center" }}>
+            <TrendingDown size={20} color={hasManque ? C.redText : C.greenText} strokeWidth={2} style={hasManque ? {} : { transform: "scaleY(-1)" }} />
           </div>
           <div style={{ flex: 1 }}>
-            <div style={{
-              fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase",
-              color: hasManque ? C.redText : C.greenText, marginBottom: 4,
-              display: "flex", alignItems: "center", gap: 6,
-            }}>
+            <div style={{ fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", color: hasManque ? C.redText : C.greenText, marginBottom: 4, display: "flex", alignItems: "center", gap: 6 }}>
               {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : <><Ico icon={Crosshair} size={14} color={C.greenText} /> Bénéfice généré par tes tarifs actuels</>}
             </div>
             {hasManque ? (
@@ -896,8 +632,7 @@ function Dash({ sal, pro, tar, isPaid }) {
                   -{fmt(manqueMensuel)}<span style={{ fontSize: 14, fontWeight: 500 }}> /mois</span>
                 </span>
                 <div style={{ color: C.light, fontSize: 14, fontStyle: "italic" }}>
-                  Taux horaire réel : {Math.round(tauxReel)} €/h vs {th} €/h nécessaire
-                  <br />
+                  Taux horaire réel : {Math.round(tauxReel)} €/h vs {th} €/h nécessaire<br />
                   {nbSousTarif} tarif{nbSousTarif > 1 ? "s" : ""} en dessous du tarif recommandé
                 </div>
               </div>
@@ -906,12 +641,8 @@ function Dash({ sal, pro, tar, isPaid }) {
                 <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 30, fontWeight: 700, color: C.greenText }}>
                   +{fmt(beneficeMensuel)}<span style={{ fontSize: 14, fontWeight: 500 }}> /mois</span>
                 </span>
-                <div style={{ color: C.light, fontSize: 14, fontStyle: "italic" }}>
-                  Taux horaire réel : {Math.round(tauxReel)} €/h vs {th} €/h nécessaire
-                </div>
-                <div style={{ color: C.light, fontSize: 12, fontStyle: "italic", opacity: 0.7 }}>
-                  * Estimation basée sur un planning rempli à 100%
-                </div>
+                <div style={{ color: C.light, fontSize: 14, fontStyle: "italic" }}>Taux horaire réel : {Math.round(tauxReel)} €/h vs {th} €/h nécessaire</div>
+                <div style={{ color: C.light, fontSize: 12, fontStyle: "italic", opacity: 0.7 }}>* Estimation basée sur un planning rempli à 100%</div>
               </div>
             )}
           </div>
@@ -919,16 +650,12 @@ function Dash({ sal, pro, tar, isPaid }) {
       )}
 
       {ca === 0 && (
-        <div style={{
-          display: "flex", alignItems: "center", gap: 16,
-          background: "rgba(254,244,176,0.04)", border: "1px solid rgba(254,244,176,0.1)",
-          borderRadius: 14, padding: "16px 24px",
-        }}>
-          <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(254,244,176,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <ArrowRight size={16} color={C.yellow} strokeWidth={2} />
+        <div style={{ display: "flex", alignItems: "center", gap: 16, background: "rgba(244,233,214,0.04)", border: "1px solid rgba(244,233,214,0.08)", borderRadius: 14, padding: "16px 24px" }}>
+          <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(244,233,214,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
+            <ArrowRight size={16} color={C.beige} strokeWidth={2} />
           </div>
           <div>
-            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, marginBottom: 2 }}>Par où commencer ?</div>
+            <div style={{ color: C.beige, fontSize: 15, fontWeight: 600, marginBottom: 2 }}>Par où commencer ?</div>
             <div style={{ color: C.light, fontSize: 12 }}>
               Commence par l'onglet <strong style={{ color: C.beige }}>Mon Salaire</strong> pour définir tes besoins perso, puis <strong style={{ color: C.beige }}>Mon CA Pro</strong> pour tes charges. Tes tarifs se calculeront automatiquement.
             </div>
@@ -939,41 +666,33 @@ function Dash({ sal, pro, tar, isPaid }) {
       <div className="g2">
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-              <SectionIcon icon={TrendingUp} />
-              Répartition de ton CA mensuel
+            <div style={{ color: C.beige, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+              <SectionIcon icon={TrendingUp} /> Répartition de ton CA mensuel
             </div>
-            {[{ l: "Ton salaire net", v: ts, icon: Wallet }, { l: "Charges fixes pro", v: tf, icon: ShieldCheck },
-              { l: "Charges variables", v: tv, icon: Receipt }, { l: "Charges & taxes", v: tc, icon: Receipt },
-              { l: "Trésorerie", v: tt, icon: Vault }].map((r, i) => (
+            {[{ l: "Ton salaire net", v: ts, icon: Wallet }, { l: "Charges fixes pro", v: tf, icon: ShieldCheck }, { l: "Charges variables", v: tv, icon: Receipt }, { l: "Charges & taxes", v: tc, icon: Receipt }, { l: "Trésorerie", v: tt, icon: Vault }].map((r, i) => (
               <div className="bk" key={i}>
-                <span style={{ color: C.beige, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
-                  <Ico icon={r.icon} size={13} color={C.light} />
-                  {r.l}
-                </span>
+                <span style={{ color: C.beige, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}><Ico icon={r.icon} size={13} color={C.light} /> {r.l}</span>
                 <div style={{ display: "flex", gap: 18 }}>
-                  <span style={{ color: C.yellow, fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(r.v)}</span>
+                  <span style={{ color: C.beige, fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(r.v)}</span>
                   <span style={{ color: C.light, fontSize: 14, width: 40, textAlign: "right" }}>{ca > 0 ? `${Math.round(r.v / ca * 100)}%` : "—"}</span>
                 </div>
               </div>
             ))}
             <div className="dv" />
             <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 4px 0" }}>
-              <span style={{ color: C.yellow, fontSize: 15, fontWeight: 600 }}>Total CA mensuel</span>
-              <span style={{ color: C.yellow, fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ca)}</span>
+              <span style={{ color: C.beige, fontSize: 15, fontWeight: 600 }}>Total CA mensuel</span>
+              <span style={{ color: C.beige, fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ca)}</span>
             </div>
           </div>
 
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-              <SectionIcon icon={Clock} />
-              Ton temps de travail
+            <div style={{ color: C.beige, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+              <SectionIcon icon={Clock} /> Ton temps de travail
             </div>
-            {[{ l: "Heures / semaine", v: tar.hs || 0 }, { l: "Semaines travaillées", v: sw },
-              { l: "Heures totales / an", v: ha }, { l: "Semaines de vacances", v: tar.sv || 0 }].map((r, i) => (
+            {[{ l: "Heures / semaine", v: tar.hs || 0 }, { l: "Semaines travaillées", v: sw }, { l: "Heures totales / an", v: ha }, { l: "Semaines de vacances", v: tar.sv || 0 }].map((r, i) => (
               <div className="bk" key={i}>
                 <span style={{ color: C.beige, fontSize: 15 }}>{r.l}</span>
-                <span style={{ color: C.yellow, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 15 }}>{r.v}</span>
+                <span style={{ color: C.beige, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 15 }}>{r.v}</span>
               </div>
             ))}
           </div>
@@ -981,9 +700,8 @@ function Dash({ sal, pro, tar, isPaid }) {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-              <SectionIcon icon={TrendingUp} />
-              Où part ton CA ?
+            <div style={{ color: C.beige, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+              <SectionIcon icon={TrendingUp} /> Où part ton CA ?
             </div>
             {hasPie ? (
               <ResponsiveContainer width="100%" height={260}>
@@ -1000,9 +718,8 @@ function Dash({ sal, pro, tar, isPaid }) {
           </div>
 
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
-              <SectionIcon icon={BarChart3} />
-              Tarifs actuels vs sur mesure
+            <div style={{ color: C.beige, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+              <SectionIcon icon={BarChart3} /> Tarifs actuels vs sur mesure
             </div>
             {bars.length > 0 ? (
               <ResponsiveContainer width="100%" height={220}>
@@ -1012,7 +729,7 @@ function Dash({ sal, pro, tar, isPaid }) {
                   <Tooltip formatter={v => fmt(v)} contentStyle={ttStyle} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Bar dataKey="actuel" name="Actuel" fill={C.light} radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="minimum" name="Sur mesure" fill={C.yellow} radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="minimum" name="Sur mesure" fill={C.beige} radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : <GhostBars />}
@@ -1035,8 +752,7 @@ function Sal({ data, on }) {
   const moveRow = (s, i, dir) => {
     const arr = [...data[s]]; const ni = i + dir;
     if (ni < 0 || ni >= arr.length) return;
-    [arr[i], arr[ni]] = [arr[ni], arr[i]];
-    on({ ...data, [s]: arr });
+    [arr[i], arr[ni]] = [arr[ni], arr[i]]; on({ ...data, [s]: arr });
   };
   const t = sum(data.fixes) + sum(data.variables) + sum(data.epargnes);
   return (
@@ -1068,16 +784,11 @@ function Pro({ data, on, sal }) {
   const moveRow = (s, i, dir) => {
     const arr = [...data[s]]; const ni = i + dir;
     if (ni < 0 || ni >= arr.length) return;
-    [arr[i], arr[ni]] = [arr[ni], arr[i]];
-    on({ ...data, [s]: arr });
+    [arr[i], arr[ni]] = [arr[ni], arr[i]]; on({ ...data, [s]: arr });
   };
   const ts = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes);
   const ca = ts + sum(data.fixes) + sum(data.variables) + sum(data.charges) + sum(data.tresorerie);
-  const irProps = (k, items) => (i) => ({
-    item: items[i], idx: i, on: (j, f, v) => up(k, j, f, v),
-    onDelete: () => delRow(k, i), onUp: () => moveRow(k, i, -1), onDown: () => moveRow(k, i, 1),
-    canUp: i > 0, canDown: i < items.length - 1,
-  });
+  const irProps = (k, items) => (i) => ({ item: items[i], idx: i, on: (j, f, v) => up(k, j, f, v), onDelete: () => delRow(k, i), onUp: () => moveRow(k, i, -1), onDown: () => moveRow(k, i, 1), canUp: i > 0, canDown: i < items.length - 1 });
   return (
     <div className="fi">
       <div className="rb">
@@ -1085,10 +796,8 @@ function Pro({ data, on, sal }) {
         <span className="rb-val">{fmt(ca)}</span>
       </div>
       <div className="sa">
-        <span style={{ color: C.light, fontWeight: 500, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
-          <Ico icon={Wallet} size={15} color={C.light} /> Salaire / Rémunération (auto)
-        </span>
-        <span style={{ color: C.yellow, fontWeight: 700, fontSize: 17, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ts)}</span>
+        <span style={{ color: C.light, fontWeight: 500, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}><Ico icon={Wallet} size={15} color={C.light} /> Salaire / Rémunération (auto)</span>
+        <span style={{ color: C.beige, fontWeight: 700, fontSize: 17, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ts)}</span>
       </div>
       <div className="g3">
         <div>
@@ -1114,9 +823,7 @@ function Pro({ data, on, sal }) {
           <div style={{ marginTop: 16 }}>
             <div className="sh"><SectionIcon icon={Vault} /><div className="sh-text">Trésorerie</div></div>
             <div className="tw">
-              <div style={{ color: C.yellow, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
-                <Ico icon={AlertTriangle} size={13} color={C.light} /> Montant à ALLOUER chaque mois
-              </div>
+              <div style={{ color: C.beige, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}><Ico icon={AlertTriangle} size={13} color={C.light} /> Montant à ALLOUER chaque mois</div>
               <div style={{ color: C.light, fontSize: 10, fontStyle: "italic", marginTop: 2 }}>Ce n'est PAS ton solde actuel, mais ce que tu VEUX mettre de côté</div>
             </div>
             {data.tresorerie.map((x, i) => <IR key={i} {...irProps("tresorerie", data.tresorerie)(i)} />)}
@@ -1140,8 +847,7 @@ function Tar({ data, on, sal, pro, isPaid }) {
   const movePrestation = (i, dir) => {
     const arr = [...data.p]; const ni = i + dir;
     if (ni < 0 || ni >= arr.length) return;
-    [arr[i], arr[ni]] = [arr[ni], arr[i]];
-    on({ ...data, p: arr });
+    [arr[i], arr[ni]] = [arr[ni], arr[i]]; on({ ...data, p: arr });
   };
 
   return (
@@ -1154,26 +860,25 @@ function Tar({ data, on, sal, pro, isPaid }) {
           <input className="pi" type="number" value={data.hs || ""} onChange={e => uP("hs", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" style={data.hs === 0 ? { border: `2px solid ${C.redText}` } : {}} />
         </div>
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <label style={{ color: C.light, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
-            Semaines de vacances / an
-          </label>
+          <label style={{ color: C.light, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>Semaines de vacances / an</label>
           <input className="pi" type="number" value={data.sv || ""} onChange={e => uP("sv", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" />
         </div>
-
         <div className="gc" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ color: C.light, fontSize: 14, fontWeight: 500 }}>CA Annuel</span>
-          <span style={{ color: C.yellow, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(caA)}</span>
+          <span style={{ color: C.beige, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(caA)}</span>
         </div>
         <div className="gc" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ color: C.light, fontSize: 14, fontWeight: 500 }}>CA Mensuel</span>
-          <span style={{ color: C.yellow, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(ca)}</span>
+          <span style={{ color: C.beige, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(ca)}</span>
         </div>
-
+        {/* Taux horaire badge — yellow conservé : chiffre clé unique */}
         <div className="tb" style={{ gridColumn: "1 / -1" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
             <Ico icon={Crosshair} size={22} color={C.dark} />
             <span style={{ color: C.dark, fontSize: 13, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>Taux horaire</span>
-            <span className={!isPaid && th > 0 ? "blur-val" : ""} style={{ color: C.dark, fontSize: 44, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>{th}<span style={{ fontSize: 20, fontWeight: 500 }}> €/h</span></span>
+            <span className={!isPaid && th > 0 ? "blur-val" : ""} style={{ color: C.dark, fontSize: 44, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", lineHeight: 1 }}>
+              {th}<span style={{ fontSize: 20, fontWeight: 500 }}> €/h</span>
+            </span>
             {!isPaid && th > 0 && <Lock size={16} color={C.dark} style={{ opacity: 0.4 }} />}
           </div>
         </div>
@@ -1186,7 +891,6 @@ function Tar({ data, on, sal, pro, isPaid }) {
       )}
 
       <div className="hint hint-y" style={{ marginBottom: 10 }}><Ico icon={Info} size={13} color={C.light} /> Plusieurs collaborateurs ? Indique le nombre TOTAL d'heures travaillées et de semaines de vacances.</div>
-
       <div className="hint hint-y" style={{ marginBottom: 16 }}><Ico icon={Clock} size={13} color={C.light} /> Comment remplir les durées : 30 min = 0.5 · 45 min = 0.75 · 1h = 1 · 1h30 = 1.5 · 2h = 2</div>
 
       <div style={{ overflowX: "auto" }}>
@@ -1274,13 +978,8 @@ export default function App() {
   const importRef = useRef(null);
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setUser(session?.user || null);
-      setAuthLoading(false);
-    });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user || null);
-    });
+    supabase.auth.getSession().then(({ data: { session } }) => { setUser(session?.user || null); setAuthLoading(false); });
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => { setUser(session?.user || null); });
     return () => subscription.unsubscribe();
   }, []);
 
@@ -1294,11 +993,8 @@ export default function App() {
           if (data.pro) setPro(data.pro);
           if (data.tar) setTar(data.tar);
           setStarted(true);
-          if (data.paid && data.expires_at) {
-            setIsPaid(new Date(data.expires_at) > new Date());
-          } else {
-            setIsPaid(data.paid || false);
-          }
+          if (data.paid && data.expires_at) { setIsPaid(new Date(data.expires_at) > new Date()); }
+          else { setIsPaid(data.paid || false); }
         }
       } catch {}
       setOk(true);
@@ -1309,14 +1005,8 @@ export default function App() {
     if (!ok || !user) return;
     const t = setTimeout(async () => {
       setSv(true);
-      try {
-        await supabase.from("user_data").upsert({
-          id: user.id,
-          email: user.email,
-          sal, pro, tar,
-          updated_at: new Date().toISOString(),
-        });
-      } catch (err) { console.error("Save error:", err); }
+      try { await supabase.from("user_data").upsert({ id: user.id, email: user.email, sal, pro, tar, updated_at: new Date().toISOString() }); }
+      catch (err) { console.error("Save error:", err); }
       setTimeout(() => setSv(false), 800);
     }, 1500);
     return () => clearTimeout(t);
@@ -1325,52 +1015,29 @@ export default function App() {
   const handleImport = (buffer) => {
     try {
       const result = parseV1Excel(buffer, dSal, dPro, dTar);
-      setSal(result.sal);
-      setPro(result.pro);
-      setTar(result.tar);
-      setStarted(true);
-      setTab("salaire");
-    } catch (err) {
-      console.error("Import failed:", err);
-    }
+      setSal(result.sal); setPro(result.pro); setTar(result.tar); setStarted(true); setTab("salaire");
+    } catch (err) { console.error("Import failed:", err); }
   };
 
   const handleHeaderImport = async (e) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    try {
-      const buf = await file.arrayBuffer();
-      handleImport(buf);
-    } catch (err) {
-      console.error("Import failed:", err);
-    }
+    try { const buf = await file.arrayBuffer(); handleImport(buf); } catch (err) { console.error("Import failed:", err); }
     e.target.value = "";
   };
 
   const handleReset = () => {
     if (window.confirm("Repartir à zéro ? Toutes tes données seront effacées.")) {
-      setSal(JSON.parse(JSON.stringify(dSal)));
-      setPro(JSON.parse(JSON.stringify(dPro)));
-      setTar(JSON.parse(JSON.stringify(dTar)));
-      setTab("dashboard");
+      setSal(JSON.parse(JSON.stringify(dSal))); setPro(JSON.parse(JSON.stringify(dPro))); setTar(JSON.parse(JSON.stringify(dTar))); setTab("dashboard");
     }
   };
 
-  const toggleTheme = () => {
-    const next = theme === "dark" ? "light" : "dark";
-    setTheme(next);
-    localStorage.setItem("tgp-theme", next);
-  };
+  const toggleTheme = () => { const next = theme === "dark" ? "light" : "dark"; setTheme(next); localStorage.setItem("tgp-theme", next); };
 
   const handleLogout = async () => {
-    await supabase.auth.signOut();
-    setUser(null);
-    setSal(JSON.parse(JSON.stringify(dSal)));
-    setPro(JSON.parse(JSON.stringify(dPro)));
-    setTar(JSON.parse(JSON.stringify(dTar)));
-    setStarted(false);
-    setIsPaid(false);
-    setOk(false);
+    await supabase.auth.signOut(); setUser(null);
+    setSal(JSON.parse(JSON.stringify(dSal))); setPro(JSON.parse(JSON.stringify(dPro))); setTar(JSON.parse(JSON.stringify(dTar)));
+    setStarted(false); setIsPaid(false); setOk(false);
   };
 
   if (authLoading) {
@@ -1385,20 +1052,10 @@ export default function App() {
     );
   }
 
-  if (!user) {
-    return <AuthPage onAuth={(u) => setUser(u)} />;
-  }
+  if (!user) return <AuthPage onAuth={(u) => setUser(u)} />;
 
   if (ok && !started) {
-    return (
-      <>
-        <style>{styles}</style>
-        <WelcomePage
-          onImport={(buf) => handleImport(buf)}
-          onSkip={() => setStarted(true)}
-        />
-      </>
-    );
+    return (<><style>{styles}</style><WelcomePage onImport={(buf) => handleImport(buf)} onSkip={() => setStarted(true)} /></>);
   }
 
   return (
@@ -1413,85 +1070,29 @@ export default function App() {
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
-          <button
-            onClick={toggleTheme}
-            title={theme === "dark" ? "Mode clair" : "Mode sombre"}
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px", borderRadius: 20,
-              border: `1px solid rgba(121,90,52,0.15)`,
-              background: "rgba(121,90,52,0.06)",
-              color: C.light, fontSize: 12, cursor: "pointer",
-              fontFamily: "'Instrument Sans', sans-serif",
-              transition: "all 0.3s",
-            }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(254,244,176,0.25)"; e.currentTarget.style.color = C.yellow; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
-          >
-            {theme === "dark" ? <Sun size={13} strokeWidth={2} /> : <Moon size={13} strokeWidth={2} />}
-          </button>
-          <button
-            onClick={() => importRef.current?.click()}
-            title="Importer depuis l'ancienne version"
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px", borderRadius: 20,
-              border: `1px solid rgba(121,90,52,0.15)`,
-              background: "rgba(121,90,52,0.06)",
-              color: C.light, fontSize: 12, cursor: "pointer",
-              fontFamily: "'Instrument Sans', sans-serif",
-              transition: "all 0.3s",
-            }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(254,244,176,0.25)"; e.currentTarget.style.color = C.yellow; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
-          >
-            <Upload size={13} strokeWidth={2} /> Importer
-          </button>
+          {[
+            { icon: theme === "dark" ? <Sun size={13} strokeWidth={2} /> : <Moon size={13} strokeWidth={2} />, onClick: toggleTheme, title: theme === "dark" ? "Mode clair" : "Mode sombre", hoverBorder: "rgba(244,233,214,0.2)", hoverColor: C.beige },
+            { icon: <><Upload size={13} strokeWidth={2} /> Importer</>, onClick: () => importRef.current?.click(), title: "Importer depuis l'ancienne version", hoverBorder: "rgba(244,233,214,0.2)", hoverColor: C.beige },
+            { icon: <><RotateCcw size={13} strokeWidth={2} /> Réinitialiser</>, onClick: handleReset, title: "Repartir à zéro", hoverBorder: "rgba(181,74,58,0.3)", hoverColor: C.redText },
+            { icon: <LogOut size={13} strokeWidth={2} />, onClick: handleLogout, title: "Se déconnecter", hoverBorder: "rgba(121,90,52,0.25)", hoverColor: C.beige },
+          ].map((btn, i) => (
+            <button key={i} onClick={btn.onClick} title={btn.title}
+              style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 20, border: `1px solid rgba(121,90,52,0.15)`, background: "rgba(121,90,52,0.06)", color: C.light, fontSize: 12, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif", transition: "all 0.3s" }}
+              onMouseOver={e => { e.currentTarget.style.borderColor = btn.hoverBorder; e.currentTarget.style.color = btn.hoverColor; }}
+              onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
+            >
+              {btn.icon}
+            </button>
+          ))}
           <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleHeaderImport} style={{ display: "none" }} />
-          <button
-            onClick={handleReset}
-            title="Repartir à zéro"
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px", borderRadius: 20,
-              border: `1px solid rgba(121,90,52,0.15)`,
-              background: "rgba(121,90,52,0.06)",
-              color: C.light, fontSize: 12, cursor: "pointer",
-              fontFamily: "'Instrument Sans', sans-serif",
-              transition: "all 0.3s",
-            }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(181,74,58,0.3)"; e.currentTarget.style.color = C.redText; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
-          >
-            <RotateCcw size={13} strokeWidth={2} /> Réinitialiser
-          </button>
-          <button
-            onClick={handleLogout}
-            title="Se déconnecter"
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px", borderRadius: 20,
-              border: `1px solid rgba(121,90,52,0.15)`,
-              background: "rgba(121,90,52,0.06)",
-              color: C.light, fontSize: 12, cursor: "pointer",
-              fontFamily: "'Instrument Sans', sans-serif",
-              transition: "all 0.3s",
-            }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.25)"; e.currentTarget.style.color = C.beige; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
-          >
-            <LogOut size={13} strokeWidth={2} />
-          </button>
           <div className={`hdr-save${sv ? " on" : ""}`}>
-            {sv ? <><Ico icon={Save} size={13} color={C.yellow} /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
+            {sv ? <><Ico icon={Save} size={13} color={C.beige} /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
           </div>
         </div>
       </header>
 
       <nav className="nav">
-        {[{ id: "dashboard", icon: LayoutDashboard, l: "Dashboard" }, { id: "salaire", icon: Wallet, l: "Mon Salaire" },
-          { id: "pro", icon: Briefcase, l: "Mon CA Pro" }, { id: "tarifs", icon: Scissors, l: "Mes Tarifs" }
-        ].map(t => (
+        {[{ id: "dashboard", icon: LayoutDashboard, l: "Dashboard" }, { id: "salaire", icon: Wallet, l: "Mon Salaire" }, { id: "pro", icon: Briefcase, l: "Mon CA Pro" }, { id: "tarifs", icon: Scissors, l: "Mes Tarifs" }].map(t => (
           <button key={t.id} className={`nt${tab === t.id ? " on" : ""}`} onClick={() => setTab(t.id)}>
             <Ico icon={t.icon} size={16} color="currentColor" />{t.l}
           </button>
