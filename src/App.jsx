@@ -38,7 +38,7 @@ const dPro = {
   tresorerie: [...mk(["Fonds de roulement","Investissements futurs","Imprévu pro"]), ...empty(3)],
 };
 const dTar = {
-  sv: 5, hs: 33,
+  sv: 0, hs: 0,
   p: [...["Forfait Coupe","Forfait Couleur","Mèches / Balayage","Patine / Gloss","Lissage / Soin","Coupe Homme","Barbe","Coupe Enfant"]
     .map(n => ({ n, dc:"",dm:"",dl:"",tc:"",tm:"",tl:"" })),
     ...Array(8).fill(0).map(() => ({ n:"",dc:"",dm:"",dl:"",tc:"",tm:"",tl:"" }))],
@@ -157,23 +157,24 @@ const styles = `
 .sh-text{font-size:14px;font-weight:600;color:#fef4b0;letter-spacing:1.5px;text-transform:uppercase}
 
 /* INPUTS */
-.ir{display:flex;gap:8px;margin-bottom:5px;align-items:center}
-.row-actions{display:flex;gap:2px;opacity:0;transition:opacity 0.2s;flex-shrink:0}
+.ir{display:flex;gap:4px;margin-bottom:5px;align-items:center}
+.row-actions{display:flex;gap:0;opacity:0;transition:opacity 0.2s;flex-shrink:0}
 .ir:hover .row-actions{opacity:1}
 .row-btn{
-  border:none;background:none;cursor:pointer;padding:2px;
+  border:none;background:none;cursor:pointer;padding:1px;
   color:#795A34;transition:color 0.2s;display:flex;align-items:center;
 }
 .row-btn:hover{color:#fef4b0}
 .ifl{
-  flex:3;padding:10px 14px;border-radius:8px;
+  flex:1;min-width:0;padding:10px 12px;border-radius:8px;
   border:1px solid rgba(121,90,52,0.12);
   font-family:'Instrument Sans',sans-serif;font-size:15px;
   color:#3D2D1A;outline:none;transition:all 0.2s;background:#f4e9d6;
+  overflow:hidden;text-overflow:ellipsis;
 }
 .ifl.e{background:#f4e9d6}
 .ifa{
-  flex:0 0 30%;max-width:120px;padding:10px 14px;border-radius:8px;
+  flex:0 0 80px;padding:10px 10px;border-radius:8px;
   border:1px solid rgba(121,90,52,0.12);
   font-family:'Instrument Sans',sans-serif;font-size:15px;
   color:#3D2D1A;outline:none;transition:all 0.2s;
@@ -202,7 +203,7 @@ const styles = `
   border-radius:8px;padding:10px 14px;margin-bottom:10px;
 }
 
-.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:40px}
+.g3{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:32px}
 .g2{display:flex;gap:32px;flex-wrap:wrap}
 .g2>div{flex:1;min-width:340px}
 
@@ -311,7 +312,7 @@ input[type=number]{-moz-appearance:textfield}
 
   .sh-text{font-size:12px}
   .ifl,.ifa{font-size:14px;padding:10px 12px}
-  .ifa{flex:0 0 30%;max-width:100px}
+  .ifa{flex:0 0 80px}
   .tr{padding:10px 14px}
   .tr-l{font-size:12px}
   .tr-v{font-size:18px}
@@ -762,12 +763,12 @@ function IR({ item, idx, on, onDelete, onUp, onDown, canUp, canDown }) {
   return (
     <div className="ir">
       <div className="row-actions">
-        <button className="row-btn" onClick={onUp} disabled={!canUp} style={{ opacity: canUp ? 1 : 0.2 }}><ChevronUp size={14} /></button>
-        <button className="row-btn" onClick={onDown} disabled={!canDown} style={{ opacity: canDown ? 1 : 0.2 }}><ChevronDown size={14} /></button>
+        <button className="row-btn" onClick={onUp} disabled={!canUp} style={{ opacity: canUp ? 1 : 0.2 }}><ChevronUp size={12} /></button>
+        <button className="row-btn" onClick={onDown} disabled={!canDown} style={{ opacity: canDown ? 1 : 0.2 }}><ChevronDown size={12} /></button>
       </div>
       <input className={`ifl${h ? "" : " e"}`} value={item.label} onChange={e => on(idx, "label", e.target.value)} placeholder="Libellé..." />
       <input className={`ifa${h ? "" : " e"}`} value={item.montant} onChange={e => on(idx, "montant", e.target.value)} placeholder="0" type="number" min="0" onWheel={e => e.target.blur()} />
-      <button className="row-btn" onClick={onDelete} style={{ opacity: h ? 0.5 : 0.2 }}><X size={14} /></button>
+      <button className="row-btn" onClick={onDelete} style={{ opacity: h ? 0.5 : 0.2 }}><X size={12} /></button>
     </div>
   );
 }
@@ -1020,7 +1021,7 @@ function Sal({ data, on }) {
         {[["fixes", "Dépenses fixes", data.fixes, ShieldCheck], ["variables", "Dépenses variables", data.variables, Receipt], ["epargnes", "Épargnes", data.epargnes, PiggyBank]].map(([k, title, items, icon]) => (
           <div key={k}>
             <div className="sh"><SectionIcon icon={icon} /><div className="sh-text">{title}</div></div>
-            <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px 0 40px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
+            <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 20px 0 34px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
             {items.map((item, i) => <IR key={i} item={item} idx={i} on={(j, f, v) => up(k, j, f, v)} onDelete={() => delRow(k, i)} onUp={() => moveRow(k, i, -1)} onDown={() => moveRow(k, i, 1)} canUp={i > 0} canDown={i < items.length - 1} />)}
             <AddRow onClick={() => addRow(k)} />
             <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(items))}</span></div>
@@ -1064,21 +1065,21 @@ function Pro({ data, on, sal }) {
       <div className="g3">
         <div>
           <div className="sh"><SectionIcon icon={ShieldCheck} /><div className="sh-text">Dépenses fixes</div></div>
-          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px 0 40px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
+          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 20px 0 34px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
           {data.fixes.map((x, i) => <IR key={i} {...irProps("fixes", data.fixes)(i)} />)}
           <AddRow onClick={() => addRow("fixes")} />
           <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(data.fixes))}</span></div>
         </div>
         <div>
           <div className="sh"><SectionIcon icon={Receipt} /><div className="sh-text">Dépenses variables</div></div>
-          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px 0 40px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
+          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 20px 0 34px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
           {data.variables.map((x, i) => <IR key={i} {...irProps("variables", data.variables)(i)} />)}
           <AddRow onClick={() => addRow("variables")} />
           <div className="tr"><span className="tr-l">Total</span><span className="tr-v">{fmt(sum(data.variables))}</span></div>
         </div>
         <div>
           <div className="sh"><SectionIcon icon={Receipt} /><div className="sh-text">Charges & taxes</div></div>
-          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 4px 0 40px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
+          <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 20px 0 34px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
           {data.charges.map((x, i) => <IR key={i} {...irProps("charges", data.charges)(i)} />)}
           <AddRow onClick={() => addRow("charges")} />
           <div className="tr"><span className="tr-l">Total charges</span><span className="tr-v">{fmt(sum(data.charges))}</span></div>
@@ -1118,14 +1119,18 @@ function Tar({ data, on, sal, pro, isPaid }) {
   return (
     <div className="fi">
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 28 }}>
-        {/* Row 1 */}
+        {/* Row 1: Hours first, then vacation */}
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <label style={{ color: C.light, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>Semaines de vacances / an</label>
-          <input className="pi" type="number" value={data.sv} onChange={e => uP("sv", e.target.value)} min="0" onWheel={e => e.target.blur()} />
+          <label style={{ color: data.hs > 0 ? C.light : C.redText, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
+            Heures de travail / semaine {data.hs === 0 && "*"}
+          </label>
+          <input className="pi" type="number" value={data.hs || ""} onChange={e => uP("hs", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" style={data.hs === 0 ? { border: `2px solid ${C.redText}` } : {}} />
         </div>
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <label style={{ color: C.light, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>Heures de travail / semaine</label>
-          <input className="pi" type="number" value={data.hs} onChange={e => uP("hs", e.target.value)} min="0" onWheel={e => e.target.blur()} />
+          <label style={{ color: data.sv > 0 ? C.light : C.redText, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
+            Semaines de vacances / an {data.sv === 0 && "*"}
+          </label>
+          <input className="pi" type="number" value={data.sv || ""} onChange={e => uP("sv", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" style={data.sv === 0 ? { border: `2px solid ${C.redText}` } : {}} />
         </div>
 
         {/* Row 2 */}
@@ -1149,10 +1154,17 @@ function Tar({ data, on, sal, pro, isPaid }) {
         </div>
       </div>
 
-      <div className="hint hint-y" style={{ marginBottom: 10 }}><Ico icon={Info} size={13} color={C.light} /> Plusieurs collaborateurs ? Indique le total des semaines et heures.</div>
+      {(data.hs === 0 || data.sv === 0) && (
+        <div style={{ color: C.redText, fontSize: 14, fontWeight: 600, marginBottom: 16, padding: "10px 16px", background: "rgba(181,74,58,0.08)", borderRadius: 10, border: `1px solid rgba(181,74,58,0.15)` }}>
+          Remplis tes heures de travail et tes semaines de vacances pour calculer tes tarifs
+        </div>
+      )}
 
-      <div className="hint hint-y" style={{ marginBottom: 16 }}><Ico icon={Clock} size={13} color={C.light} /> 1h = 1 · 30min = 0.5 · 45min = 0.75 · 1h30 = 1.5</div>
+      <div className="hint hint-y" style={{ marginBottom: 10 }}><Ico icon={Info} size={13} color={C.light} /> Plusieurs collaborateurs ? Indique le nombre TOTAL d'heures travaillées et de semaines de vacances.</div>
 
+      <div className="hint hint-y" style={{ marginBottom: 16 }}><Ico icon={Clock} size={13} color={C.light} /> Comment remplir les durées : 30 min = 0.5 · 45 min = 0.75 · 1h = 1 · 1h30 = 1.5 · 2h = 2</div>
+
+      {data.hs > 0 ? (
       <div style={{ overflowX: "auto" }}>
         <table className="tt">
           <thead>
@@ -1209,6 +1221,7 @@ function Tar({ data, on, sal, pro, isPaid }) {
         </table>
         <AddRow onClick={addPrestation} label="Ajouter une prestation" />
       </div>
+      ) : null}
     </div>
   );
 }
@@ -1435,15 +1448,15 @@ export default function App() {
         ))}
       </nav>
 
-      <main className="main" style={{ paddingBottom: !isPaid ? 100 : 32 }}>
+      <main className="main" style={{ paddingBottom: (!isPaid && tab === "tarifs" && tar.hs > 0 && tar.sv > 0) ? 100 : 32 }}>
         {tab === "dashboard" && <Dash sal={sal} pro={pro} tar={tar} isPaid={isPaid} />}
         {tab === "salaire" && <Sal data={sal} on={setSal} />}
         {tab === "pro" && <Pro data={pro} on={setPro} sal={sal} />}
         {tab === "tarifs" && <Tar data={tar} on={setTar} sal={sal} pro={pro} isPaid={isPaid} />}
       </main>
 
-      {/* Unlock CTA — fixed bottom bar when not paid and has data */}
-      {!isPaid && (() => {
+      {/* Unlock CTA — only on tarifs tab when both params filled */}
+      {!isPaid && tab === "tarifs" && tar.hs > 0 && tar.sv > 0 && (() => {
         const totalAny = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes) + sum(pro.fixes) + sum(pro.variables) + sum(pro.charges) + sum(pro.tresorerie);
         return totalAny > 0;
       })() && (
