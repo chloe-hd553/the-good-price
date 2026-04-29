@@ -67,6 +67,9 @@ const styles = `
   position:relative;
   font-size:16px;
   transition:background 0.4s, color 0.4s;
+  /* variables texte — surchargées en dark */
+  --tx: #3D2D1A;
+  --tx2: #553F24;
 }
 .tgp::before{
   content:'';position:fixed;inset:0;z-index:0;pointer-events:none;opacity:0.02;
@@ -74,7 +77,7 @@ const styles = `
 }
 
 /* DARK MODE */
-.tgp.dark{ background:#2C1F12; color:#f4e9d6; }
+.tgp.dark{ background:#2C1F12; color:#f4e9d6; --tx: #f4e9d6; --tx2: #f4e9d6; }
 .tgp.dark .hdr{ background:rgba(61,45,26,0.85); backdrop-filter:blur(30px); border-bottom:1px solid rgba(121,90,52,0.25); }
 .tgp.dark .hdr-name{color:#fef4b0}
 .tgp.dark .hdr-by{color:#795A34}
@@ -310,11 +313,11 @@ input[type=number]{-moz-appearance:textfield}
 .auth-link:hover{color:#3D2D1A}
 `;
 
-const Ico = ({ icon: Icon, size = 16, color = C.beige, ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
+const Ico = ({ icon: Icon, size = 16, color = "var(--tx)", ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
 
 const SectionIcon = ({ icon: Icon }) => (
   <div style={{ width: 22, height: 22, borderRadius: 6, background: `rgba(244,233,214,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-    <Icon size={12} color={C.beige} strokeWidth={2} />
+    <Icon size={12} color="var(--tx)" strokeWidth={2} />
   </div>
 );
 
@@ -445,10 +448,10 @@ function AuthPage({ onAuth }) {
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
             <div className="hdr-logo" style={{ width: 56, height: 56 }}><Scissors size={24} strokeWidth={2} /></div>
           </div>
-          <div className="hdr-name" style={{ fontSize: 28, marginBottom: 4, color: C.beige }}>The Good Price</div>
+          <div className="hdr-name" style={{ fontSize: 28, marginBottom: 4, color: "var(--tx)" }}>The Good Price</div>
           <div className="hdr-by" style={{ marginBottom: 36 }}>Your Hair Business</div>
           <div style={{ textAlign: "left" }}>
-            <div style={{ color: C.beige, fontSize: 20, fontWeight: 600, marginBottom: 4, fontFamily: "'Cormorant Garamond',serif" }}>
+            <div style={{ color: "var(--tx)", fontSize: 20, fontWeight: 600, marginBottom: 4, fontFamily: "'Cormorant Garamond',serif" }}>
               {mode === "login" ? "Connexion" : "Créer ton compte"}
             </div>
             <div style={{ color: C.light, fontSize: 14, marginBottom: 24 }}>
@@ -506,7 +509,7 @@ function WelcomePage({ onImport, onSkip }) {
           <div style={{ display: "flex", justifyContent: "center", marginBottom: 24 }}>
             <div className="hdr-logo" style={{ width: 64, height: 64 }}><Scissors size={28} strokeWidth={2} /></div>
           </div>
-          <div className="hdr-name" style={{ fontSize: 32, marginBottom: 4, color: C.beige }}>The Good Price</div>
+          <div className="hdr-name" style={{ fontSize: 32, marginBottom: 4, color: "var(--tx)" }}>The Good Price</div>
           <div className="hdr-by" style={{ marginBottom: 40 }}>Your Hair Business</div>
           <div className="tagline" style={{ fontSize: 20, marginBottom: 48, color: C.light, whiteSpace: "nowrap" }}>
             <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, transparent, ${C.light})`, display: "inline-block" }} />
@@ -514,7 +517,7 @@ function WelcomePage({ onImport, onSkip }) {
             <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, ${C.light}, transparent)`, display: "inline-block" }} />
           </div>
           <button onClick={() => fileRef.current?.click()} disabled={loading}
-            style={{ width: "100%", padding: "20px 28px", borderRadius: 16, background: "linear-gradient(160deg, rgba(61,45,26,0.8), rgba(44,31,18,0.65))", border: `1px solid rgba(121,90,52,0.2)`, cursor: "pointer", display: "flex", alignItems: "center", gap: 16, transition: "all 0.3s", marginBottom: 14, color: C.beige }}
+            style={{ width: "100%", padding: "20px 28px", borderRadius: 16, background: "linear-gradient(160deg, rgba(61,45,26,0.8), rgba(44,31,18,0.65))", border: `1px solid rgba(121,90,52,0.2)`, cursor: "pointer", display: "flex", alignItems: "center", gap: 16, transition: "all 0.3s", marginBottom: 14, color: "var(--tx)" }}
             onMouseOver={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.35)"}
             onMouseOut={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.2)"}
           >
@@ -522,14 +525,14 @@ function WelcomePage({ onImport, onSkip }) {
               <FileSpreadsheet size={22} color={C.beige} strokeWidth={1.8} />
             </div>
             <div style={{ textAlign: "left" }}>
-              <div style={{ color: C.beige, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>{loading ? "Import en cours..." : "J'ai déjà rempli l'ancienne version"}</div>
+              <div style={{ color: "var(--tx)", fontSize: 16, fontWeight: 600, marginBottom: 2 }}>{loading ? "Import en cours..." : "J'ai déjà rempli l'ancienne version"}</div>
               <div style={{ color: C.light, fontSize: 13 }}>Importe ton ancien fichier pour tout transférer automatiquement</div>
             </div>
           </button>
           <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFile} style={{ display: "none" }} />
           {error && <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "8px 12px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>{error}</div>}
           <button onClick={onSkip}
-            style={{ width: "100%", padding: "20px 28px", borderRadius: 16, background: "rgba(121,90,52,0.03)", border: `1px solid rgba(121,90,52,0.1)`, cursor: "pointer", display: "flex", alignItems: "center", gap: 16, transition: "all 0.3s", color: C.beige }}
+            style={{ width: "100%", padding: "20px 28px", borderRadius: 16, background: "rgba(121,90,52,0.03)", border: `1px solid rgba(121,90,52,0.1)`, cursor: "pointer", display: "flex", alignItems: "center", gap: 16, transition: "all 0.3s", color: "var(--tx)" }}
             onMouseOver={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.2)"}
             onMouseOut={e => e.currentTarget.style.borderColor = "rgba(121,90,52,0.1)"}
           >
@@ -537,7 +540,7 @@ function WelcomePage({ onImport, onSkip }) {
               <Plus size={22} color={C.light} strokeWidth={1.8} />
             </div>
             <div style={{ textAlign: "left" }}>
-              <div style={{ color: C.beige, fontSize: 16, fontWeight: 600, marginBottom: 2 }}>C'est ma première fois</div>
+              <div style={{ color: "var(--tx)", fontSize: 16, fontWeight: 600, marginBottom: 2 }}>C'est ma première fois</div>
               <div style={{ color: C.light, fontSize: 13 }}>Je remplis tout depuis le début</div>
             </div>
           </button>
@@ -550,7 +553,7 @@ function WelcomePage({ onImport, onSkip }) {
 function AddRow({ onClick, label = "Ajouter une ligne" }) {
   return (
     <button onClick={onClick} style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 6, width: "100%", padding: "8px 0", borderRadius: 8, marginTop: 4, marginBottom: 8, border: `1px dashed rgba(121,90,52,0.2)`, background: "transparent", color: C.light, fontSize: 13, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif", transition: "all 0.2s" }}
-      onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(244,233,214,0.25)"; e.currentTarget.style.color = C.beige; }}
+      onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(244,233,214,0.25)"; e.currentTarget.style.color = "var(--tx)"; }}
       onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.2)"; e.currentTarget.style.color = C.light; }}
     >
       <Plus size={14} strokeWidth={2} /> {label}
@@ -582,7 +585,7 @@ function Dash({ sal, pro, tar, isPaid }) {
   const pie = [{ name: "Salaire net", value: ts }, { name: "Charges fixes", value: tf }, { name: "Charges var.", value: tv }, { name: "Taxes", value: tc }, { name: "Trésorerie", value: tt }].filter(d => d.value > 0);
   const bars = tar.p.filter(p => p.n && (parseFloat(p.tc) || parseFloat(p.dc))).map(p => ({ nom: p.n, actuel: parseFloat(p.tc) || 0, minimum: p.dc ? Math.ceil(parseFloat(p.dc) * th) : 0 }));
   const hasPie = pie.length > 0;
-  const ttStyle = { background: C.dark, border: `1px solid ${C.med}`, borderRadius: 8, fontSize: 12, color: C.beige };
+  const ttStyle = { background: C.dark, border: `1px solid ${C.med}`, borderRadius: 8, fontSize: 12, color: "var(--tx)" };
 
   let totalPrix = 0, totalDurees = 0, nbSousTarif = 0;
   tar.p.forEach(p => {
@@ -659,12 +662,12 @@ function Dash({ sal, pro, tar, isPaid }) {
       {ca === 0 && (
         <div style={{ display: "flex", alignItems: "center", gap: 16, background: "rgba(244,233,214,0.04)", border: "1px solid rgba(244,233,214,0.08)", borderRadius: 14, padding: "16px 24px" }}>
           <div style={{ width: 36, height: 36, borderRadius: 10, background: "rgba(244,233,214,0.08)", display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-            <ArrowRight size={16} color={C.beige} strokeWidth={2} />
+            <ArrowRight size={16} color="var(--tx)" strokeWidth={2} />
           </div>
           <div>
-            <div style={{ color: C.beige, fontSize: 15, fontWeight: 600, marginBottom: 2 }}>Par où commencer ?</div>
+            <div style={{ color: "var(--tx)", fontSize: 15, fontWeight: 600, marginBottom: 2 }}>Par où commencer ?</div>
             <div style={{ color: C.light, fontSize: 12 }}>
-              Commence par l'onglet <strong style={{ color: C.beige }}>Mon Salaire</strong> pour définir tes besoins perso, puis <strong style={{ color: C.beige }}>Mon CA Pro</strong> pour tes charges. Tes tarifs se calculeront automatiquement.
+              Commence par l'onglet <strong style={{ color: "var(--tx)" }}>Mon Salaire</strong> pour définir tes besoins perso, puis <strong style={{ color: "var(--tx)" }}>Mon CA Pro</strong> pour tes charges. Tes tarifs se calculeront automatiquement.
             </div>
           </div>
         </div>
@@ -673,33 +676,33 @@ function Dash({ sal, pro, tar, isPaid }) {
       <div className="g2">
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="gc">
-            <div style={{ color: C.beige, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: "var(--tx)", fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={TrendingUp} /> Répartition de ton CA mensuel
             </div>
             {[{ l: "Ton salaire net", v: ts, icon: Wallet }, { l: "Charges fixes pro", v: tf, icon: ShieldCheck }, { l: "Charges variables", v: tv, icon: Receipt }, { l: "Charges & taxes", v: tc, icon: Receipt }, { l: "Trésorerie", v: tt, icon: Vault }].map((r, i) => (
               <div className="bk" key={i}>
-                <span style={{ color: C.beige, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}><Ico icon={r.icon} size={13} color={C.light} /> {r.l}</span>
+                <span style={{ color: "var(--tx)", fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}><Ico icon={r.icon} size={13} color={C.light} /> {r.l}</span>
                 <div style={{ display: "flex", gap: 18 }}>
-                  <span style={{ color: C.beige, fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(r.v)}</span>
+                  <span style={{ color: "var(--tx)", fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(r.v)}</span>
                   <span style={{ color: C.light, fontSize: 14, width: 40, textAlign: "right" }}>{ca > 0 ? `${Math.round(r.v / ca * 100)}%` : "—"}</span>
                 </div>
               </div>
             ))}
             <div className="dv" />
             <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 4px 0" }}>
-              <span style={{ color: C.beige, fontSize: 15, fontWeight: 600 }}>Total CA mensuel</span>
-              <span style={{ color: C.beige, fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ca)}</span>
+              <span style={{ color: "var(--tx)", fontSize: 15, fontWeight: 600 }}>Total CA mensuel</span>
+              <span style={{ color: "var(--tx)", fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ca)}</span>
             </div>
           </div>
 
           <div className="gc">
-            <div style={{ color: C.beige, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: "var(--tx)", fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={Clock} /> Ton temps de travail
             </div>
             {[{ l: "Heures / semaine", v: tar.hs || 0 }, { l: "Semaines travaillées", v: sw }, { l: "Heures totales / an", v: ha }, { l: "Semaines de vacances", v: tar.sv || 0 }].map((r, i) => (
               <div className="bk" key={i}>
-                <span style={{ color: C.beige, fontSize: 15 }}>{r.l}</span>
-                <span style={{ color: C.beige, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 15 }}>{r.v}</span>
+                <span style={{ color: "var(--tx)", fontSize: 15 }}>{r.l}</span>
+                <span style={{ color: "var(--tx)", fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 15 }}>{r.v}</span>
               </div>
             ))}
           </div>
@@ -707,7 +710,7 @@ function Dash({ sal, pro, tar, isPaid }) {
 
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="gc">
-            <div style={{ color: C.beige, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: "var(--tx)", fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={TrendingUp} /> Où part ton CA ?
             </div>
             {hasPie ? (
@@ -718,25 +721,25 @@ function Dash({ sal, pro, tar, isPaid }) {
                     {pie.map((_, i) => <Cell key={i} fill={PIE[i % PIE.length]} />)}
                   </Pie>
                   <Tooltip formatter={v => fmt(v)} contentStyle={ttStyle} />
-                  <Legend wrapperStyle={{ fontSize: 11, color: C.beige }} />
+                  <Legend wrapperStyle={{ fontSize: 11, color: "var(--tx)" }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : <GhostDonut />}
           </div>
 
           <div className="gc">
-            <div style={{ color: C.beige, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: "var(--tx)", fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={BarChart3} /> Tarifs actuels vs sur mesure
             </div>
             {bars.length > 0 ? (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={bars}>
-                  <XAxis dataKey="nom" tick={{ fill: C.beige, fontSize: 9 }} angle={-15} textAnchor="end" height={55} axisLine={{ stroke: C.med }} tickLine={{ stroke: C.med }} />
+                  <XAxis dataKey="nom" tick={{ fill: "#553F24", fontSize: 9 }} angle={-15} textAnchor="end" height={55} axisLine={{ stroke: C.med }} tickLine={{ stroke: C.med }} />
                   <YAxis tick={{ fill: C.light, fontSize: 11 }} axisLine={{ stroke: C.med }} tickLine={{ stroke: C.med }} />
                   <Tooltip formatter={v => fmt(v)} contentStyle={ttStyle} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Bar dataKey="actuel" name="Actuel" fill={C.light} radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="minimum" name="Sur mesure" fill={C.beige} radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="minimum" name="Sur mesure" fill="#a08060" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : <GhostBars />}
@@ -804,7 +807,7 @@ function Pro({ data, on, sal }) {
       </div>
       <div className="sa">
         <span style={{ color: C.light, fontWeight: 500, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}><Ico icon={Wallet} size={15} color={C.light} /> Salaire / Rémunération (auto)</span>
-        <span style={{ color: C.beige, fontWeight: 700, fontSize: 17, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ts)}</span>
+        <span style={{ color: "var(--tx)", fontWeight: 700, fontSize: 17, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ts)}</span>
       </div>
       <div className="g3">
         <div>
@@ -830,7 +833,7 @@ function Pro({ data, on, sal }) {
           <div style={{ marginTop: 16 }}>
             <div className="sh"><SectionIcon icon={Vault} /><div className="sh-text">Trésorerie</div></div>
             <div className="tw">
-              <div style={{ color: C.beige, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}><Ico icon={AlertTriangle} size={13} color={C.light} /> Montant à ALLOUER chaque mois</div>
+              <div style={{ color: "var(--tx)", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}><Ico icon={AlertTriangle} size={13} color={C.light} /> Montant à ALLOUER chaque mois</div>
               <div style={{ color: C.light, fontSize: 10, fontStyle: "italic", marginTop: 2 }}>Ce n'est PAS ton solde actuel, mais ce que tu VEUX mettre de côté</div>
             </div>
             {data.tresorerie.map((x, i) => <IR key={i} {...irProps("tresorerie", data.tresorerie)(i)} />)}
@@ -872,11 +875,11 @@ function Tar({ data, on, sal, pro, isPaid }) {
         </div>
         <div className="gc" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ color: C.light, fontSize: 14, fontWeight: 500 }}>CA Annuel</span>
-          <span style={{ color: C.beige, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(caA)}</span>
+          <span style={{ color: "var(--tx)", fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(caA)}</span>
         </div>
         <div className="gc" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ color: C.light, fontSize: 14, fontWeight: 500 }}>CA Mensuel</span>
-          <span style={{ color: C.beige, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(ca)}</span>
+          <span style={{ color: "var(--tx)", fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(ca)}</span>
         </div>
         {/* Taux horaire badge — yellow conservé : chiffre clé unique */}
         <div className="tb" style={{ gridColumn: "1 / -1" }}>
@@ -1078,10 +1081,10 @@ export default function App() {
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           {[
-            { icon: theme === "dark" ? <Sun size={13} strokeWidth={2} /> : <Moon size={13} strokeWidth={2} />, onClick: toggleTheme, title: theme === "dark" ? "Mode clair" : "Mode sombre", hoverBorder: "rgba(244,233,214,0.2)", hoverColor: C.beige },
-            { icon: <><Upload size={13} strokeWidth={2} /> Importer</>, onClick: () => importRef.current?.click(), title: "Importer depuis l'ancienne version", hoverBorder: "rgba(244,233,214,0.2)", hoverColor: C.beige },
+            { icon: theme === "dark" ? <Sun size={13} strokeWidth={2} /> : <Moon size={13} strokeWidth={2} />, onClick: toggleTheme, title: theme === "dark" ? "Mode clair" : "Mode sombre", hoverBorder: "rgba(244,233,214,0.2)", hoverColor: "var(--tx)" },
+            { icon: <><Upload size={13} strokeWidth={2} /> Importer</>, onClick: () => importRef.current?.click(), title: "Importer depuis l'ancienne version", hoverBorder: "rgba(244,233,214,0.2)", hoverColor: "var(--tx)" },
             { icon: <><RotateCcw size={13} strokeWidth={2} /> Réinitialiser</>, onClick: handleReset, title: "Repartir à zéro", hoverBorder: "rgba(181,74,58,0.3)", hoverColor: C.redText },
-            { icon: <LogOut size={13} strokeWidth={2} />, onClick: handleLogout, title: "Se déconnecter", hoverBorder: "rgba(121,90,52,0.25)", hoverColor: C.beige },
+            { icon: <LogOut size={13} strokeWidth={2} />, onClick: handleLogout, title: "Se déconnecter", hoverBorder: "rgba(121,90,52,0.25)", hoverColor: "var(--tx)" },
           ].map((btn, i) => (
             <button key={i} onClick={btn.onClick} title={btn.title}
               style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 20, border: `1px solid rgba(121,90,52,0.15)`, background: "rgba(121,90,52,0.06)", color: C.light, fontSize: 12, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif", transition: "all 0.3s" }}
@@ -1093,7 +1096,7 @@ export default function App() {
           ))}
           <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleHeaderImport} style={{ display: "none" }} />
           <div className={`hdr-save${sv ? " on" : ""}`}>
-            {sv ? <><Ico icon={Save} size={13} color={C.beige} /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
+            {sv ? <><Ico icon={Save} size={13} color="var(--tx)" /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
           </div>
         </div>
       </header>
