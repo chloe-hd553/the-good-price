@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Scissors, LayoutDashboard, Wallet, Briefcase, Crosshair, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw, Lock, LogOut, Mail, KeyRound, Eye, EyeOff, Sun, Moon } from "lucide-react";
+import { Scissors, LayoutDashboard, Wallet, Briefcase, Crosshair, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw, Lock, LogOut, Mail, KeyRound, Eye, EyeOff, Sun, Moon, User, MessageSquare, Download, Send, Paperclip, CreditCard, RefreshCw } from "lucide-react";
 import * as XLSX from "xlsx";
 import { supabase } from "./supabase.js";
 
@@ -310,7 +310,99 @@ input[type=number]{-moz-appearance:textfield}
 .auth-btn:hover{opacity:0.9}
 .auth-btn:disabled{opacity:0.5;cursor:not-allowed}
 .auth-link{color:#795A34;font-size:14px;cursor:pointer;border:none;background:none;font-family:'Instrument Sans',sans-serif;text-decoration:underline;transition:color 0.2s;}
-.auth-link:hover{color:#3D2D1A}
+/* ── USER MENU ── */
+.um-avatar{
+  width:36px;height:36px;border-radius:50%;
+  background:linear-gradient(145deg,#795A34,#553F24);
+  border:2px solid rgba(121,90,52,0.3);
+  display:flex;align-items:center;justify-content:center;
+  font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:700;
+  color:#fef4b0;cursor:pointer;transition:all 0.25s;
+  box-shadow:0 2px 8px rgba(121,90,52,0.2);
+}
+.um-avatar:hover{box-shadow:0 4px 14px rgba(121,90,52,0.35);transform:scale(1.05)}
+.um-drop{
+  position:absolute;top:calc(100% + 10px);right:0;z-index:200;
+  background:#FBF5EC;border:1px solid rgba(121,90,52,0.15);
+  border-radius:14px;padding:6px;min-width:200px;
+  box-shadow:0 8px 32px rgba(121,90,52,0.15),0 2px 8px rgba(0,0,0,0.06);
+}
+.tgp.dark .um-drop{background:#3D2D1A;border-color:rgba(121,90,52,0.25);box-shadow:0 8px 32px rgba(0,0,0,0.35)}
+.um-email{padding:10px 14px 8px;font-size:12px;color:#795A34;border-bottom:1px solid rgba(121,90,52,0.12);margin-bottom:4px;word-break:break-all;font-style:italic}
+.tgp.dark .um-email{color:#795A34}
+.um-item{
+  display:flex;align-items:center;gap:10px;width:100%;padding:10px 14px;
+  border:none;background:none;border-radius:9px;cursor:pointer;
+  font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:500;
+  color:#3D2D1A;transition:all 0.18s;text-align:left;
+}
+.um-item:hover{background:rgba(121,90,52,0.1);color:#553F24}
+.tgp.dark .um-item{color:#f4e9d6}
+.tgp.dark .um-item:hover{background:rgba(121,90,52,0.2);color:#f4e9d6}
+.um-sep{height:1px;background:rgba(121,90,52,0.12);margin:4px 0}
+.um-item.danger{color:#B54A3A}
+.um-item.danger:hover{background:rgba(181,74,58,0.08);color:#B54A3A}
+
+/* ── MODAL BASE ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(61,45,26,0.4);backdrop-filter:blur(6px);
+  display:flex;align-items:center;justify-content:center;padding:24px;
+}
+.modal-box{
+  background:#FBF5EC;border-radius:20px;padding:32px;
+  max-width:520px;width:100%;max-height:88vh;overflow-y:auto;
+  box-shadow:0 24px 64px rgba(61,45,26,0.2);
+  border:1px solid rgba(121,90,52,0.12);
+  position:relative;
+}
+.tgp.dark .modal-box{background:#3D2D1A;border-color:rgba(121,90,52,0.25)}
+.modal-title{
+  font-family:'Cormorant Garamond',serif;font-size:22px;font-weight:600;
+  color:#3D2D1A;margin-bottom:24px;display:flex;align-items:center;gap:10px;
+}
+.tgp.dark .modal-title{color:#f4e9d6}
+.modal-close{
+  position:absolute;top:20px;right:20px;
+  background:none;border:none;cursor:pointer;
+  color:#795A34;padding:6px;border-radius:8px;transition:all 0.2s;
+}
+.modal-close:hover{background:rgba(121,90,52,0.1);color:#3D2D1A}
+.tgp.dark .modal-close:hover{background:rgba(121,90,52,0.2);color:#f4e9d6}
+
+/* ── MODAL FIELDS ── */
+.mf-label{font-size:12px;font-weight:600;color:#795A34;letter-spacing:1.5px;text-transform:uppercase;margin-bottom:6px;display:block}
+.mf-val{font-size:15px;font-weight:500;color:#3D2D1A;margin-bottom:20px}
+.tgp.dark .mf-val{color:#f4e9d6}
+.mf-input{width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(121,90,52,0.2);background:#fff;color:#3D2D1A;font-family:'Instrument Sans',sans-serif;font-size:15px;outline:none;transition:all 0.2s;resize:vertical;}
+.tgp.dark .mf-input{background:rgba(61,45,26,0.5);color:#f4e9d6;border-color:rgba(121,90,52,0.3)}
+.mf-input:focus{border-color:#795A34;box-shadow:0 0 0 3px rgba(121,90,52,0.1)}
+.mf-input::placeholder{color:rgba(121,90,52,0.4)}
+.mf-select{width:100%;padding:12px 14px;border-radius:10px;border:1px solid rgba(121,90,52,0.2);background:#fff;color:#3D2D1A;font-family:'Instrument Sans',sans-serif;font-size:15px;outline:none;transition:all 0.2s;appearance:none;cursor:pointer;}
+.tgp.dark .mf-select{background:rgba(61,45,26,0.5);color:#f4e9d6;border-color:rgba(121,90,52,0.3)}
+.mf-select:focus{border-color:#795A34;box-shadow:0 0 0 3px rgba(121,90,52,0.1)}
+.mf-btn{
+  display:flex;align-items:center;gap:8px;padding:11px 20px;border-radius:10px;border:none;
+  font-family:'Instrument Sans',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all 0.2s;
+}
+.mf-btn.primary{background:#553F24;color:#f4e9d6}
+.mf-btn.primary:hover{background:#3D2D1A}
+.mf-btn.primary:disabled{opacity:0.5;cursor:not-allowed}
+.mf-btn.ghost{background:rgba(121,90,52,0.08);color:#553F24}
+.mf-btn.ghost:hover{background:rgba(121,90,52,0.15)}
+.mf-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.mf-badge{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:5px 12px;border-radius:20px;font-size:12px;font-weight:600;
+}
+.mf-badge.active{background:#2D3B28;color:#B8DEAB}
+.mf-badge.inactive{background:#3D2519;color:#F4B8A8}
+.mf-sep{height:1px;background:rgba(121,90,52,0.12);margin:20px 0}
+.mf-msg-ok{color:#2D5A25;font-size:13px;padding:8px 12px;background:rgba(45,90,37,0.08);border-radius:8px;margin-top:8px}
+.mf-msg-err{color:#8B2A1C;font-size:13px;padding:8px 12px;background:rgba(139,42,28,0.08);border-radius:8px;margin-top:8px}
+.mf-files{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
+.mf-file-tag{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;background:rgba(121,90,52,0.1);font-size:12px;color:#553F24;font-weight:500}
+.tgp.dark .mf-file-tag{background:rgba(121,90,52,0.2);color:#f4e9d6}
 `;
 
 const Ico = ({ icon: Icon, size = 16, color = "var(--tx)", ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
@@ -973,6 +1065,335 @@ function Tar({ data, on, sal, pro, isPaid }) {
   );
 }
 
+/* ── MODAL BASE ── */
+function Modal({ onClose, title, icon: Icon, children }) {
+  useEffect(() => {
+    const esc = (e) => { if (e.key === "Escape") onClose(); };
+    document.addEventListener("keydown", esc);
+    return () => document.removeEventListener("keydown", esc);
+  }, [onClose]);
+  return (
+    <div className="modal-overlay" onClick={e => { if (e.target === e.currentTarget) onClose(); }}>
+      <div className="modal-box">
+        <button className="modal-close" onClick={onClose}><X size={18} /></button>
+        <div className="modal-title">
+          {Icon && <Icon size={20} color="#795A34" strokeWidth={1.8} />}
+          {title}
+        </div>
+        {children}
+      </div>
+    </div>
+  );
+}
+
+/* ── MON COMPTE MODAL ── */
+function MonCompteModal({ user, isPaid, expiresAt, onClose, onLogout }) {
+  const [pwMode, setPwMode] = useState(false);
+  const [newPw, setNewPw] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [pwMsg, setPwMsg] = useState(null);
+  const [pwLoading, setPwLoading] = useState(false);
+
+  const handlePw = async () => {
+    if (newPw.length < 6) { setPwMsg({ ok: false, txt: "Minimum 6 caractères." }); return; }
+    setPwLoading(true); setPwMsg(null);
+    const { error } = await supabase.auth.updateUser({ password: newPw });
+    if (error) setPwMsg({ ok: false, txt: "Erreur : " + error.message });
+    else { setPwMsg({ ok: true, txt: "Mot de passe mis à jour !" }); setNewPw(""); setPwMode(false); }
+    setPwLoading(false);
+  };
+
+  const expDate = expiresAt ? new Date(expiresAt).toLocaleDateString("fr-FR", { day: "2-digit", month: "long", year: "numeric" }) : null;
+  const isActive = isPaid && (!expiresAt || new Date(expiresAt) > new Date());
+
+  return (
+    <Modal onClose={onClose} title="Mon compte" icon={User}>
+      {/* Email */}
+      <span className="mf-label">Adresse email</span>
+      <div className="mf-val" style={{ fontFamily: "'Instrument Sans',sans-serif" }}>{user?.email}</div>
+
+      {/* Abonnement */}
+      <span className="mf-label">Abonnement</span>
+      <div className="mf-row" style={{ marginBottom: 20 }}>
+        <span className={`mf-badge ${isActive ? "active" : "inactive"}`}>
+          {isActive ? <><Check size={12} /> Actif</> : <><Lock size={12} /> Inactif</>}
+        </span>
+        {isActive && expDate && (
+          <span style={{ fontSize: 13, color: "#795A34" }}>Expire le {expDate}</span>
+        )}
+        {!isActive && (
+          <span style={{ fontSize: 13, color: "#795A34" }}>Accès limité — tarifs sur mesure verrouillés</span>
+        )}
+      </div>
+
+      {/* Gérer le paiement */}
+      {isActive && (
+        <>
+          <span className="mf-label">Paiement</span>
+          <div style={{ marginBottom: 20 }}>
+            <button
+              className="mf-btn ghost"
+              onClick={() => window.open("https://billing.stripe.com/p/login/YOUR_STRIPE_PORTAL", "_blank")}
+            >
+              <CreditCard size={15} /> Gérer mon abonnement
+            </button>
+            <div style={{ fontSize: 12, color: "#795A34", marginTop: 6, fontStyle: "italic" }}>
+              Changer de moyen de paiement · Annuler · Voir mes factures
+            </div>
+          </div>
+        </>
+      )}
+
+      <div className="mf-sep" />
+
+      {/* Mot de passe */}
+      <span className="mf-label">Sécurité</span>
+      {!pwMode ? (
+        <button className="mf-btn ghost" onClick={() => setPwMode(true)} style={{ marginBottom: 20 }}>
+          <KeyRound size={15} /> Changer mon mot de passe
+        </button>
+      ) : (
+        <div style={{ marginBottom: 20 }}>
+          <div style={{ position: "relative", marginBottom: 8 }}>
+            <input
+              className="mf-input" type={showPw ? "text" : "password"}
+              placeholder="Nouveau mot de passe (6 car. min)"
+              value={newPw} onChange={e => setNewPw(e.target.value)}
+              style={{ paddingRight: 40 }}
+            />
+            <button onClick={() => setShowPw(!showPw)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4 }}>
+              {showPw ? <EyeOff size={15} color="#795A34" /> : <Eye size={15} color="#795A34" />}
+            </button>
+          </div>
+          <div className="mf-row">
+            <button className="mf-btn primary" onClick={handlePw} disabled={pwLoading}>
+              <Check size={14} /> {pwLoading ? "Mise à jour..." : "Valider"}
+            </button>
+            <button className="mf-btn ghost" onClick={() => { setPwMode(false); setNewPw(""); setPwMsg(null); }}>Annuler</button>
+          </div>
+          {pwMsg && <div className={pwMsg.ok ? "mf-msg-ok" : "mf-msg-err"}>{pwMsg.txt}</div>}
+        </div>
+      )}
+
+      <div className="mf-sep" />
+
+      {/* Déconnexion */}
+      <button className="mf-btn" onClick={onLogout} style={{ background: "rgba(181,74,58,0.08)", color: "#B54A3A", gap: 8 }}>
+        <LogOut size={15} /> Se déconnecter
+      </button>
+    </Modal>
+  );
+}
+
+/* ── CONTACT MODAL ── */
+function ContactModal({ user, onClose }) {
+  const [subject, setSubject] = useState("");
+  const [message, setMessage] = useState("");
+  const [files, setFiles] = useState([]);
+  const [status, setStatus] = useState(null); // null | "sending" | "ok" | "err"
+  const fileRef = useRef(null);
+
+  const SUBJECTS = [
+    "Question sur mon abonnement",
+    "Problème technique",
+    "Je n'arrive pas à utiliser une fonctionnalité",
+    "Demande d'amélioration",
+    "Autre",
+  ];
+
+  const handleFiles = (e) => {
+    const picked = Array.from(e.target.files || []);
+    setFiles(prev => [...prev, ...picked].slice(0, 5));
+    e.target.value = "";
+  };
+
+  const removeFile = (i) => setFiles(prev => prev.filter((_, j) => j !== i));
+
+  const handleSend = async () => {
+    if (!subject || !message.trim()) return;
+    setStatus("sending");
+    try {
+      const fd = new FormData();
+      fd.append("_subject", `[The Good Price] ${subject}`);
+      fd.append("_replyto", user?.email || "");
+      fd.append("_autoresponse", `Bonjour !\n\nJ'ai bien reçu ta demande et je te répondrai dès que possible.\n\nÀ très vite !\nChloé — Your Hair Business`);
+      fd.append("email_utilisateur", user?.email || "");
+      fd.append("objet", subject);
+      fd.append("message", message);
+      files.forEach(f => fd.append("fichier[]", f));
+
+      const res = await fetch("https://formsubmit.co/ajax/hello.chezchloe@outlook.com", {
+        method: "POST",
+        headers: { Accept: "application/json" },
+        body: fd,
+      });
+
+      const data = await res.json().catch(() => ({}));
+      if (res.ok && data.success !== "false") setStatus("ok");
+      else setStatus("err");
+    } catch {
+      setStatus("err");
+    }
+  };
+
+  if (status === "ok") {
+    return (
+      <Modal onClose={onClose} title="Message envoyé" icon={Check}>
+        <div style={{ textAlign: "center", padding: "16px 0" }}>
+          <div style={{ width: 56, height: 56, borderRadius: "50%", background: "rgba(45,90,37,0.1)", display: "flex", alignItems: "center", justifyContent: "center", margin: "0 auto 16px" }}>
+            <Check size={28} color="#2D5A25" strokeWidth={2} />
+          </div>
+          <div style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 20, fontWeight: 600, color: "var(--tx)", marginBottom: 10 }}>
+            Ton message a bien été envoyé !
+          </div>
+          <div style={{ color: "#795A34", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+            Je te répondrai dès que possible à <strong>{user?.email}</strong>.<br />
+            Pense à vérifier tes spams si tu ne reçois pas de réponse rapidement.
+          </div>
+          <button className="mf-btn primary" onClick={onClose} style={{ margin: "0 auto" }}>
+            Fermer
+          </button>
+        </div>
+      </Modal>
+    );
+  }
+
+  return (
+    <Modal onClose={onClose} title="Nous contacter" icon={MessageSquare}>
+      {/* Objet */}
+      <span className="mf-label" style={{ display: "block", marginBottom: 6 }}>Objet de ta demande *</span>
+      <div style={{ position: "relative", marginBottom: 18 }}>
+        <select
+          className="mf-select"
+          value={subject}
+          onChange={e => setSubject(e.target.value)}
+        >
+          <option value="">Sélectionne un objet...</option>
+          {SUBJECTS.map(s => <option key={s} value={s}>{s}</option>)}
+        </select>
+        <ChevronDown size={15} color="#795A34" style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", pointerEvents: "none" }} />
+      </div>
+
+      {/* Message */}
+      <span className="mf-label" style={{ display: "block", marginBottom: 6 }}>Ton message *</span>
+      <textarea
+        className="mf-input"
+        rows={5}
+        placeholder="Décris ta demande en détail..."
+        value={message}
+        onChange={e => setMessage(e.target.value)}
+        style={{ marginBottom: 18 }}
+      />
+
+      {/* Fichiers */}
+      <span className="mf-label" style={{ display: "block", marginBottom: 6 }}>Fichiers joints <span style={{ fontWeight: 400, textTransform: "none", letterSpacing: 0 }}>(optionnel, max 5)</span></span>
+      <div className="mf-row" style={{ marginBottom: files.length > 0 ? 8 : 18 }}>
+        <button
+          className="mf-btn ghost"
+          onClick={() => fileRef.current?.click()}
+          disabled={files.length >= 5}
+        >
+          <Paperclip size={14} /> Ajouter un fichier
+        </button>
+        <span style={{ fontSize: 12, color: "#795A34" }}>{files.length}/5</span>
+      </div>
+      <input ref={fileRef} type="file" multiple onChange={handleFiles} style={{ display: "none" }} />
+      {files.length > 0 && (
+        <div className="mf-files" style={{ marginBottom: 18 }}>
+          {files.map((f, i) => (
+            <span key={i} className="mf-file-tag">
+              <Paperclip size={10} /> {f.name.length > 22 ? f.name.slice(0, 20) + "…" : f.name}
+              <button onClick={() => removeFile(i)} style={{ background: "none", border: "none", cursor: "pointer", padding: 0, display: "flex", lineHeight: 1 }}>
+                <X size={11} color="#795A34" />
+              </button>
+            </span>
+          ))}
+        </div>
+      )}
+
+      {status === "err" && (
+        <div className="mf-msg-err" style={{ marginBottom: 16 }}>
+          Une erreur est survenue. Réessaie ou écris-moi directement à hello.chezchloe@outlook.com
+        </div>
+      )}
+
+      <div className="mf-row">
+        <button
+          className="mf-btn primary"
+          onClick={handleSend}
+          disabled={!subject || !message.trim() || status === "sending"}
+        >
+          <Send size={14} /> {status === "sending" ? "Envoi..." : "Envoyer"}
+        </button>
+        <span style={{ fontSize: 12, color: "#795A34" }}>* Champs obligatoires</span>
+      </div>
+    </Modal>
+  );
+}
+
+/* ── USER MENU ── */
+function UserMenu({ user, isPaid, expiresAt, onLogout, onExport, sal, pro, tar }) {
+  const [open, setOpen] = useState(false);
+  const [modal, setModal] = useState(null);
+  const ref = useRef(null);
+
+  // Initiales depuis l'email
+  const parts = (user?.email || "").split("@")[0].split(/[._-]/);
+  const initials = parts.length >= 2
+    ? (parts[0][0] + parts[1][0]).toUpperCase()
+    : (user?.email || "??").slice(0, 2).toUpperCase();
+
+  useEffect(() => {
+    const h = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false); };
+    document.addEventListener("mousedown", h);
+    return () => document.removeEventListener("mousedown", h);
+  }, []);
+
+  const open_ = (m) => { setModal(m); setOpen(false); };
+
+  const menuItems = [
+    { icon: User, label: "Mon compte", onClick: () => open_("compte") },
+    { icon: MessageSquare, label: "Contacter Chloé", onClick: () => open_("contact") },
+    { icon: Download, label: "Exporter mes données", onClick: () => { onExport(); setOpen(false); } },
+  ];
+
+  return (
+    <div ref={ref} style={{ position: "relative" }}>
+      <button className="um-avatar" onClick={() => setOpen(!open)} title="Mon compte">
+        {initials}
+      </button>
+
+      {open && (
+        <div className="um-drop">
+          <div className="um-email">{user?.email}</div>
+          {menuItems.map((item, i) => (
+            <button key={i} className="um-item" onClick={item.onClick}>
+              <item.icon size={15} color="#795A34" strokeWidth={1.8} />
+              {item.label}
+            </button>
+          ))}
+          <div className="um-sep" />
+          <button className="um-item danger" onClick={() => { onLogout(); setOpen(false); }}>
+            <LogOut size={15} color="#B54A3A" strokeWidth={1.8} />
+            Se déconnecter
+          </button>
+        </div>
+      )}
+
+      {modal === "compte" && (
+        <MonCompteModal
+          user={user} isPaid={isPaid} expiresAt={expiresAt}
+          onClose={() => setModal(null)}
+          onLogout={() => { setModal(null); onLogout(); }}
+        />
+      )}
+      {modal === "contact" && (
+        <ContactModal user={user} onClose={() => setModal(null)} />
+      )}
+    </div>
+  );
+}
+
 export default function App() {
   const [tab, setTab] = useState("dashboard");
   const [sal, setSal] = useState(dSal);
@@ -984,6 +1405,7 @@ export default function App() {
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
   const [isPaid, setIsPaid] = useState(false);
+  const [expiresAt, setExpiresAt] = useState(null);
   const [theme, setTheme] = useState(() => localStorage.getItem("tgp-theme") || "light");
   const importRef = useRef(null);
 
@@ -1003,8 +1425,10 @@ export default function App() {
           if (data.pro) setPro(data.pro);
           if (data.tar) setTar(data.tar);
           setStarted(true);
-          if (data.paid && data.expires_at) { setIsPaid(new Date(data.expires_at) > new Date()); }
-          else { setIsPaid(data.paid || false); }
+          if (data.paid && data.expires_at) {
+            setIsPaid(new Date(data.expires_at) > new Date());
+            setExpiresAt(data.expires_at);
+          } else { setIsPaid(data.paid || false); }
         }
       } catch {}
       setOk(true);
@@ -1044,6 +1468,27 @@ export default function App() {
 
   const toggleTheme = () => { const next = theme === "dark" ? "light" : "dark"; setTheme(next); localStorage.setItem("tgp-theme", next); };
 
+  const handleExport = () => {
+    const wb = XLSX.utils.book_new();
+    const toRows = (arr) => arr.map(r => [r.label, parseFloat(r.montant) || 0]);
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Libellé","Montant"],
+      ["── FIXES ──",""], ...toRows(sal.fixes),
+      ["── VARIABLES ──",""], ...toRows(sal.variables),
+      ["── ÉPARGNES ──",""], ...toRows(sal.epargnes),
+    ]), "Mon Salaire");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Libellé","Montant"],
+      ["── FIXES ──",""], ...toRows(pro.fixes),
+      ["── VARIABLES ──",""], ...toRows(pro.variables),
+      ["── CHARGES ──",""], ...toRows(pro.charges),
+      ["── TRÉSORERIE ──",""], ...toRows(pro.tresorerie),
+    ]), "Mon CA Pro");
+    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
+      ["Prestation","Durée courte","Durée moy.","Durée longue","Tarif courte","Tarif moy.","Tarif longue"],
+      ...tar.p.filter(p => p.n).map(p => [p.n, p.dc, p.dm, p.dl, p.tc, p.tm, p.tl]),
+    ]), "Mes Tarifs");
+    XLSX.writeFile(wb, "The_Good_Price_mes_donnees.xlsx");
+  };
+
   const handleLogout = async () => {
     await supabase.auth.signOut(); setUser(null);
     setSal(JSON.parse(JSON.stringify(dSal))); setPro(JSON.parse(JSON.stringify(dPro))); setTar(JSON.parse(JSON.stringify(dTar)));
@@ -1079,12 +1524,11 @@ export default function App() {
             <div className="hdr-by">Your Hair Business</div>
           </div>
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
           {[
-            { icon: theme === "dark" ? <Sun size={13} strokeWidth={2} /> : <Moon size={13} strokeWidth={2} />, onClick: toggleTheme, title: theme === "dark" ? "Mode clair" : "Mode sombre", hoverBorder: "rgba(244,233,214,0.2)", hoverColor: "var(--tx)" },
-            { icon: <><Upload size={13} strokeWidth={2} /> Importer</>, onClick: () => importRef.current?.click(), title: "Importer depuis l'ancienne version", hoverBorder: "rgba(244,233,214,0.2)", hoverColor: "var(--tx)" },
+            { icon: theme === "dark" ? <Sun size={13} strokeWidth={2} /> : <Moon size={13} strokeWidth={2} />, onClick: toggleTheme, title: theme === "dark" ? "Mode clair" : "Mode sombre", hoverBorder: "rgba(121,90,52,0.3)", hoverColor: "var(--tx)" },
+            { icon: <><Upload size={13} strokeWidth={2} /> Importer</>, onClick: () => importRef.current?.click(), title: "Importer depuis l'ancienne version", hoverBorder: "rgba(121,90,52,0.3)", hoverColor: "var(--tx)" },
             { icon: <><RotateCcw size={13} strokeWidth={2} /> Réinitialiser</>, onClick: handleReset, title: "Repartir à zéro", hoverBorder: "rgba(181,74,58,0.3)", hoverColor: C.redText },
-            { icon: <LogOut size={13} strokeWidth={2} />, onClick: handleLogout, title: "Se déconnecter", hoverBorder: "rgba(121,90,52,0.25)", hoverColor: "var(--tx)" },
           ].map((btn, i) => (
             <button key={i} onClick={btn.onClick} title={btn.title}
               style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 20, border: `1px solid rgba(121,90,52,0.15)`, background: "rgba(121,90,52,0.06)", color: C.light, fontSize: 12, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif", transition: "all 0.3s" }}
@@ -1098,6 +1542,11 @@ export default function App() {
           <div className={`hdr-save${sv ? " on" : ""}`}>
             {sv ? <><Ico icon={Save} size={13} color="var(--tx)" /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
           </div>
+          <UserMenu
+            user={user} isPaid={isPaid} expiresAt={expiresAt}
+            onLogout={handleLogout} onExport={handleExport}
+            sal={sal} pro={pro} tar={tar}
+          />
         </div>
       </header>
 
