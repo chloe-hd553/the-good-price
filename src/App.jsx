@@ -4,6 +4,8 @@ import { Scissors, LayoutDashboard, Wallet, Briefcase, Crosshair, Calendar, Cloc
 import * as XLSX from "xlsx";
 import { supabase } from "./supabase.js";
 
+const CHLOE_PHOTO = "data:image/jpeg;base64,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";
+
 /* ── PALETTE STRICTE ── */
 const C = {
   bg: "#2C1F12",
@@ -403,6 +405,36 @@ input[type=number]{-moz-appearance:textfield}
 .mf-files{display:flex;flex-wrap:wrap;gap:8px;margin-top:8px}
 .mf-file-tag{display:flex;align-items:center;gap:6px;padding:4px 10px;border-radius:20px;background:rgba(121,90,52,0.1);font-size:12px;color:#553F24;font-weight:500}
 .tgp.dark .mf-file-tag{background:rgba(121,90,52,0.2);color:#f4e9d6}
+
+/* ── TUTORIAL ── */
+.tuto-overlay{position:fixed;inset:0;z-index:800;pointer-events:none;}
+.tuto-hole{
+  position:fixed;z-index:801;border-radius:12px;pointer-events:none;
+  box-shadow:0 0 0 4px #fef4b0,0 0 0 8px rgba(254,244,176,0.25),0 0 0 9999px rgba(44,31,18,0.6);
+  transition:all 0.4s cubic-bezier(0.4,0,0.2,1);
+}
+.tuto-card{
+  position:fixed;z-index:802;pointer-events:all;
+  background:#FBF5EC;border-radius:18px;padding:20px 22px;
+  max-width:300px;min-width:250px;
+  box-shadow:0 16px 48px rgba(44,31,18,0.25),0 4px 12px rgba(44,31,18,0.1);
+  border:1px solid rgba(121,90,52,0.15);
+  animation:fi 0.35s ease-out;
+}
+.tgp.dark .tuto-card{background:#3D2D1A;border-color:rgba(121,90,52,0.3)}
+.tuto-bubble{display:flex;align-items:flex-start;gap:12px;margin-bottom:14px}
+.tuto-avatar{width:44px;height:44px;border-radius:50%;object-fit:cover;flex-shrink:0;border:2px solid rgba(121,90,52,0.25)}
+.tuto-title{font-family:'Cormorant Garamond',serif;font-size:16px;font-weight:600;color:#3D2D1A;margin-bottom:5px;line-height:1.3}
+.tgp.dark .tuto-title{color:#f4e9d6}
+.tuto-text{font-size:13px;color:#553F24;line-height:1.55}
+.tgp.dark .tuto-text{color:#b89a78}
+.tuto-footer{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.tuto-step{font-size:11px;color:#795A34;font-weight:600;letter-spacing:1px}
+.tuto-next{display:flex;align-items:center;gap:6px;padding:8px 16px;border-radius:20px;border:none;background:#553F24;color:#f4e9d6;font-family:'Instrument Sans',sans-serif;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s}
+.tuto-next:hover{background:#3D2D1A}
+.tuto-skip{background:none;border:none;font-size:12px;color:#795A34;cursor:pointer;font-family:'Instrument Sans',sans-serif;padding:4px;transition:color 0.2s}
+.tuto-skip:hover{color:#3D2D1A}
+.tgp.dark .tuto-skip:hover{color:#f4e9d6}
 `;
 
 const Ico = ({ icon: Icon, size = 16, color = "var(--tx)", ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
@@ -501,10 +533,102 @@ function parseV1Excel(buffer, dSal, dPro, dTar) {
 }
 
 /* ── AUTH PAGE ── */
+/* ── TUTORIAL OVERLAY ── */
+const TUTO_STEPS = [
+  { tab: null, sel: null,
+    title: "Bienvenue dans The Good Price ! 🎉",
+    text: "Je suis Chloé, et je vais te guider en quelques étapes. Tu verras, c'est simple — et ça va tout changer pour toi !" },
+  { tab: "salaire", sel: '[data-tuto="tab-salaire"]',
+    title: "1 — Mon Salaire",
+    text: "Commence ici. Tu vas renseigner tout ce dont tu as besoin chaque mois pour vivre : loyer, alimentation, épargne..." },
+  { tab: "salaire", sel: '[data-tuto="sal-grid"]',
+    title: "Remplis chaque ligne",
+    text: "Dépenses fixes, variables, épargne — sois honnête avec toi-même. C'est la base de tout le calcul !" },
+  { tab: "pro", sel: '[data-tuto="tab-pro"]',
+    title: "2 — Mon CA Pro",
+    text: "Ici, tes charges professionnelles : loyer du salon, produits, assurances, charges sociales... tout ce que ton activité te coûte." },
+  { tab: "tarifs", sel: '[data-tuto="tab-tarifs"]',
+    title: "3 — Mes Tarifs",
+    text: "C'est ici que la magie opère. On va calculer ton taux horaire personnalisé et ta grille de tarifs sur mesure." },
+  { tab: "tarifs", sel: '[data-tuto="tar-heures"]',
+    title: "Ton temps de travail",
+    text: "Renseigne tes heures par semaine et tes semaines de vacances. Ces deux chiffres permettent de calculer ton taux horaire réel." },
+  { tab: "tarifs", sel: '[data-tuto="tar-table"]',
+    title: "Ta grille de tarifs",
+    text: "Entre les durées et tes tarifs actuels. L'appli calcule automatiquement ce que tu devrais facturer — et te montre l'écart. Souvent surprenant !" },
+  { tab: "dashboard", sel: '[data-tuto="dash-kpis"]',
+    title: "Tout est ici 🎯",
+    text: "Salaire net cible, CA mensuel, taux horaire, analyse de tes tarifs... Tout est résumé sur ce dashboard. C'est ta boussole !" },
+];
+
+function TutorialOverlay({ onClose, setTab, theme }) {
+  const [step, setStep] = useState(0);
+  const [rect, setRect] = useState(null);
+  const current = TUTO_STEPS[step];
+  const total = TUTO_STEPS.length;
+
+  useEffect(() => {
+    const s = TUTO_STEPS[step];
+    if (s.tab) setTab(s.tab);
+    if (!s.sel) { setRect(null); return; }
+    const find = () => {
+      const el = document.querySelector(s.sel);
+      if (el) {
+        const r = el.getBoundingClientRect();
+        setRect({ top: r.top - 8, left: r.left - 8, width: r.width + 16, height: r.height + 16 });
+      } else { setRect(null); }
+    };
+    const t = setTimeout(find, 180);
+    return () => clearTimeout(t);
+  }, [step]);
+
+  // Position card: below rect if room, else above, else center
+  const cardStyle = (() => {
+    if (!rect) return { top: "50%", left: "50%", transform: "translate(-50%,-50%)" };
+    const vw = window.innerWidth, vh = window.innerHeight;
+    const cardH = 200, cardW = 310;
+    let top, left;
+    if (rect.top + rect.height + 20 + cardH < vh) {
+      top = rect.top + rect.height + 16;
+    } else {
+      top = Math.max(12, rect.top - cardH - 16);
+    }
+    left = Math.min(Math.max(12, rect.left), vw - cardW - 12);
+    return { top, left };
+  })();
+
+  const next = () => { if (step < total - 1) setStep(s => s + 1); else onClose(); };
+
+  return (
+    <>
+      <div className="tuto-overlay" />
+      {rect && <div className="tuto-hole" style={{ top: rect.top, left: rect.left, width: rect.width, height: rect.height }} />}
+      <div className={`tuto-card${theme === "dark" ? "" : ""}`} style={cardStyle}>
+        <div className="tuto-bubble">
+          <img src={CHLOE_PHOTO} className="tuto-avatar" alt="Chloé" />
+          <div>
+            <div className="tuto-title">{current.title}</div>
+            <div className="tuto-text">{current.text}</div>
+          </div>
+        </div>
+        <div className="tuto-footer">
+          <button className="tuto-skip" onClick={onClose}>Passer</button>
+          <span className="tuto-step">{step + 1} / {total}</span>
+          <button className="tuto-next" onClick={next}>
+            {step < total - 1 ? <>Suivant <ChevronRight size={13} /></> : <>Terminer <Check size={13} /></>}
+          </button>
+        </div>
+      </div>
+    </>
+  );
+}
+
+/* ── AUTH PAGE ── */
 function AuthPage({ onAuth }) {
   const [mode, setMode] = useState("login");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [rememberMe, setRememberMe] = useState(true);
   const [showPw, setShowPw] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -524,6 +648,12 @@ function AuthPage({ onAuth }) {
       } else {
         const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) throw err;
+        if (!rememberMe) {
+          localStorage.setItem("tgp-no-persist", "1");
+          sessionStorage.setItem("tgp-active", "1");
+        } else {
+          localStorage.removeItem("tgp-no-persist");
+        }
         onAuth(data.user);
       }
     } catch (err) {
@@ -563,6 +693,17 @@ function AuthPage({ onAuth }) {
                   {showPw ? <EyeOff size={16} color={C.light} /> : <Eye size={16} color={C.light} />}
                 </button>
               </div>
+              {mode === "login" && (
+                <label style={{ display: "flex", alignItems: "center", gap: 8, cursor: "pointer", color: C.light, fontSize: 13 }}>
+                  <input
+                    type="checkbox"
+                    checked={rememberMe}
+                    onChange={e => setRememberMe(e.target.checked)}
+                    style={{ accentColor: "#795A34", width: 15, height: 15, cursor: "pointer" }}
+                  />
+                  Rester connectée
+                </label>
+              )}
               <button className="auth-btn" type="submit" disabled={loading}>
                 {loading ? "Chargement..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
               </button>
@@ -701,7 +842,7 @@ function Dash({ sal, pro, tar, isPaid }) {
         <span style={{ width: 40, height: 1, background: `linear-gradient(90deg, ${C.light}, transparent)`, display: "inline-block" }} />
       </div>
 
-      <div className="kpis">
+      <div className="kpis" data-tuto="dash-kpis">
         {[{ icon: Wallet, l: "Salaire net", v: fmt(ts), s: "Ce que tu te verses / mois", lock: false },
           { icon: Briefcase, l: "CA nécessaire", v: fmt(ca), s: "Ton objectif de CA / mois", lock: false },
           { icon: Crosshair, l: "Taux horaire", v: `${th} €/h`, s: "Ta valeur / heure", lock: true },
@@ -863,8 +1004,7 @@ function Sal({ data, on }) {
         <span className="rb-label"><Ico icon={Wallet} size={18} color={C.light} /> Mon Salaire Souhaité</span>
         <span className="rb-val">{fmt(t)}</span>
       </div>
-      <div className="g3">
-        {[["fixes", "Dépenses fixes", data.fixes, ShieldCheck], ["variables", "Dépenses variables", data.variables, Receipt], ["epargnes", "Épargnes", data.epargnes, PiggyBank]].map(([k, title, items, icon]) => (
+      <div className="g3" data-tuto="sal-grid">.map(([k, title, items, icon]) => (
           <div key={k}>
             <div className="sh"><SectionIcon icon={icon} /><div className="sh-text">{title}</div></div>
             <div style={{ fontSize: 12, color: C.light, display: "flex", justifyContent: "space-between", padding: "0 20px 0 34px", marginBottom: 6 }}><span>Libellé</span><span style={{ marginRight: 20 }}>Montant / mois</span></div>
@@ -954,7 +1094,7 @@ function Tar({ data, on, sal, pro, isPaid }) {
 
   return (
     <div className="fi">
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 28 }}>
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 28 }} data-tuto="tar-heures">
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <label style={{ color: data.hs > 0 ? C.light : C.redText, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
             Heures de travail / semaine {data.hs === 0 && "*"}
@@ -995,7 +1135,7 @@ function Tar({ data, on, sal, pro, isPaid }) {
       <div className="hint hint-y" style={{ marginBottom: 10 }}><Ico icon={Info} size={13} color={C.light} /> Plusieurs collaborateurs ? Indique le nombre TOTAL d'heures travaillées et de semaines de vacances.</div>
       <div className="hint hint-y" style={{ marginBottom: 16 }}><Ico icon={Clock} size={13} color={C.light} /> Comment remplir les durées : 30 min = 0.5 · 45 min = 0.75 · 1h = 1 · 1h30 = 1.5 · 2h = 2</div>
 
-      <div style={{ overflowX: "auto" }}>
+      <div style={{ overflowX: "auto" }} data-tuto="tar-table">
         <table className="tt">
           <thead>
             <tr>
@@ -1332,12 +1472,10 @@ function ContactModal({ user, onClose }) {
 }
 
 /* ── USER MENU ── */
-function UserMenu({ user, isPaid, expiresAt, onLogout, onExport, sal, pro, tar }) {
+function UserMenu({ user, isPaid, expiresAt, onLogout, onOpenModal }) {
   const [open, setOpen] = useState(false);
-  const [modal, setModal] = useState(null);
   const ref = useRef(null);
 
-  // Initiales depuis l'email
   const parts = (user?.email || "").split("@")[0].split(/[._-]/);
   const initials = parts.length >= 2
     ? (parts[0][0] + parts[1][0]).toUpperCase()
@@ -1349,12 +1487,9 @@ function UserMenu({ user, isPaid, expiresAt, onLogout, onExport, sal, pro, tar }
     return () => document.removeEventListener("mousedown", h);
   }, []);
 
-  const open_ = (m) => { setModal(m); setOpen(false); };
-
   const menuItems = [
-    { icon: User, label: "Mon compte", onClick: () => open_("compte") },
-    { icon: MessageSquare, label: "Contacter Chloé", onClick: () => open_("contact") },
-    { icon: Download, label: "Exporter mes données", onClick: () => { onExport(); setOpen(false); } },
+    { icon: User, label: "Mon compte", onClick: () => { onOpenModal("compte"); setOpen(false); } },
+    { icon: MessageSquare, label: "Contacter Chloé", onClick: () => { onOpenModal("contact"); setOpen(false); } },
   ];
 
   return (
@@ -1362,7 +1497,6 @@ function UserMenu({ user, isPaid, expiresAt, onLogout, onExport, sal, pro, tar }
       <button className="um-avatar" onClick={() => setOpen(!open)} title="Mon compte">
         {initials}
       </button>
-
       {open && (
         <div className="um-drop">
           <div className="um-email">{user?.email}</div>
@@ -1378,17 +1512,6 @@ function UserMenu({ user, isPaid, expiresAt, onLogout, onExport, sal, pro, tar }
             Se déconnecter
           </button>
         </div>
-      )}
-
-      {modal === "compte" && (
-        <MonCompteModal
-          user={user} isPaid={isPaid} expiresAt={expiresAt}
-          onClose={() => setModal(null)}
-          onLogout={() => { setModal(null); onLogout(); }}
-        />
-      )}
-      {modal === "contact" && (
-        <ContactModal user={user} onClose={() => setModal(null)} />
       )}
     </div>
   );
@@ -1406,6 +1529,18 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [isPaid, setIsPaid] = useState(false);
   const [expiresAt, setExpiresAt] = useState(null);
+  const [modal, setModal] = useState(null); // "compte" | "contact" | null
+  const [showTutorial, setShowTutorial] = useState(false);
+
+  // No-persist: sign out if user didn't check "rester connectée" in a new session
+  useEffect(() => {
+    const isNewSession = !sessionStorage.getItem("tgp-active");
+    const noP = localStorage.getItem("tgp-no-persist");
+    if (isNewSession && noP) {
+      supabase.auth.signOut();
+      localStorage.removeItem("tgp-no-persist");
+    }
+  }, []);
   const [theme, setTheme] = useState(() => localStorage.getItem("tgp-theme") || "light");
   const importRef = useRef(null);
 
@@ -1468,27 +1603,6 @@ export default function App() {
 
   const toggleTheme = () => { const next = theme === "dark" ? "light" : "dark"; setTheme(next); localStorage.setItem("tgp-theme", next); };
 
-  const handleExport = () => {
-    const wb = XLSX.utils.book_new();
-    const toRows = (arr) => arr.map(r => [r.label, parseFloat(r.montant) || 0]);
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Libellé","Montant"],
-      ["── FIXES ──",""], ...toRows(sal.fixes),
-      ["── VARIABLES ──",""], ...toRows(sal.variables),
-      ["── ÉPARGNES ──",""], ...toRows(sal.epargnes),
-    ]), "Mon Salaire");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([["Libellé","Montant"],
-      ["── FIXES ──",""], ...toRows(pro.fixes),
-      ["── VARIABLES ──",""], ...toRows(pro.variables),
-      ["── CHARGES ──",""], ...toRows(pro.charges),
-      ["── TRÉSORERIE ──",""], ...toRows(pro.tresorerie),
-    ]), "Mon CA Pro");
-    XLSX.utils.book_append_sheet(wb, XLSX.utils.aoa_to_sheet([
-      ["Prestation","Durée courte","Durée moy.","Durée longue","Tarif courte","Tarif moy.","Tarif longue"],
-      ...tar.p.filter(p => p.n).map(p => [p.n, p.dc, p.dm, p.dl, p.tc, p.tm, p.tl]),
-    ]), "Mes Tarifs");
-    XLSX.writeFile(wb, "The_Good_Price_mes_donnees.xlsx");
-  };
-
   const handleLogout = async () => {
     await supabase.auth.signOut(); setUser(null);
     setSal(JSON.parse(JSON.stringify(dSal))); setPro(JSON.parse(JSON.stringify(dPro))); setTar(JSON.parse(JSON.stringify(dTar)));
@@ -1514,6 +1628,25 @@ export default function App() {
   }
 
   return (
+    <>
+    {/* Modals rendered at root — hors du header sticky pour éviter le stacking context */}
+    {modal === "compte" && (
+      <MonCompteModal
+        user={user} isPaid={isPaid} expiresAt={expiresAt}
+        onClose={() => setModal(null)}
+        onLogout={() => { setModal(null); handleLogout(); }}
+      />
+    )}
+    {modal === "contact" && (
+      <ContactModal user={user} onClose={() => setModal(null)} />
+    )}
+    {showTutorial && (
+      <TutorialOverlay
+        onClose={() => setShowTutorial(false)}
+        setTab={setTab}
+        theme={theme}
+      />
+    )}
     <div className={`tgp${theme === "dark" ? " dark" : ""}`}>
       <style>{styles}</style>
       <header className="hdr">
@@ -1538,21 +1671,31 @@ export default function App() {
               {btn.icon}
             </button>
           ))}
+          {/* Bouton tuto */}
+          <button
+            onClick={() => setShowTutorial(true)}
+            title="Guide d'utilisation"
+            style={{ display: "flex", alignItems: "center", gap: 6, padding: "6px 12px", borderRadius: 20, border: `1px solid rgba(121,90,52,0.2)`, background: "rgba(254,244,176,0.12)", color: "#795A34", fontSize: 12, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif", transition: "all 0.3s" }}
+            onMouseOver={e => { e.currentTarget.style.background = "rgba(254,244,176,0.25)"; e.currentTarget.style.color = "var(--tx)"; }}
+            onMouseOut={e => { e.currentTarget.style.background = "rgba(254,244,176,0.12)"; e.currentTarget.style.color = "#795A34"; }}
+          >
+            <Info size={13} strokeWidth={2} /> Tuto
+          </button>
           <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleHeaderImport} style={{ display: "none" }} />
           <div className={`hdr-save${sv ? " on" : ""}`}>
             {sv ? <><Ico icon={Save} size={13} color="var(--tx)" /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
           </div>
           <UserMenu
             user={user} isPaid={isPaid} expiresAt={expiresAt}
-            onLogout={handleLogout} onExport={handleExport}
-            sal={sal} pro={pro} tar={tar}
+            onLogout={handleLogout}
+            onOpenModal={setModal}
           />
         </div>
       </header>
 
       <nav className="nav">
         {[{ id: "dashboard", icon: LayoutDashboard, l: "Dashboard" }, { id: "salaire", icon: Wallet, l: "Mon Salaire" }, { id: "pro", icon: Briefcase, l: "Mon CA Pro" }, { id: "tarifs", icon: Scissors, l: "Mes Tarifs" }].map(t => (
-          <button key={t.id} className={`nt${tab === t.id ? " on" : ""}`} onClick={() => setTab(t.id)}>
+          <button key={t.id} className={`nt${tab === t.id ? " on" : ""}`} onClick={() => setTab(t.id)} data-tuto={`tab-${t.id}`}>
             <Ico icon={t.icon} size={16} color="currentColor" />{t.l}
           </button>
         ))}
@@ -1576,5 +1719,6 @@ export default function App() {
         </div>
       )}
     </div>
+    </>
   );
 }
