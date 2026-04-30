@@ -78,9 +78,7 @@ const styles = `
 /* LIGHT MODE */
 .tgp{--accent:#fef4b0;--text-soft:#f4e9d6;--accent-red:#F4B8A8}
 .tgp.light{
-  --accent:#553F24;
   --text-soft:#795A34;
-  --accent-red:#B54A3A;
   background:#f4e9d6;
   color:#3D2D1A;
 }
@@ -426,11 +424,11 @@ input[type=number]{-moz-appearance:textfield}
 .auth-link:hover{color:#f4e9d6}
 `;
 
-const Ico = ({ icon: Icon, size = 16, color = "currentColor", ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
+const Ico = ({ icon: Icon, size = 16, color = C.yellow, ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
 
 const SectionIcon = ({ icon: Icon }) => (
   <div style={{ width: 22, height: 22, borderRadius: 6, background: `rgba(254,244,176,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-    <Icon size={12} color="currentColor" strokeWidth={2} />
+    <Icon size={12} color={C.yellow} strokeWidth={2} />
   </div>
 );
 
