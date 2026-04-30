@@ -46,11 +46,11 @@ export default async function handler(req, res) {
       locale: 'fr',
     };
 
-    // Pour la sub mensuelle : on annule auto après 12 prélèvements (1 an)
+    // Pour la sub mensuelle : on attache des metadata
+    // L'annulation auto après 12 mois est gérée par le webhook (stripe.subscriptions.update)
+    // car cancel_at n'est pas accepté dans subscription_data côté Checkout Session
     if (mode === 'subscription') {
-      const cancelAt = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60;
       sessionParams.subscription_data = {
-        cancel_at: cancelAt,
         metadata: { userId, plan },
       };
     }
@@ -60,6 +60,4 @@ export default async function handler(req, res) {
     return res.status(200).json({ url: session.url });
   } catch (err) {
     console.error('create-checkout error:', err);
-    return res.status(500).json({ error: err.message });
-  }
-}
+    re
