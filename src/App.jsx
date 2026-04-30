@@ -1469,6 +1469,8 @@ export default function App() {
           >
             {theme === "dark" ? <Sun size={13} strokeWidth={2} /> : <Moon size={13} strokeWidth={2} />}
           </button>
+          <button
+            onClick={() => importRef.current?.click()}
             title="Importer depuis l'ancienne version"
             style={{
               display: "flex", alignItems: "center", gap: 6,
@@ -1540,4 +1542,22 @@ export default function App() {
         {tab === "salaire" && <Sal data={sal} on={setSal} />}
         {tab === "pro" && <Pro data={pro} on={setPro} sal={sal} />}
         {tab === "tarifs" && <Tar data={tar} on={setTar} sal={sal} pro={pro} isPaid={isPaid} />}
-     
+      </main>
+
+      {/* Unlock CTA — only on tarifs tab when both params filled */}
+      {!isPaid && tab === "tarifs" && tar.hs > 0 && (() => {
+        const totalAny = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes) + sum(pro.fixes) + sum(pro.variables) + sum(pro.charges) + sum(pro.tresorerie);
+        return totalAny > 0;
+      })() && (
+        <div className="unlock-bar">
+          <button className="unlock-btn" onClick={() => setShowPaywall(true)}>
+            <Lock size={18} /> Débloquer mes tarifs sur mesure
+          </button>
+        </div>
+      )}
+
+      {/* Paywall modal */}
+      {showPaywall && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
+    </div>
+  );
+}
