@@ -76,10 +76,11 @@ const styles = `
 }
 
 /* LIGHT MODE */
-.tgp{--accent:#fef4b0;--text-soft:#f4e9d6}
+.tgp{--accent:#fef4b0;--text-soft:#f4e9d6;--accent-red:#F4B8A8}
 .tgp.light{
   --accent:#553F24;
   --text-soft:#795A34;
+  --accent-red:#B54A3A;
   background:#f4e9d6;
   color:#3D2D1A;
 }
@@ -1174,10 +1175,10 @@ function Tar({ data, on, sal, pro, isPaid }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 28 }}>
         {/* Row 1: Hours first, then vacation */}
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <label style={{ color: data.hs > 0 ? C.light : C.redText, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
+          <label style={{ color: data.hs > 0 ? C.light : "var(--accent-red)", fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
             Heures de travail / semaine {data.hs === 0 && "*"}
           </label>
-          <input className="pi" type="number" value={data.hs || ""} onChange={e => uP("hs", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" style={data.hs === 0 ? { border: `2px solid ${C.redText}` } : {}} />
+          <input className="pi" type="number" value={data.hs || ""} onChange={e => uP("hs", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" style={data.hs === 0 ? { border: "2px solid var(--accent-red)" } : {}} />
         </div>
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <label style={{ color: C.light, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
@@ -1208,7 +1209,7 @@ function Tar({ data, on, sal, pro, isPaid }) {
       </div>
 
       {data.hs === 0 && (
-        <div style={{ color: C.redText, fontSize: 14, fontWeight: 600, marginBottom: 16, padding: "10px 16px", background: "rgba(181,74,58,0.08)", borderRadius: 10, border: `1px solid rgba(181,74,58,0.15)` }}>
+        <div style={{ color: "var(--accent-red)", fontSize: 14, fontWeight: 600, marginBottom: 16, padding: "10px 16px", background: "rgba(181,74,58,0.08)", borderRadius: 10, border: "1px solid rgba(181,74,58,0.25)" }}>
           Remplis tes heures de travail par semaine pour calculer tes tarifs sur mesure
         </div>
       )}
@@ -1526,7 +1527,7 @@ export default function App() {
               fontFamily: "'Instrument Sans', sans-serif",
               transition: "all 0.3s",
             }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(181,74,58,0.3)"; e.currentTarget.style.color = C.redText; }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(181,74,58,0.4)"; e.currentTarget.style.color = "var(--accent-red)"; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
           >
             <RotateCcw size={13} strokeWidth={2} /> Réinitialiser
