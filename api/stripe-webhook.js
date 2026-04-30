@@ -116,6 +116,19 @@ export default async function handler(req, res) {
           sessionId: session.id,
         });
 
+        // Pour la sub mensuelle : programmer l'annulation auto à +1 an
+        // (cancel_at refusé sur Checkout Session, donc on le pose ici une fois la sub créée)
+        if (session.mode === 'subscription' && session.subscription) {
+          try {
+            const cancelAt = Math.floor(Date.now() / 1000) + 365 * 24 * 60 * 60;
+            await stripe.subscriptions.update(session.subscription, {
+              cancel_at: cancelAt,
+            });
+          } catch (e) {
+            console.error('Failed to set cancel_at on sub', session.subscription, e.message);
+          }
+        }
+
         // Sync MailerLite (non-bloquant : si ML échoue, le paiement est quand même validé)
         if (email) {
           const ml = await addToMailerLiteGroup(email);
@@ -164,26 +177,4 @@ export default async function handler(req, res) {
 
       // ─── Sub annulée (manuel ou auto après 12 mois ou échec définitif) ─
       case 'customer.subscription.deleted': {
-        const sub = event.data.object;
-        const customerId = sub.customer;
-        const user = await findUserByCustomerId(customerId);
-        if (!user) break;
-        await setUserPaid(user.id, {
-          paid: false,
-          expiresAt: new Date().toISOString(),
-          subscriptionId: null,
-        });
-        break;
-      }
-
-      default:
-        // Events qu'on ignore explicitement
-        break;
-    }
-
-    return res.status(200).json({ received: true });
-  } catch (err) {
-    console.error('Webhook handler error:', err);
-    return res.status(500).json({ error: err.message });
-  }
-}
+        
