@@ -1328,6 +1328,28 @@ export default function App() {
             setIsPaid(data.paid || false);
           }
         }
+
+        // Check legacy customers whitelist (anciennes clientes — accès à vie)
+        // Si l'utilisateur n'est pas encore marqué comme payé, on regarde si son email
+        // est dans la table legacy_customers. Si oui, on le débloque définitivement.
+        if (!data?.paid && user.email) {
+          const { data: legacy } = await supabase
+            .from("legacy_customers")
+            .select("email")
+            .eq("email", user.email)
+            .maybeSingle();
+          if (legacy) {
+            const lifeExpires = "2099-12-31T00:00:00Z";
+            await supabase.from("user_data").upsert({
+              id: user.id,
+              email: user.email,
+              paid: true,
+              paid_at: new Date().toISOString(),
+              expires_at: lifeExpires,
+            });
+            setIsPaid(true);
+          }
+        }
       } catch {} // No data yet = new user
       setOk(true);
     })();
