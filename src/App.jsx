@@ -76,9 +76,10 @@ const styles = `
 }
 
 /* LIGHT MODE */
-.tgp{--accent:#fef4b0}
+.tgp{--accent:#fef4b0;--text-soft:#f4e9d6}
 .tgp.light{
   --accent:#553F24;
+  --text-soft:#795A34;
   background:#f4e9d6;
   color:#3D2D1A;
 }
@@ -952,7 +953,7 @@ function Dash({ sal, pro, tar, isPaid }) {
           <div>
             <div style={{ color: "var(--accent)", fontSize: 15, fontWeight: 600, marginBottom: 2 }}>Par où commencer ?</div>
             <div style={{ color: C.light, fontSize: 12 }}>
-              Commence par l'onglet <strong style={{ color: C.beige }}>Mon Salaire</strong> pour définir tes besoins perso, puis <strong style={{ color: C.beige }}>Mon CA Pro</strong> pour tes charges. Tes tarifs se calculeront automatiquement.
+              Commence par l'onglet <strong style={{ color: "var(--text-soft)" }}>Mon Salaire</strong> pour définir tes besoins perso, puis <strong style={{ color: "var(--text-soft)" }}>Mon CA Pro</strong> pour tes charges. Tes tarifs se calculeront automatiquement.
             </div>
           </div>
         </div>
@@ -970,7 +971,7 @@ function Dash({ sal, pro, tar, isPaid }) {
               { l: "Charges variables", v: tv, icon: Receipt }, { l: "Charges & taxes", v: tc, icon: Receipt },
               { l: "Trésorerie", v: tt, icon: Vault }].map((r, i) => (
               <div className="bk" key={i}>
-                <span style={{ color: C.beige, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
+                <span style={{ color: "var(--text-soft)", fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
                   <Ico icon={r.icon} size={13} color={C.light} />
                   {r.l}
                 </span>
@@ -995,7 +996,7 @@ function Dash({ sal, pro, tar, isPaid }) {
             {[{ l: "Heures / semaine", v: tar.hs || 0 }, { l: "Semaines travaillées", v: sw },
               { l: "Heures totales / an", v: ha }, { l: "Semaines de vacances", v: tar.sv || 0 }].map((r, i) => (
               <div className="bk" key={i}>
-                <span style={{ color: C.beige, fontSize: 15 }}>{r.l}</span>
+                <span style={{ color: "var(--text-soft)", fontSize: 15 }}>{r.l}</span>
                 <span style={{ color: "var(--accent)", fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 15 }}>{r.v}</span>
               </div>
             ))}
@@ -1017,7 +1018,7 @@ function Dash({ sal, pro, tar, isPaid }) {
                     {pie.map((_, i) => <Cell key={i} fill={PIE[i % PIE.length]} />)}
                   </Pie>
                   <Tooltip formatter={v => fmt(v)} contentStyle={ttStyle} />
-                  <Legend wrapperStyle={{ fontSize: 11, color: C.beige }} />
+                  <Legend wrapperStyle={{ fontSize: 11, color: "var(--text-soft)" }} />
                 </PieChart>
               </ResponsiveContainer>
             ) : <GhostDonut />}
