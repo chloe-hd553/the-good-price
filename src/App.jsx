@@ -76,19 +76,22 @@ const styles = `
 }
 
 /* LIGHT MODE */
+.tgp{--accent:#fef4b0}
 .tgp.light{
-  background:#fef4b0;
+  --accent:#553F24;
+  background:#f4e9d6;
   color:#3D2D1A;
 }
 .tgp.light .hdr{
-  background:rgba(244,233,214,0.95);
+  background:rgba(255,255,255,0.55);
   border-bottom:1px solid rgba(121,90,52,0.2);
+  backdrop-filter:blur(20px);
 }
 .tgp.light .hdr-name{color:#3D2D1A}
 .tgp.light .hdr-by{color:#795A34}
-.tgp.light .hdr-save{color:#795A34;border-color:rgba(121,90,52,0.2);background:rgba(121,90,52,0.06)}
+.tgp.light .hdr-save{color:#795A34;border-color:rgba(121,90,52,0.2);background:rgba(255,255,255,0.4)}
 .tgp.light .hdr-save.on{color:#553F24;border-color:rgba(85,63,36,0.3)}
-.tgp.light .nav{background:rgba(254,244,176,0.7);border-bottom:1px solid rgba(121,90,52,0.15)}
+.tgp.light .nav{background:rgba(255,255,255,0.45);border-bottom:1px solid rgba(121,90,52,0.15);backdrop-filter:blur(20px)}
 .tgp.light .nt{color:#795A34}
 .tgp.light .nt:hover{color:#3D2D1A}
 .tgp.light .nt.on{color:#3D2D1A;border-bottom-color:#3D2D1A}
@@ -117,6 +120,7 @@ const styles = `
 .tgp.light .tt .th-ec{background:#795A34;color:#f4e9d6}
 .tgp.light .mc{color:#3D2D1A;background:rgba(121,90,52,0.15)}
 .tgp.light .tagline{color:#3D2D1A}
+.tgp.light .hint-y{color:#553F24}
 .tgp.light .tgp::before{opacity:0.02}
 
 
@@ -420,11 +424,11 @@ input[type=number]{-moz-appearance:textfield}
 .auth-link:hover{color:#f4e9d6}
 `;
 
-const Ico = ({ icon: Icon, size = 16, color = C.yellow, ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
+const Ico = ({ icon: Icon, size = 16, color = "currentColor", ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
 
 const SectionIcon = ({ icon: Icon }) => (
   <div style={{ width: 22, height: 22, borderRadius: 6, background: `rgba(254,244,176,0.08)`, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>
-    <Icon size={12} color={C.yellow} strokeWidth={2} />
+    <Icon size={12} color="currentColor" strokeWidth={2} />
   </div>
 );
 
@@ -946,7 +950,7 @@ function Dash({ sal, pro, tar, isPaid }) {
             <ArrowRight size={16} color={C.yellow} strokeWidth={2} />
           </div>
           <div>
-            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, marginBottom: 2 }}>Par où commencer ?</div>
+            <div style={{ color: "var(--accent)", fontSize: 15, fontWeight: 600, marginBottom: 2 }}>Par où commencer ?</div>
             <div style={{ color: C.light, fontSize: 12 }}>
               Commence par l'onglet <strong style={{ color: C.beige }}>Mon Salaire</strong> pour définir tes besoins perso, puis <strong style={{ color: C.beige }}>Mon CA Pro</strong> pour tes charges. Tes tarifs se calculeront automatiquement.
             </div>
@@ -958,7 +962,7 @@ function Dash({ sal, pro, tar, isPaid }) {
         {/* LEFT: Breakdown + Time */}
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: "var(--accent)", fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={TrendingUp} />
               Répartition de ton CA mensuel
             </div>
@@ -971,20 +975,20 @@ function Dash({ sal, pro, tar, isPaid }) {
                   {r.l}
                 </span>
                 <div style={{ display: "flex", gap: 18 }}>
-                  <span style={{ color: C.yellow, fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(r.v)}</span>
+                  <span style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(r.v)}</span>
                   <span style={{ color: C.light, fontSize: 14, width: 40, textAlign: "right" }}>{ca > 0 ? `${Math.round(r.v / ca * 100)}%` : "—"}</span>
                 </div>
               </div>
             ))}
             <div className="dv" />
             <div style={{ display: "flex", justifyContent: "space-between", padding: "4px 4px 0" }}>
-              <span style={{ color: C.yellow, fontSize: 15, fontWeight: 600 }}>Total CA mensuel</span>
-              <span style={{ color: C.yellow, fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ca)}</span>
+              <span style={{ color: "var(--accent)", fontSize: 15, fontWeight: 600 }}>Total CA mensuel</span>
+              <span style={{ color: "var(--accent)", fontWeight: 700, fontSize: 15, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ca)}</span>
             </div>
           </div>
 
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: "var(--accent)", fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={Clock} />
               Ton temps de travail
             </div>
@@ -992,7 +996,7 @@ function Dash({ sal, pro, tar, isPaid }) {
               { l: "Heures totales / an", v: ha }, { l: "Semaines de vacances", v: tar.sv || 0 }].map((r, i) => (
               <div className="bk" key={i}>
                 <span style={{ color: C.beige, fontSize: 15 }}>{r.l}</span>
-                <span style={{ color: C.yellow, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 15 }}>{r.v}</span>
+                <span style={{ color: "var(--accent)", fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 15 }}>{r.v}</span>
               </div>
             ))}
           </div>
@@ -1001,7 +1005,7 @@ function Dash({ sal, pro, tar, isPaid }) {
         {/* RIGHT: Charts or ghosts */}
         <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: "var(--accent)", fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={TrendingUp} />
               Où part ton CA ?
             </div>
@@ -1020,7 +1024,7 @@ function Dash({ sal, pro, tar, isPaid }) {
           </div>
 
           <div className="gc">
-            <div style={{ color: C.yellow, fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
+            <div style={{ color: "var(--accent)", fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={BarChart3} />
               Tarifs actuels vs sur mesure
             </div>
@@ -1032,7 +1036,7 @@ function Dash({ sal, pro, tar, isPaid }) {
                   <Tooltip formatter={v => fmt(v)} contentStyle={ttStyle} />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
                   <Bar dataKey="actuel" name="Actuel" fill={C.light} radius={[6, 6, 0, 0]} />
-                  <Bar dataKey="minimum" name="Sur mesure" fill={C.yellow} radius={[6, 6, 0, 0]} />
+                  <Bar dataKey="minimum" name="Sur mesure" fill="var(--accent)" radius={[6, 6, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             ) : <GhostBars />}
@@ -1108,7 +1112,7 @@ function Pro({ data, on, sal }) {
         <span style={{ color: C.light, fontWeight: 500, fontSize: 13, display: "flex", alignItems: "center", gap: 8 }}>
           <Ico icon={Wallet} size={15} color={C.light} /> Salaire / Rémunération (auto)
         </span>
-        <span style={{ color: C.yellow, fontWeight: 700, fontSize: 17, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ts)}</span>
+        <span style={{ color: "var(--accent)", fontWeight: 700, fontSize: 17, fontFamily: "'Cormorant Garamond',serif" }}>{fmt(ts)}</span>
       </div>
       <div className="g3">
         <div>
@@ -1134,7 +1138,7 @@ function Pro({ data, on, sal }) {
           <div style={{ marginTop: 16 }}>
             <div className="sh"><SectionIcon icon={Vault} /><div className="sh-text">Trésorerie</div></div>
             <div className="tw">
-              <div style={{ color: C.yellow, fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
+              <div style={{ color: "var(--accent)", fontSize: 11, fontWeight: 600, display: "flex", alignItems: "center", gap: 6 }}>
                 <Ico icon={AlertTriangle} size={13} color={C.light} /> Montant à ALLOUER chaque mois
               </div>
               <div style={{ color: C.light, fontSize: 10, fontStyle: "italic", marginTop: 2 }}>Ce n'est PAS ton solde actuel, mais ce que tu VEUX mettre de côté</div>
@@ -1184,11 +1188,11 @@ function Tar({ data, on, sal, pro, isPaid }) {
         {/* Row 2 */}
         <div className="gc" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ color: C.light, fontSize: 14, fontWeight: 500 }}>CA Annuel</span>
-          <span style={{ color: C.yellow, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(caA)}</span>
+          <span style={{ color: "var(--accent)", fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(caA)}</span>
         </div>
         <div className="gc" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
           <span style={{ color: C.light, fontSize: 14, fontWeight: 500 }}>CA Mensuel</span>
-          <span style={{ color: C.yellow, fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(ca)}</span>
+          <span style={{ color: "var(--accent)", fontWeight: 700, fontFamily: "'Cormorant Garamond',serif", fontSize: 22 }}>{fmt(ca)}</span>
         </div>
 
         {/* Row 3: Taux horaire — full width */}
