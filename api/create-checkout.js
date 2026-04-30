@@ -1,6 +1,5 @@
 // /api/create-checkout.js
 // Vercel serverless function — crée une Stripe Checkout Session
-// Appelé par le front quand l'utilisatrice clique "Débloquer" et choisit une option
 
 import Stripe from 'stripe';
 
@@ -30,7 +29,6 @@ export default async function handler(req, res) {
         : process.env.STRIPE_PRICE_MONTHLY;
 
     const mode = plan === 'oneshot' ? 'payment' : 'subscription';
-
     const appUrl = process.env.APP_URL || 'https://the-good-price.vercel.app';
 
     const sessionParams = {
@@ -46,9 +44,6 @@ export default async function handler(req, res) {
       locale: 'fr',
     };
 
-    // Pour la sub mensuelle : on attache des metadata
-    // L'annulation auto après 12 mois est gérée par le webhook (stripe.subscriptions.update)
-    // car cancel_at n'est pas accepté dans subscription_data côté Checkout Session
     if (mode === 'subscription') {
       sessionParams.subscription_data = {
         metadata: { userId, plan },
@@ -56,8 +51,9 @@ export default async function handler(req, res) {
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
-
     return res.status(200).json({ url: session.url });
   } catch (err) {
     console.error('create-checkout error:', err);
-    re
+    return res.status(500).json({ error: err.message });
+  }
+}
