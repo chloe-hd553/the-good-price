@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect } from "react";
+import { createPortal } from "react-dom";
 import { X, LogOut, CreditCard, Send, Paperclip, Check } from "lucide-react";
 
 /* ── Couleurs locales (miroir App.jsx) ── */
@@ -118,7 +119,11 @@ const umStyles = `
   box-shadow: 0 24px 60px rgba(0,0,0,0.5);
   animation: fi 0.2s ease-out;
 }
-.tgp.light .mpanel {
+/* Wrapper portal hors DOM .tgp — gère le theme context */
+.tgp-portal { position: fixed; inset: 0; pointer-events: none; z-index: 800; }
+.tgp-portal .moverlay { pointer-events: auto; }
+
+.tgp-portal.light .mpanel {
   background: #fdfaf6;
   border-color: rgba(121,90,52,0.15);
   box-shadow: 0 16px 48px rgba(121,90,52,0.15);
@@ -140,7 +145,7 @@ const umStyles = `
   transition: all 0.2s;
 }
 .mpanel-close:hover { background: rgba(121,90,52,0.2); color: #f4e9d6; }
-.tgp.light .mpanel-close:hover { color: #3D2D1A; }
+.tgp-portal.light .mpanel-close:hover { color: #3D2D1A; }
 .mpanel-title {
   font-family: 'Cormorant Garamond', serif;
   font-size: 24px;
@@ -149,7 +154,7 @@ const umStyles = `
   margin-bottom: 24px;
   padding-right: 40px;
 }
-.tgp.light .mpanel-title { color: #3D2D1A; }
+.tgp-portal.light .mpanel-title { color: #3D2D1A; }
 .mpanel-section { margin-bottom: 24px; }
 .mpanel-section-label {
   font-size: 11px;
@@ -176,7 +181,7 @@ const umStyles = `
   overflow: hidden;
   text-overflow: ellipsis;
 }
-.tgp.light .mpanel-row-value { color: #3D2D1A; }
+.tgp-portal.light .mpanel-row-value { color: #3D2D1A; }
 .mpanel-badge {
   display: inline-flex;
   align-items: center;
@@ -208,7 +213,7 @@ const umStyles = `
 }
 .mpanel-btn:hover { border-color: rgba(254,244,176,0.25); background: rgba(254,244,176,0.06); }
 .mpanel-btn:disabled { opacity: 0.5; cursor: not-allowed; }
-.tgp.light .mpanel-btn { color: #3D2D1A; }
+.tgp-portal.light .mpanel-btn { color: #3D2D1A; }
 
 /* ── CONTACT FORM ── */
 .cf-field { display: flex; flex-direction: column; gap: 6px; margin-bottom: 16px; }
@@ -232,7 +237,7 @@ const umStyles = `
   transition: all 0.2s;
   resize: none;
 }
-.tgp.light .cf-input {
+.tgp-portal.light .cf-input {
   background: rgba(255,255,255,0.8);
   color: #3D2D1A;
   border-color: rgba(121,90,52,0.2);
@@ -269,7 +274,7 @@ const umStyles = `
   font-size: 12px;
   margin: 3px;
 }
-.tgp.light .cf-chip { color: #3D2D1A; }
+.tgp-portal.light .cf-chip { color: #3D2D1A; }
 .cf-chip-x {
   background: none;
   border: none;
@@ -678,7 +683,7 @@ function ContactPanel({ user, onClose }) {
 /* ══════════════════════════════════════════
    USER MENU (export par défaut)
 ══════════════════════════════════════════ */
-export default function UserMenu({ user, isPaid, userData, onLogout }) {
+export default function UserMenu({ user, isPaid, userData, onLogout, theme }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState(null); // null | "compte" | "contact"
   const menuRef = useRef(null);
@@ -751,8 +756,11 @@ export default function UserMenu({ user, isPaid, userData, onLogout }) {
         )}
       </div>
 
-      {/* ── Modals ── */}
-      {view && (
+      {/* ── Modals — rendu via createPortal sur document.body
+           pour éviter que backdrop-filter du header
+           ne casse la position: fixed de l'overlay ── */}
+      {view && createPortal(
+        <div className={theme === "light" ? "tgp-portal light" : "tgp-portal"}>
         <div
           className="moverlay"
           onClick={(e) => {
@@ -771,6 +779,8 @@ export default function UserMenu({ user, isPaid, userData, onLogout }) {
             <ContactPanel user={user} onClose={() => setView(null)} />
           )}
         </div>
+        </div>,
+        document.body
       )}
     </>
   );
