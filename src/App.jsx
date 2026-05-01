@@ -6,6 +6,7 @@ import { supabase } from "./supabase.js";
 import PaywallModal from "./PaywallModal.jsx";
 import ThankYouPage from "./ThankYouPage.jsx";
 import CancelPage from "./CancelPage.jsx";
+import UserMenu from "./UserMenu.jsx";
 
 /* ── PALETTE STRICTE ── */
 const C = {
@@ -423,6 +424,13 @@ input[type=number]{-moz-appearance:textfield}
   text-decoration:underline;transition:color 0.2s;
 }
 .auth-link:hover{color:#f4e9d6}
+
+/* ── REMEMBER ME ── */
+.auth-remember{
+  display:flex;align-items:center;gap:8px;
+  font-size:14px;color:#795A34;cursor:pointer;user-select:none;
+}
+.auth-remember input{width:15px;height:15px;cursor:pointer;accent-color:#795A34}
 `;
 
 const Ico = ({ icon: Icon, size = 16, color = "currentColor", ...props }) => <Icon size={size} color={color} strokeWidth={1.8} {...props} />;
@@ -596,6 +604,7 @@ function AuthPage({ onAuth }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
+  const [remember, setRemember] = useState(true);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
@@ -611,11 +620,23 @@ function AuthPage({ onAuth }) {
           setSuccess("Un email de confirmation va t'être envoyé par « Supabase Auth ». Pense à vérifier tes spams. Clique sur le lien dans ce mail puis reviens ici pour te connecter.");
           setMode("login");
         } else if (data.user) {
+          if (remember) {
+            localStorage.setItem("tgp-remember", "true");
+          } else {
+            localStorage.removeItem("tgp-remember");
+            sessionStorage.setItem("tgp-active", "1");
+          }
           onAuth(data.user);
         }
       } else {
         const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
         if (err) throw err;
+        if (remember) {
+          localStorage.setItem("tgp-remember", "true");
+        } else {
+          localStorage.removeItem("tgp-remember");
+          sessionStorage.setItem("tgp-active", "1");
+        }
         onAuth(data.user);
       }
     } catch (err) {
@@ -660,7 +681,17 @@ function AuthPage({ onAuth }) {
                   {showPw ? <EyeOff size={16} color={C.light} /> : <Eye size={16} color={C.light} />}
                 </button>
               </div>
-              <button className="auth-btn" type="submit" disabled={loading}>
+              {mode === "login" && (
+                <label className="auth-remember" style={{ marginTop: 4 }}>
+                  <input
+                    type="checkbox"
+                    checked={remember}
+                    onChange={e => setRemember(e.target.checked)}
+                  />
+                  Rester connectée
+                </label>
+              )}
+              <button className="auth-btn" type="submit" disabled={loading} style={{ marginTop: 4 }}>
                 {loading ? "Chargement..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
               </button>
             </form>
@@ -1300,12 +1331,26 @@ export default function App() {
   const [isPaid, setIsPaid] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("tgp-theme") || "dark");
   const [showPaywall, setShowPaywall] = useState(false);
+  const [userData, setUserData] = useState(null);
   const [route, setRoute] = useState(() => (typeof window !== "undefined" ? window.location.pathname : "/"));
   const importRef = useRef(null);
 
-  // Check auth session on mount
+  // Check auth session on mount — gestion "rester connectée"
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        const rememberMe = localStorage.getItem("tgp-remember") === "true";
+        const sameSession = sessionStorage.getItem("tgp-active") === "1";
+        if (!rememberMe && !sameSession) {
+          // Session Supabase présente mais "rester connectée" non coché
+          // et pas la même session navigateur → déconnexion auto
+          supabase.auth.signOut().then(() => {
+            setUser(null);
+            setAuthLoading(false);
+          });
+          return;
+        }
+      }
       setUser(session?.user || null);
       setAuthLoading(false);
     });
@@ -1322,6 +1367,7 @@ export default function App() {
       try {
         const { data } = await supabase.from("user_data").select("*").eq("id", user.id).single();
         if (data) {
+          setUserData(data);
           if (data.sal) setSal(data.sal);
           if (data.pro) setPro(data.pro);
           if (data.tar) setTar(data.tar);
@@ -1418,8 +1464,12 @@ export default function App() {
     localStorage.setItem("tgp-theme", next);
   };
 
-  const handleLogout = async () => {    await supabase.auth.signOut();
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    localStorage.removeItem("tgp-remember");
+    sessionStorage.removeItem("tgp-active");
     setUser(null);
+    setUserData(null);
     setSal(JSON.parse(JSON.stringify(dSal)));
     setPro(JSON.parse(JSON.stringify(dPro)));
     setTar(JSON.parse(JSON.stringify(dTar)));
@@ -1531,26 +1581,15 @@ export default function App() {
           >
             <RotateCcw size={13} strokeWidth={2} /> Réinitialiser
           </button>
-          <button
-            onClick={handleLogout}
-            title="Se déconnecter"
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px", borderRadius: 20,
-              border: `1px solid rgba(121,90,52,0.15)`,
-              background: "rgba(121,90,52,0.06)",
-              color: C.light, fontSize: 12, cursor: "pointer",
-              fontFamily: "'Instrument Sans', sans-serif",
-              transition: "all 0.3s",
-            }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.25)"; e.currentTarget.style.color = C.beige; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
-          >
-            <LogOut size={13} strokeWidth={2} />
-          </button>
           <div className={`hdr-save${sv ? " on" : ""}`}>
             {sv ? <><Ico icon={Save} size={13} color={C.yellow} /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
           </div>
+          <UserMenu
+            user={user}
+            isPaid={isPaid}
+            userData={userData}
+            onLogout={handleLogout}
+          />
         </div>
       </header>
 
