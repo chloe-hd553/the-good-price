@@ -1589,6 +1589,7 @@ export default function App() {
             isPaid={isPaid}
             userData={userData}
             onLogout={handleLogout}
+            theme={theme}
           />
         </div>
       </header>
