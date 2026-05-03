@@ -125,6 +125,8 @@ html,body{overflow-x:hidden;max-width:100vw}
 .tgp.light .tagline{color:#3D2D1A}
 .tgp.light .hint-y{color:#553F24}
 .tgp.light .tgp::before{opacity:0.02}
+.tgp.light .ci.rd{background:rgba(123,36,17,0.08) !important;color:#7b2411 !important;border-color:rgba(123,36,17,0.25) !important}
+.tgp.light .en{color:#7b2411 !important}
 
 
 /* HEADER */
@@ -680,7 +682,7 @@ function AuthPage({ onAuth }) {
               {mode === "login" ? "Retrouve tes données là où tu les avais laissées" : "Gratuit — commence à calculer tes tarifs"}
             </div>
 
-            {error && <div style={{ color: redText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>{error}</div>}
+            {error && <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>{error}</div>}
             {success && <div style={{ color: C.greenText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(45,59,40,0.3)", borderRadius: 8, lineHeight: 1.5 }}>{success}</div>}
 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
@@ -797,7 +799,7 @@ function WelcomePage({ onImport, onSkip }) {
           <input ref={fileRef} type="file" accept=".xlsx,.xls" onChange={handleFile} style={{ display: "none" }} />
 
           {error && (
-            <div style={{ color: redText, fontSize: 13, marginBottom: 12, padding: "8px 12px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>
+            <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "8px 12px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>
               {error}
             </div>
           )}
@@ -946,20 +948,20 @@ function Dash({ sal, pro, tar, isPaid }) {
             background: hasManque ? "rgba(181,74,58,0.15)" : "rgba(90,125,79,0.15)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <TrendingDown size={20} color={hasManque ? redText : C.greenText} strokeWidth={2}
+            <TrendingDown size={20} color={hasManque ? C.redText : C.greenText} strokeWidth={2}
               style={hasManque ? {} : { transform: "scaleY(-1)" }} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{
               fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase",
-              color: hasManque ? redText : C.greenText, marginBottom: 4,
+              color: hasManque ? C.redText : C.greenText, marginBottom: 4,
               display: "flex", alignItems: "center", gap: 6,
             }}>
               {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : <><Ico icon={Crosshair} size={14} color={C.greenText} /> Bénéfice généré par tes tarifs actuels</>}
             </div>
             {hasManque ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 30, fontWeight: 700, color: redText }}>
+                <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 30, fontWeight: 700, color: C.redText }}>
                   −{fmt(manqueMensuel)}<span style={{ fontSize: 14, fontWeight: 500 }}> /mois</span>
                 </span>
                 <div style={{ color: C.light, fontSize: 14, fontStyle: "italic" }}>
@@ -1219,10 +1221,10 @@ function Tar({ data, on, sal, pro, isPaid }) {
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 28 }}>
         {/* Row 1: Hours first, then vacation */}
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <label style={{ color: data.hs > 0 ? C.light : redText, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
+          <label style={{ color: data.hs > 0 ? C.light : C.redText, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
             Heures de travail / semaine {data.hs === 0 && "*"}
           </label>
-          <input className="pi" type="number" value={data.hs || ""} onChange={e => uP("hs", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" style={data.hs === 0 ? { border: `2px solid ${redText}` } : {}} />
+          <input className="pi" type="number" value={data.hs || ""} onChange={e => uP("hs", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" style={data.hs === 0 ? { border: `2px solid ${C.redText}` } : {}} />
         </div>
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <label style={{ color: C.light, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
@@ -1253,7 +1255,7 @@ function Tar({ data, on, sal, pro, isPaid }) {
       </div>
 
       {data.hs === 0 && (
-        <div style={{ color: redText, fontSize: 14, fontWeight: 600, marginBottom: 16, padding: "10px 16px", background: "rgba(181,74,58,0.08)", borderRadius: 10, border: `1px solid rgba(181,74,58,0.15)` }}>
+        <div style={{ color: C.redText, fontSize: 14, fontWeight: 600, marginBottom: 16, padding: "10px 16px", background: "rgba(181,74,58,0.08)", borderRadius: 10, border: `1px solid rgba(181,74,58,0.15)` }}>
           Remplis tes heures de travail par semaine pour calculer tes tarifs sur mesure
         </div>
       )}
@@ -1344,8 +1346,7 @@ export default function App() {
   const [authLoading, setAuthLoading] = useState(true);
   const [isPaid, setIsPaid] = useState(false);
   const [theme, setTheme] = useState(() => localStorage.getItem("tgp-theme") || "dark");
-  const redText = theme === "light" ? "#7b2411" : C.redText;
-  const redBg   = theme === "light" ? "rgba(123,36,17,0.07)" : C.redBg;
+
   const [showPaywall, setShowPaywall] = useState(false);
   const [userData, setUserData] = useState(null);
   const [route, setRoute] = useState(() => (typeof window !== "undefined" ? window.location.pathname : "/"));
@@ -1592,7 +1593,7 @@ export default function App() {
               fontFamily: "'Instrument Sans', sans-serif",
               transition: "all 0.3s",
             }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(181,74,58,0.3)"; e.currentTarget.style.color = redText; }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(181,74,58,0.3)"; e.currentTarget.style.color = C.redText; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
           >
             <RotateCcw size={13} strokeWidth={2} /><span className="hdr-btn-text"> Réinitialiser</span>
