@@ -381,6 +381,10 @@ input[type=number]{-moz-appearance:textfield}
   .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
   .tt{min-width:600px}
   .tgp{overflow-x:hidden}
+  .gc{overflow:hidden;width:100%}
+  .ir{width:100%;min-width:0}
+  .ifl{min-width:0;width:0}
+  .ifa{flex:0 0 70px;min-width:0}
 }
 
 /* ── BLUR LOCK ── */
