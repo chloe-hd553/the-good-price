@@ -876,7 +876,7 @@ function IR({ item, idx, on, onDelete, onUp, onDown, canUp, canDown }) {
 function Dash({ sal, pro, tar, isPaid, theme }) {
   const isLight = theme === "light";
   const manqueText  = isLight ? "#7b2411" : C.redText;
-  const manqueBg    = isLight ? "linear-gradient(135deg,rgba(123,36,17,0.09),rgba(123,36,17,0.05))" : "linear-gradient(135deg,rgba(61,37,25,0.85),rgba(44,31,18,0.7))";
+  const manqueBg    = isLight ? "linear-gradient(135deg,rgba(123,36,17,0.13),rgba(123,36,17,0.08))" : "linear-gradient(135deg,rgba(61,37,25,0.85),rgba(44,31,18,0.7))";
   const manqueBorder = isLight ? "rgba(123,36,17,0.28)" : "rgba(181,74,58,0.2)";
   const manqueIconBg = isLight ? "rgba(123,36,17,0.1)" : "rgba(181,74,58,0.15)";
   const ts = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes);
