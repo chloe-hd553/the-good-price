@@ -136,9 +136,9 @@ html,body{overflow-x:hidden;max-width:100vw}
 }
 .hdr-left{display:flex;align-items:center;gap:14px}
 .hdr-logo{
-  width:42px;height:42px;border-radius:50%;
+  width:42px;height:42px;min-width:42px;min-height:42px;border-radius:50%;
   background:linear-gradient(145deg,#795A34,#553F24);
-  display:flex;align-items:center;justify-content:center;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
   box-shadow:0 0 0 1px rgba(121,90,52,0.4),0 4px 16px rgba(0,0,0,0.3);
   color:#fef4b0;
 }
@@ -340,11 +340,13 @@ input[type=number]{-moz-appearance:textfield}
 
 /* ── RESPONSIVE: MOBILE ── */
 @media(max-width:640px){
-  .hdr{padding:14px 16px}
-  .hdr-name{font-size:20px}
-  .hdr-by{font-size:9px;letter-spacing:2px}
-  .hdr-logo{width:36px;height:36px}
-  .hdr-save{font-size:11px;padding:5px 10px}
+  .hdr{padding:10px 14px;gap:8px}
+  .hdr-name{font-size:17px;white-space:nowrap}
+  .hdr-by{font-size:8px;letter-spacing:2px}
+  .hdr-logo{width:36px;height:36px;min-width:36px;min-height:36px}
+  .hdr-save{font-size:11px;padding:5px 8px}
+  .hdr-btn-text{display:none}
+  .hdr-save-text{display:none}
 
   .nav{padding:0 12px;gap:0;overflow-x:auto}
   .nt{padding:12px 14px;font-size:13px;gap:6px}
@@ -1570,7 +1572,7 @@ export default function App() {
             onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(254,244,176,0.25)"; e.currentTarget.style.color = C.yellow; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
           >
-            <Upload size={13} strokeWidth={2} /> Importer
+            <Upload size={13} strokeWidth={2} /><span className="hdr-btn-text"> Importer</span>
           </button>
           <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleHeaderImport} style={{ display: "none" }} />
           <button
@@ -1588,10 +1590,10 @@ export default function App() {
             onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(181,74,58,0.3)"; e.currentTarget.style.color = C.redText; }}
             onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
           >
-            <RotateCcw size={13} strokeWidth={2} /> Réinitialiser
+            <RotateCcw size={13} strokeWidth={2} /><span className="hdr-btn-text"> Réinitialiser</span>
           </button>
           <div className={`hdr-save${sv ? " on" : ""}`}>
-            {sv ? <><Ico icon={Save} size={13} color={C.yellow} /> Sauvegarde...</> : <><Ico icon={Check} size={13} color={C.light} /> Sauvegardé</>}
+            {sv ? <><Ico icon={Save} size={13} color={C.yellow} /><span className="hdr-save-text"> Sauvegarde...</span></> : <><Ico icon={Check} size={13} color={C.light} /><span className="hdr-save-text"> Sauvegardé</span></>}
           </div>
           <UserMenu
             user={user}
