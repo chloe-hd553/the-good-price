@@ -343,9 +343,7 @@ input[type=number]{-moz-appearance:textfield}
   .hdr{padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));gap:6px;overflow:visible}
   .hdr-left{flex:1;min-width:0;overflow:hidden}
   .hdr-title-block{overflow:hidden}
-  .hdr-name{font-size:16px;white-space:normal;line-height:1.2}
-  .hdr-price{display:block;font-size:16px}
-  .mobile-br{display:block}
+  .hdr-name{font-size:16px;white-space:nowrap;line-height:1.2}
   .hdr-by{font-size:7px;letter-spacing:3px;white-space:nowrap}
   .hdr-logo{width:34px;height:34px;min-width:34px;min-height:34px}
   .hdr-save{font-size:11px;padding:5px 6px}
@@ -1540,7 +1538,7 @@ export default function App() {
         <div className="hdr-left">
           <div className="hdr-logo"><Scissors size={20} strokeWidth={2} /></div>
           <div className="hdr-title-block">
-            <div className="hdr-name">The Good<br className="mobile-br" /><span className="hdr-price">Price</span></div>
+            <div className="hdr-name">The Good Price</div>
             <div className="hdr-by">Your Hair Business</div>
           </div>
         </div>
