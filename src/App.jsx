@@ -967,10 +967,9 @@ function Dash({ sal, pro, tar, isPaid, theme }) {
                 <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 30, fontWeight: 700, color: manqueText }}>
                   −{fmt(manqueMensuel)}<span style={{ fontSize: 14, fontWeight: 500 }}> /mois</span>
                 </span>
-                <div style={{ color: C.light, fontSize: 14, fontStyle: "italic" }}>
-                  Taux horaire réel : {Math.round(tauxReel)} €/h vs {th} €/h nécessaire
-                  <br />
-                  {nbSousTarif} tarif{nbSousTarif > 1 ? "s" : ""} en dessous du tarif recommandé
+                <div style={{ color: C.light, fontSize: 11, fontStyle: "italic", display: "flex", flexDirection: "column", gap: 2 }}>
+                  <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>Taux horaire réel : {Math.round(tauxReel)} €/h vs {th} €/h nécessaire</span>
+                  <span style={{ whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }}>{nbSousTarif} tarif{nbSousTarif > 1 ? "s" : ""} en dessous du tarif recommandé</span>
                 </div>
               </div>
             ) : (
