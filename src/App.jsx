@@ -378,7 +378,7 @@ input[type=number]{-moz-appearance:textfield}
   .tr{padding:10px 14px}
   .tr-l{font-size:12px}
   .tr-v{font-size:18px}
-  .hint{font-size:13px}
+  .hint{font-size:11px;line-height:1.4}
 
   .row-actions{opacity:0.6}
 
