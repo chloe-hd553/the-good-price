@@ -873,7 +873,12 @@ function IR({ item, idx, on, onDelete, onUp, onDown, canUp, canDown }) {
   );
 }
 
-function Dash({ sal, pro, tar, isPaid }) {
+function Dash({ sal, pro, tar, isPaid, theme }) {
+  const isLight = theme === "light";
+  const manqueText  = isLight ? "#7b2411" : C.redText;
+  const manqueBg    = isLight ? "linear-gradient(135deg,rgba(123,36,17,0.09),rgba(123,36,17,0.05))" : "linear-gradient(135deg,rgba(61,37,25,0.85),rgba(44,31,18,0.7))";
+  const manqueBorder = isLight ? "rgba(123,36,17,0.28)" : "rgba(181,74,58,0.2)";
+  const manqueIconBg = isLight ? "rgba(123,36,17,0.1)" : "rgba(181,74,58,0.15)";
   const ts = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes);
   const tf = sum(pro.fixes), tv = sum(pro.variables), tc = sum(pro.charges), tt = sum(pro.tresorerie);
   const ca = ts + tf + tv + tc + tt, caA = ca * 12;
@@ -937,31 +942,29 @@ function Dash({ sal, pro, tar, isPaid }) {
         <div style={{
           display: "flex", alignItems: "center", gap: 18,
           padding: "18px 28px", borderRadius: 16,
-          background: hasManque
-            ? "linear-gradient(135deg, rgba(61,37,25,0.85), rgba(44,31,18,0.7))"
-            : "linear-gradient(135deg, rgba(45,59,40,0.6), rgba(44,31,18,0.5))",
-          border: `1px solid ${hasManque ? "rgba(181,74,58,0.2)" : "rgba(90,125,79,0.2)"}`,
+          background: hasManque ? manqueBg : "linear-gradient(135deg, rgba(45,59,40,0.6), rgba(44,31,18,0.5))",
+          border: `1px solid ${hasManque ? manqueBorder : "rgba(90,125,79,0.2)"}`,
           position: "relative", overflow: "hidden",
         }}>
           <div style={{
             width: 44, height: 44, borderRadius: 12, flexShrink: 0,
-            background: hasManque ? "rgba(181,74,58,0.15)" : "rgba(90,125,79,0.15)",
+            background: hasManque ? manqueIconBg : "rgba(90,125,79,0.15)",
             display: "flex", alignItems: "center", justifyContent: "center",
           }}>
-            <TrendingDown size={20} color={hasManque ? C.redText : C.greenText} strokeWidth={2}
+            <TrendingDown size={20} color={hasManque ? manqueText : C.greenText} strokeWidth={2}
               style={hasManque ? {} : { transform: "scaleY(-1)" }} />
           </div>
           <div style={{ flex: 1 }}>
             <div style={{
               fontSize: 12, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase",
-              color: hasManque ? C.redText : C.greenText, marginBottom: 4,
+              color: hasManque ? manqueText : C.greenText, marginBottom: 4,
               display: "flex", alignItems: "center", gap: 6,
             }}>
               {hasManque ? "CA perdu chaque mois avec tes tarifs actuels" : <><Ico icon={Crosshair} size={14} color={C.greenText} /> Bénéfice généré par tes tarifs actuels</>}
             </div>
             {hasManque ? (
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 30, fontWeight: 700, color: C.redText }}>
+                <span style={{ fontFamily: "'Cormorant Garamond',serif", fontSize: 30, fontWeight: 700, color: manqueText }}>
                   −{fmt(manqueMensuel)}<span style={{ fontSize: 14, fontWeight: 500 }}> /mois</span>
                 </span>
                 <div style={{ color: C.light, fontSize: 14, fontStyle: "italic" }}>
