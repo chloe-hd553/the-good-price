@@ -42,8 +42,8 @@ export default async function handler(req, res) {
     return res.status(500).json({ error: "Configuration email manquante" });
   }
 
-  const DEST_EMAIL = "chloe-huissoud@hotmail.fr";
-  const FROM_DISPLAY = "The Good Price <onboarding@resend.dev>";
+  const DEST_EMAIL = "hello.chezchloe@outlook.com";
+  const FROM_DISPLAY = "The Good Price <contact@yourhairbusiness.fr>";
 
   /* ── Email à Chloé ── */
   const adminHtml = `
