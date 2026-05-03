@@ -61,6 +61,7 @@ const styles = `
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;0,700&family=Instrument+Sans:ital,wght@0,400;0,500;0,600;0,700&display=swap');
 
 *{box-sizing:border-box;margin:0;padding:0}
+html,body{overflow-x:hidden;max-width:100vw}
 
 .tgp{
   min-height:100vh;
@@ -376,6 +377,10 @@ input[type=number]{-moz-appearance:textfield}
 
   .tb{padding:18px 20px;border-radius:14px}
   .pi{font-size:18px;padding:12px 14px}
+
+  .tw{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  .tt{min-width:600px}
+  .tgp{overflow-x:hidden}
 }
 
 /* ── BLUR LOCK ── */
