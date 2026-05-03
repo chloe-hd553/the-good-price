@@ -340,16 +340,18 @@ input[type=number]{-moz-appearance:textfield}
 
 /* ── RESPONSIVE: MOBILE ── */
 @media(max-width:640px){
-  .hdr{padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));gap:6px}
-  .hdr-name{font-size:17px;white-space:normal;line-height:1.2}
-  .hdr-price{display:block;letter-spacing:0.38em}
+  .hdr{padding:10px 14px;padding-top:max(10px,env(safe-area-inset-top));gap:6px;overflow:visible}
+  .hdr-left{flex:1;min-width:0;overflow:hidden}
+  .hdr-title-block{overflow:hidden}
+  .hdr-name{font-size:16px;white-space:normal;line-height:1.2}
+  .hdr-price{display:block;font-size:16px}
   .mobile-br{display:block}
-  .hdr-by{font-size:8px;letter-spacing:2.5px;white-space:nowrap}
-  .hdr-logo{width:36px;height:36px;min-width:36px;min-height:36px}
+  .hdr-by{font-size:7px;letter-spacing:3px;white-space:nowrap}
+  .hdr-logo{width:34px;height:34px;min-width:34px;min-height:34px}
   .hdr-save{font-size:11px;padding:5px 6px}
   .hdr-btn-text{display:none}
   .hdr-save-text{display:none}
-  .hdr-actions{gap:6px !important;flex-shrink:0}
+  .hdr-actions{gap:4px !important;flex-shrink:0}
 
   .nav{padding:0 12px;gap:0;overflow-x:auto}
   .nt{padding:12px 14px;font-size:13px;gap:6px}
@@ -1537,7 +1539,7 @@ export default function App() {
       <header className="hdr">
         <div className="hdr-left">
           <div className="hdr-logo"><Scissors size={20} strokeWidth={2} /></div>
-          <div>
+          <div className="hdr-title-block">
             <div className="hdr-name">The Good<br className="mobile-br" /><span className="hdr-price">Price</span></div>
             <div className="hdr-by">Your Hair Business</div>
           </div>
