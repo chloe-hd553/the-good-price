@@ -1625,7 +1625,7 @@ export default function App() {
       </nav>
 
       <main className="main" style={{ paddingBottom: (!isPaid && tab === "tarifs" && tar.hs > 0) ? 100 : 32 }}>
-        {tab === "dashboard" && <Dash sal={sal} pro={pro} tar={tar} isPaid={isPaid} />}
+        {tab === "dashboard" && <Dash sal={sal} pro={pro} tar={tar} isPaid={isPaid} theme={theme} />}
         {tab === "salaire" && <Sal data={sal} on={setSal} />}
         {tab === "pro" && <Pro data={pro} on={setPro} sal={sal} />}
         {tab === "tarifs" && <Tar data={tar} on={setTar} sal={sal} pro={pro} isPaid={isPaid} />}
