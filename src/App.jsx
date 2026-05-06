@@ -1,12 +1,17 @@
 import { useState, useEffect, useRef } from "react";
 import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, Tooltip, Legend, ResponsiveContainer } from "recharts";
-import { Scissors, LayoutDashboard, Wallet, Briefcase, Crosshair, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw, Lock, LogOut, Mail, KeyRound, Eye, EyeOff, Sun, Moon } from "lucide-react";
+import { Scissors, LayoutDashboard, Wallet, Briefcase, Crosshair, Calendar, Clock, TrendingUp, TrendingDown, ChevronRight, ChevronUp, ChevronDown, PiggyBank, ShieldCheck, Receipt, Vault, AlertTriangle, Save, Check, CircleDot, BarChart3, Info, ArrowRight, Upload, FileSpreadsheet, Plus, X, RotateCcw, Lock, LogOut, Mail, KeyRound, Eye, EyeOff, Sun, Moon, Smartphone, Monitor } from "lucide-react";
 import * as XLSX from "xlsx";
 import { supabase } from "./supabase.js";
 import PaywallModal from "./PaywallModal.jsx";
 import ThankYouPage from "./ThankYouPage.jsx";
 import CancelPage from "./CancelPage.jsx";
 import UserMenu from "./UserMenu.jsx";
+import OnboardingTour from "./OnboardingTour.jsx";
+
+// 🚩 Feature flag : tuto visible seulement pour cet email pendant les tests
+// Pour l'activer pour toutes les clientes, changer en : () => true
+const TOUR_ENABLED = (email) => email === "chloe-huissoud@hotmail.fr";
 
 /* ── PALETTE STRICTE ── */
 const C = {
@@ -633,7 +638,7 @@ function AuthPage({ onAuth }) {
         const { data, error: err } = await supabase.auth.signUp({ email, password });
         if (err) throw err;
         if (data.user && !data.user.email_confirmed_at) {
-          setSuccess("Un email de confirmation va t'être envoyé par « Supabase Auth ». Pense à vérifier tes spams. Clique sur le lien dans ce mail puis reviens ici pour te connecter.");
+          setSuccess("Un email de confirmation vient de t'être envoyé. Clique sur le lien qu'il contient pour activer ton compte — pense à vérifier tes spams si tu ne le vois pas. Une fois confirmé, reviens ici pour te connecter.");
           setMode("login");
         } else if (data.user) {
           if (remember) {
@@ -919,13 +924,13 @@ function Dash({ sal, pro, tar, isPaid, theme }) {
       </div>
 
       {/* KPI 2x2 — always balanced */}
-      <div className="kpis">
+      <div className="kpis" data-tour="dashboard-cards">
         {[{ icon: Wallet, l: "Salaire net", v: fmt(ts), s: "Ce que tu te verses / mois", lock: false },
           { icon: Briefcase, l: "CA nécessaire", v: fmt(ca), s: "Ton objectif de CA / mois", lock: false },
-          { icon: Crosshair, l: "Taux horaire", v: `${th} €/h`, s: "Ta valeur / heure", lock: true },
+          { icon: Crosshair, l: "Taux horaire", v: `${th} €/h`, s: "Ta valeur / heure", lock: true, tour: "taux-horaire" },
           { icon: Calendar, l: "CA annuel", v: fmt(caA), s: "Objectif annuel", lock: false }
         ].map((k, i) => (
-          <div className="kpi" key={i}>
+          <div className="kpi" key={i} {...(k.tour ? { "data-tour": k.tour } : {})}>
             <div className="kpi-icon">
               <Ico icon={k.icon} size={14} color={C.light} />
               <span className="kpi-label">{k.l}</span>
@@ -1119,7 +1124,7 @@ function Sal({ data, on }) {
         <span className="rb-label"><Ico icon={Wallet} size={18} color={C.light} /> Mon Salaire Souhaité</span>
         <span className="rb-val">{fmt(t)}</span>
       </div>
-      <div className="g3">
+      <div className="g3" data-tour="salaire-sections">
         {[["fixes", "Dépenses fixes", data.fixes, ShieldCheck], ["variables", "Dépenses variables", data.variables, Receipt], ["epargnes", "Épargnes", data.epargnes, PiggyBank]].map(([k, title, items, icon]) => (
           <div key={k}>
             <div className="sh"><SectionIcon icon={icon} /><div className="sh-text">{title}</div></div>
@@ -1203,7 +1208,9 @@ function Pro({ data, on, sal }) {
   );
 }
 
-function Tar({ data, on, sal, pro, isPaid }) {
+function Tar({ data, on, sal, pro, isPaid, theme }) {
+  const isLight = theme === "light";
+  const redAlert = isLight ? "#B54A3A" : C.redText;
   const ts = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes);
   const ca = ts + sum(pro.fixes) + sum(pro.variables) + sum(pro.charges) + sum(pro.tresorerie);
   const caA = ca * 12, sw = 52 - (data.sv || 0), ha = (data.hs || 0) * sw, th = ha > 0 ? Math.ceil(caA / ha) : 0;
@@ -1220,13 +1227,13 @@ function Tar({ data, on, sal, pro, isPaid }) {
 
   return (
     <div className="fi">
-      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 28 }}>
+      <div data-tour="tarifs-hours" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 28 }}>
         {/* Row 1: Hours first, then vacation */}
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
-          <label style={{ color: data.hs > 0 ? C.light : C.redText, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
+          <label style={{ color: data.hs > 0 ? C.light : redAlert, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
             Heures de travail / semaine {data.hs === 0 && "*"}
           </label>
-          <input className="pi" type="number" value={data.hs || ""} onChange={e => uP("hs", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" style={data.hs === 0 ? { border: `2px solid ${C.redText}` } : {}} />
+          <input className="pi" type="number" value={data.hs || ""} onChange={e => uP("hs", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" style={data.hs === 0 ? { border: `2px solid ${redAlert}` } : {}} />
         </div>
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <label style={{ color: C.light, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
@@ -1257,7 +1264,7 @@ function Tar({ data, on, sal, pro, isPaid }) {
       </div>
 
       {data.hs === 0 && (
-        <div style={{ color: C.redText, fontSize: 14, fontWeight: 600, marginBottom: 16, padding: "10px 16px", background: "rgba(181,74,58,0.08)", borderRadius: 10, border: `1px solid rgba(181,74,58,0.15)` }}>
+        <div style={{ color: redAlert, fontSize: 14, fontWeight: 600, marginBottom: 16, padding: "10px 16px", background: "rgba(181,74,58,0.08)", borderRadius: 10, border: `1px solid rgba(181,74,58,0.15)` }}>
           Remplis tes heures de travail par semaine pour calculer tes tarifs sur mesure
         </div>
       )}
@@ -1266,7 +1273,7 @@ function Tar({ data, on, sal, pro, isPaid }) {
 
       <div className="hint hint-y" style={{ marginBottom: 16 }}><Ico icon={Clock} size={13} color={C.light} /> Comment remplir les durées : 30 min = 0.5 · 45 min = 0.75 · 1h = 1 · 1h30 = 1.5 · 2h = 2</div>
 
-      <div style={{ overflowX: "auto" }}>
+      <div data-tour="tarifs-table" style={{ overflowX: "auto" }}>
         <table className="tt">
           <thead>
             <tr>
@@ -1336,6 +1343,117 @@ function Tar({ data, on, sal, pro, isPaid }) {
   );
 }
 
+function EmailConfirmedScreen({ onDone }) {
+  const [countdown, setCountdown] = useState(4);
+  useEffect(() => {
+    const t = setInterval(() => {
+      setCountdown(n => {
+        if (n <= 1) { clearInterval(t); onDone(); return 0; }
+        return n - 1;
+      });
+    }, 1000);
+    return () => clearInterval(t);
+  }, []);
+  return (
+    <div style={{ background: C.dark, borderRadius: 20, padding: "44px 32px", maxWidth: 480, width: "100%", textAlign: "center", border: `1px solid ${C.med}` }}>
+      <div style={{ width: 72, height: 72, margin: "0 auto 24px", borderRadius: "50%", background: C.yellow, display: "flex", alignItems: "center", justifyContent: "center" }}>
+        <Check size={36} color={C.bg} strokeWidth={3} />
+      </div>
+      <div style={{ color: C.yellow, fontFamily: "'Cormorant Garamond', serif", fontSize: 34, fontWeight: 700, lineHeight: 1.1, marginBottom: 14 }}>
+        Email confirmé !
+      </div>
+      <div style={{ color: C.beige, fontSize: 15, lineHeight: 1.6, marginBottom: 28, opacity: 0.9 }}>
+        Ton adresse email est bien vérifiée.<br />
+        Tu peux maintenant te connecter et accéder à ton espace.
+      </div>
+      <button onClick={onDone} style={{ background: C.yellow, color: C.bg, border: "none", borderRadius: 12, padding: "13px 28px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif" }}>
+        Me connecter →
+      </button>
+      <div style={{ marginTop: 16, color: C.light, fontSize: 12 }}>
+        Redirection automatique dans {countdown}s
+      </div>
+    </div>
+  );
+}
+
+function InstallPromptIOS({ onDismiss, onSnooze, showDismiss }) {
+  const [step, setStep] = useState("preview");
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div style={{ background: C.dark, borderRadius: 20, maxWidth: 340, width: "100%", textAlign: "center", border: `1px solid ${C.med}`, overflow: "hidden" }}>
+        <img src="/install-preview.png" alt="App sur l\'écran d\'accueil" style={{ width: "100%", maxHeight: 340, objectFit: "contain", display: "block", margin: "0 auto" }} />
+        <div style={{ padding: "20px 24px 24px" }}>
+          {step === "preview" ? (
+            <>
+              <button onClick={() => setStep("tutorial")} style={{ width: "100%", background: C.yellow, color: C.bg, border: "none", borderRadius: 12, padding: "14px 20px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif", marginBottom: 12 }}>
+                Ajouter à mon écran d\'accueil
+              </button>
+              <button onClick={onSnooze} style={{ background: "none", border: "none", color: C.light, fontSize: 13, cursor: "pointer", display: "block", width: "100%", marginBottom: 6 }}>
+                Plus tard
+              </button>
+              {showDismiss && <button onClick={onDismiss} style={{ background: "none", border: "none", color: C.light, fontSize: 12, cursor: "pointer", opacity: 0.6 }}>
+                Non merci, je n\'en ai pas besoin
+              </button>}
+            </>
+          ) : (
+            <>
+              <div style={{ textAlign: "left", marginBottom: 20 }}>
+                {[
+                  { num: "1", text: <><strong style={{color:C.beige}}>Appuie sur le bouton partage</strong> en bas de Safari</> },
+                  { num: "2", text: <>Fais défiler et appuie sur <strong style={{color:C.beige}}>"Sur l\'écran d\'accueil"</strong></> },
+                  { num: "3", text: <>Appuie sur <strong style={{color:C.beige}}>"Ajouter"</strong> en haut à droite</> },
+                ].map(({ num, text }) => (
+                  <div key={num} style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
+                    <div style={{ minWidth: 28, height: 28, borderRadius: "50%", background: C.yellow, color: C.bg, fontWeight: 700, fontSize: 13, display: "flex", alignItems: "center", justifyContent: "center", flexShrink: 0 }}>{num}</div>
+                    <div style={{ color: C.light, fontSize: 14, lineHeight: 1.5, paddingTop: 4 }}>{text}</div>
+                  </div>
+                ))}
+              </div>
+              <button onClick={onSnooze} style={{ background: "none", border: "none", color: C.light, fontSize: 13, cursor: "pointer", display: "block", width: "100%", marginBottom: 6 }}>
+                Plus tard
+              </button>
+              {showDismiss && <button onClick={onDismiss} style={{ background: "none", border: "none", color: C.light, fontSize: 12, cursor: "pointer", opacity: 0.6 }}>
+                Non merci, je n\'en ai pas besoin
+              </button>}
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function InstallPrompt({ onInstall, onDismiss, onSnooze, isDesktop, showDismiss }) {
+  return (
+    <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+      <div style={{ background: C.dark, borderRadius: 20, maxWidth: 340, width: "100%", textAlign: "center", border: `1px solid ${C.med}`, overflow: "hidden" }}>
+        {isDesktop ? (
+          <div style={{ padding: "32px 24px 8px", display: "flex", flexDirection: "column", alignItems: "center", gap: 12 }}>
+            <div style={{ width: 72, height: 72, borderRadius: 18, background: C.bg, border: `2px solid ${C.med}`, display: "flex", alignItems: "center", justifyContent: "center" }}>
+              <Scissors size={32} color={C.yellow} strokeWidth={1.5} />
+            </div>
+            <div style={{ color: C.yellow, fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 700 }}>The Good Price</div>
+            <div style={{ color: C.light, fontSize: 13, lineHeight: 1.5 }}>Installe l\'app sur ton bureau pour y accéder en un clic, sans passer par le navigateur.</div>
+          </div>
+        ) : (
+          <img src="/install-preview.png" alt="App sur l\'écran d\'accueil" style={{ width: "100%", maxHeight: 340, objectFit: "contain", display: "block" }} />
+        )}
+        <div style={{ padding: "20px 24px 24px" }}>
+          <button onClick={onInstall} style={{ width: "100%", background: C.yellow, color: C.bg, border: "none", borderRadius: 12, padding: "14px 20px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif", marginBottom: 12 }}>
+            {isDesktop ? "Installer sur mon bureau" : "Ajouter à mon écran d\'accueil"}
+          </button>
+          <button onClick={onSnooze} style={{ background: "none", border: "none", color: C.light, fontSize: 13, cursor: "pointer", display: "block", width: "100%", marginBottom: 6 }}>
+            Plus tard
+          </button>
+          {showDismiss && <button onClick={onDismiss} style={{ background: "none", border: "none", color: C.light, fontSize: 12, cursor: "pointer", opacity: 0.6 }}>
+            Non merci, je n\'en ai pas besoin
+          </button>}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [tab, setTab] = useState("dashboard");
   const [sal, setSal] = useState(dSal);
@@ -1352,7 +1470,18 @@ export default function App() {
   const [showPaywall, setShowPaywall] = useState(false);
   const [userData, setUserData] = useState(null);
   const [route, setRoute] = useState(() => (typeof window !== "undefined" ? window.location.pathname : "/"));
+  const [emailJustConfirmed, setEmailJustConfirmed] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const hash = window.location.hash;
+    return hash.includes("type=signup") || hash.includes("type=email_change");
+  });
+  const [showInstall, setShowInstall] = useState(false);
+  const [showInstallIOS, setShowInstallIOS] = useState(false);
+  const [showTour, setShowTour] = useState(false);
+  const deferredPrompt = useRef(null);
   const importRef = useRef(null);
+
+  const isIOS = typeof window !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.navigator.standalone;
 
   // Check auth session on mount — gestion "rester connectée"
   useEffect(() => {
@@ -1378,6 +1507,65 @@ export default function App() {
     });
     return () => subscription.unsubscribe();
   }, []);
+
+  // Capture beforeinstallprompt (stocké pour déclencher l'install au clic)
+  useEffect(() => {
+    if (window.__deferredInstallPrompt) {
+      deferredPrompt.current = window.__deferredInstallPrompt;
+    }
+    const handler = (e) => {
+      e.preventDefault();
+      deferredPrompt.current = e;
+      window.__deferredInstallPrompt = e;
+    };
+    window.addEventListener("beforeinstallprompt", handler);
+    return () => window.removeEventListener("beforeinstallprompt", handler);
+  }, []);
+
+  // Détecte si l'app a été désinstallée → réinitialise uniquement le flag "installée"
+  useEffect(() => {
+    if (!user) return;
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+    if (!isStandalone) {
+      localStorage.removeItem(`tgp-install-installed-${user.id}`);
+    }
+  }, [user]);
+
+  // Affiche la popup dès que l'user est connecté (clés localStorage par user ID)
+  useEffect(() => {
+    if (!user) return;
+    if (isIOS) return;
+    const isStandalone = window.matchMedia("(display-mode: standalone)").matches;
+    if (isStandalone) return;
+    const uid = user.id;
+    if (localStorage.getItem(`tgp-install-dismissed-${uid}`)) return;
+    if (localStorage.getItem(`tgp-install-installed-${uid}`)) return;
+    const count = parseInt(localStorage.getItem(`tgp-install-count-${uid}`) || "0") + 1;
+    localStorage.setItem(`tgp-install-count-${uid}`, count.toString());
+    setShowInstall(true);
+  }, [user]);
+
+  // Affiche le tuto iOS après connexion
+  useEffect(() => {
+    if (!user || !isIOS) return;
+    const uid = user.id;
+    const dismissed = localStorage.getItem(`tgp-install-ios-dismissed-${uid}`);
+    if (dismissed) return;
+    const t = setTimeout(() => {
+      const count = parseInt(localStorage.getItem(`tgp-install-ios-count-${uid}`) || "0") + 1;
+      localStorage.setItem(`tgp-install-ios-count-${uid}`, count.toString());
+      setShowInstallIOS(true);
+    }, 1500);
+    return () => clearTimeout(t);
+  }, [user]);
+
+  // Démarre le tuto pour les nouveaux utilisateurs (avec feature flag)
+  useEffect(() => {
+    if (!user) return;
+    if (!TOUR_ENABLED(user.email)) return;
+    const done = localStorage.getItem(`tgp-tour-done-${user.id}`);
+    if (!done) setShowTour(true);
+  }, [user]);
 
   // Load data from Supabase when user logs in
   useEffect(() => {
@@ -1497,6 +1685,38 @@ export default function App() {
     setOk(false);
   };
 
+  const handleTourComplete = () => {
+    if (user?.id) localStorage.setItem(`tgp-tour-done-${user.id}`, "true");
+    setShowTour(false);
+  };
+
+  const handleInstall = async () => {
+    const uid = user?.id;
+    const prompt = deferredPrompt.current || window.__deferredInstallPrompt;
+    if (prompt) {
+      prompt.prompt();
+      const { outcome } = await prompt.userChoice;
+      if (outcome === "accepted" && uid) localStorage.setItem(`tgp-install-installed-${uid}`, "true");
+      deferredPrompt.current = null;
+      window.__deferredInstallPrompt = null;
+    }
+    setShowInstall(false);
+  };
+  const handleInstallDismiss = () => { if (user?.id) localStorage.setItem(`tgp-install-dismissed-${user.id}`, "true"); setShowInstall(false); };
+  const handleInstallSnooze = () => { setShowInstall(false); };
+  const handleInstallIOSDismiss = () => { if (user?.id) localStorage.setItem(`tgp-install-ios-dismissed-${user.id}`, "true"); setShowInstallIOS(false); };
+  const handleInstallIOSSnooze = () => { setShowInstallIOS(false); };
+
+  // Confirmation email
+  if (emailJustConfirmed) {
+    return (
+      <div style={{ background: C.bg, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", padding: 24, fontFamily: "'Instrument Sans', sans-serif" }}>
+        <style>{styles}</style>
+        <EmailConfirmedScreen onDone={() => { window.history.replaceState({}, "/", "/"); setEmailJustConfirmed(false); }} />
+      </div>
+    );
+  }
+
   // Redirection retour Stripe
   if (route === "/merci") {
     return <ThankYouPage onContinue={() => { window.history.replaceState({}, "", "/"); setRoute("/"); }} />;
@@ -1539,6 +1759,9 @@ export default function App() {
   return (
     <div className={`tgp${theme === "light" ? " light" : ""}`}>
       <style>{styles}</style>
+      {showTour && <OnboardingTour currentTab={tab} setTab={setTab} onComplete={handleTourComplete} />}
+      {showInstall && <InstallPrompt onInstall={handleInstall} onDismiss={handleInstallDismiss} onSnooze={handleInstallSnooze} isDesktop={!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)} showDismiss={parseInt(localStorage.getItem(`tgp-install-count-${user?.id}`) || "0") >= 3} />}
+      {showInstallIOS && <InstallPromptIOS onDismiss={handleInstallIOSDismiss} onSnooze={handleInstallIOSSnooze} showDismiss={parseInt(localStorage.getItem(`tgp-install-ios-count-${user?.id}`) || "0") >= 3} />}
       <header className="hdr">
         <div className="hdr-left">
           <div className="hdr-logo"><Scissors size={20} strokeWidth={2} /></div>
@@ -1600,14 +1823,35 @@ export default function App() {
           >
             <RotateCcw size={13} strokeWidth={2} /><span className="hdr-btn-text"> Réinitialiser</span>
           </button>
-          <div className={`hdr-save${sv ? " on" : ""}`}>
+          <div data-tour="save-btn" className={`hdr-save${sv ? " on" : ""}`}>
             {sv ? <><Ico icon={Save} size={13} color={C.yellow} /><span className="hdr-save-text"> Sauvegarde...</span></> : <><Ico icon={Check} size={13} color={C.light} /><span className="hdr-save-text"> Sauvegardé</span></>}
           </div>
+          {!window.matchMedia("(display-mode: standalone)").matches && !window.navigator.standalone && !localStorage.getItem(`tgp-install-dismissed-${user?.id}`) && (
+            <button
+              onClick={() => isIOS ? setShowInstallIOS(true) : setShowInstall(true)}
+              title={isIOS || /Android/i.test(navigator.userAgent) ? "Ajouter à mon écran d'accueil" : "Installer sur mon bureau"}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: 32, height: 32, borderRadius: "50%",
+                border: `1px solid rgba(121,90,52,0.15)`,
+                background: "rgba(121,90,52,0.06)",
+                color: C.light, cursor: "pointer",
+                flexShrink: 0,
+              }}
+              onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(254,244,176,0.25)"; e.currentTarget.style.color = C.yellow; }}
+              onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
+            >
+              {isIOS || /Android/i.test(navigator.userAgent) ? <Smartphone size={14} strokeWidth={2} /> : <Monitor size={14} strokeWidth={2} />}
+            </button>
+          )}
           <UserMenu
             user={user}
             isPaid={isPaid}
             userData={userData}
             onLogout={handleLogout}
+            onInstall={() => isIOS ? setShowInstallIOS(true) : setShowInstall(true)}
+            isInstalled={window.matchMedia("(display-mode: standalone)").matches || !!window.navigator.standalone}
+            onRestartTour={() => { localStorage.removeItem(`tgp-tour-done-${user?.id}`); setShowTour(true); }}
             theme={theme}
           />
         </div>
@@ -1617,7 +1861,7 @@ export default function App() {
         {[{ id: "dashboard", icon: LayoutDashboard, l: "Dashboard" }, { id: "salaire", icon: Wallet, l: "Mon Salaire" },
           { id: "pro", icon: Briefcase, l: "Mon CA Pro" }, { id: "tarifs", icon: Scissors, l: "Mes Tarifs" }
         ].map(t => (
-          <button key={t.id} className={`nt${tab === t.id ? " on" : ""}`} onClick={() => setTab(t.id)}>
+          <button key={t.id} data-tour={`tab-${t.id}`} className={`nt${tab === t.id ? " on" : ""}`} onClick={() => setTab(t.id)}>
             <Ico icon={t.icon} size={16} color="currentColor" />{t.l}
           </button>
         ))}
@@ -1627,7 +1871,7 @@ export default function App() {
         {tab === "dashboard" && <Dash sal={sal} pro={pro} tar={tar} isPaid={isPaid} theme={theme} />}
         {tab === "salaire" && <Sal data={sal} on={setSal} />}
         {tab === "pro" && <Pro data={pro} on={setPro} sal={sal} />}
-        {tab === "tarifs" && <Tar data={tar} on={setTar} sal={sal} pro={pro} isPaid={isPaid} />}
+        {tab === "tarifs" && <Tar data={tar} on={setTar} sal={sal} pro={pro} isPaid={isPaid} theme={theme} />}
       </main>
 
       {/* Unlock CTA — only on tarifs tab when both params filled */}
