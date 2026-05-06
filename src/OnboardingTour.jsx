@@ -27,7 +27,7 @@ const STEPS = [
   },
   {
     target: '[data-tour="salaire-sections"]', tab: "salaire", pos: "bottom",
-    text: "Tu as 3 catégories :\n• Dépenses fixes : les mêmes chaque mois (loyer, abonnements...)\n• Dépenses variables : qui changent (courses, sorties...)\n• Épargne : ce que tu mets de côté\n\n💡 Astuce : remplis avec des montants un peu plus hauts que la réalité. Qui peut le plus peut le moins, tu te construis une vraie sécurité.",
+    text: "Tu as 3 catégories :\n• Dépenses fixes : les mêmes chaque mois (loyer, abonnements...)\n• Dépenses variables : qui changent (courses, sorties...)\n• Épargne : ce que tu mets de côté\n\n💡 Astuce : remplis avec des montants un peu plus hauts que la réalité. Qui peut le plus peut le moins !",
   },
   {
     target: '[data-tour="tab-pro"]', tab: "pro", pos: "bottom",
@@ -154,14 +154,14 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
       // Place above
       style.bottom = vh - (rect.top - PAD - 12);
     } else if (s.pos === "bottom" || s.pos === "bottom-left") {
-      // Place below if space, otherwise above, otherwise clamp
-      if (spaceBelow >= BUBBLE_H) {
-        style.top = rect.bottom + PAD + 12;
-      } else if (spaceAbove >= BUBBLE_H) {
-        style.bottom = vh - (rect.top - PAD - 12);
+      // Place below the target, clamped so bubble never exits viewport
+      const idealTop = rect.bottom + PAD + 12;
+      // Use bottom anchor if placing below would overflow
+      if (idealTop + BUBBLE_H > vh - 16) {
+        // Anchor from bottom of viewport instead
+        style.bottom = 16;
       } else {
-        // Not enough space either side → clamp to bottom of screen with margin
-        style.top = Math.max(12, vh - BUBBLE_H - 16);
+        style.top = idealTop;
       }
     } else if (spaceBelow >= BUBBLE_H) {
       style.top = rect.bottom + PAD + 12;
@@ -197,7 +197,7 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
       )}
 
       {/* ── Bulle ── */}
-      <div style={{ ...getBubbleStyle(), zIndex: 10000, background: C.dark, border: `1px solid ${C.med}`, borderRadius: 18, padding: "20px 22px 18px", boxShadow: "0 24px 64px rgba(0,0,0,0.55)", fontFamily: "'Instrument Sans', sans-serif", display: "flex", flexDirection: "column" }}>
+      <div style={{ ...getBubbleStyle(), zIndex: 10000, background: C.dark, border: `1px solid ${C.med}`, borderRadius: 18, padding: "20px 22px 18px", boxShadow: "0 24px 64px rgba(0,0,0,0.55)", fontFamily: "'Instrument Sans', sans-serif", display: "flex", flexDirection: "column", maxHeight: "calc(100vh - 40px)", overflow: "hidden" }}>
 
         {/* En-tête : photo + nom + compteur + croix */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
