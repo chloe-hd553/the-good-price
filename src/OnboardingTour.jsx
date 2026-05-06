@@ -34,12 +34,12 @@ const STEPS = [
     text: "Ensuite, tes dépenses Pro.\n\nFais la même chose avec tes charges professionnelles : loyer du salon, produits, formations, assurances...\nTout ce que ton activité te coûte chaque mois.",
   },
   {
-    target: '[data-tour="tarifs-hours"]', tab: "tarifs", pos: "bottom",
+    target: '[data-tour="tarifs-inputs"]', tab: "tarifs", pos: "bottom",
     text: "Ici commence la magie ✨\n\n👉 HEURES / SEMAINE : combien d'heures tu travailles (ou voudrais travailler)\n👉 SEMAINES DE VACANCES : combien tu en prends par an\n\n👥 Plusieurs collaborateurs ? Indique le total de toute l'équipe.",
   },
   {
     target: '[data-tour="tarifs-table"]', tab: "tarifs", pos: "top", anchorRight: true,
-    text: "Maintenant, remplis ton tableau de prestations.\n\nPour chaque soin, note le temps passé sur la cliente :\n• Une seule cliente à la fois → le temps total\n• Plusieurs en parallèle → le temps exact passé sur chacune",
+    text: "Pour chaque prestation, note le temps passé sur la cliente :\n• Une seule cliente à la fois → le temps total\n• Plusieurs en parallèle → le temps exact passé sur chacune",
   },
   {
     target: '[data-tour="tarifs-table"]', tab: "tarifs", pos: "top", anchorRight: true,
@@ -54,8 +54,8 @@ const STEPS = [
     text: "Et voilà le résultat ! ✨\n\nPour chaque prestation, tu vois le prix que tu devrais appliquer, et l'écart avec ton tarif actuel.\n\nPlus d'approximation, que des chiffres précis !",
   },
   {
-    target: '[data-tour="dashboard-stats"]', tab: "dashboard", pos: "bottom",
-    text: "Ce bandeau résume l'impact de tes tarifs actuels.\n\nEn rouge : tu laisses de l'argent sur la table chaque mois.\nEn vert : tu es au-dessus de ton objectif. 💪\n\nC'est souvent là que le déclic se fait.",
+    target: '[data-tour="dashboard-stats"]', tab: "dashboard", pos: "bottom", anchorRight: true,
+    text: "Ce bandeau résume l'impact de tes tarifs actuels.\n\nEn rouge : tu laisses de l'argent sur la table chaque mois (et je te dirais combien exactement)\nEn vert : tu es au-dessus de ton objectif 👏🏽",
   },
   {
     target: '[data-tour="dashboard-charts"]', tab: "dashboard", pos: "top",
@@ -67,11 +67,11 @@ const STEPS = [
   },
   {
     target: '[data-tour="save-btn"]', tab: null, pos: "bottom",
-    text: "Pas de panique, tout est sauvegardé automatiquement 💾\n\nTu peux fermer l'onglet et revenir quand tu veux, tes données t'attendent exactement là où tu les as laissées.",
+    text: "Pas de panique, tout est sauvegardé automatiquement 💾\n\nTu peux fermer l'appli et revenir quand tu veux, tes données t'attendent exactement là où tu les as laissées.",
   },
   {
     target: '[data-tour="user-menu"]', tab: null, pos: "bottom-left",
-    text: "En cliquant sur tes initiales ici, tu accèdes à :\n• Ton compte & ton abonnement\n• Un accès direct pour me contacter si tu as une question 💌",
+    text: "En cliquant ici, tu accèdes à :\n• Ton compte & ton abonnement\n• Un accès direct pour me contacter si tu as une question 💌",
   },
   {
     target: null, tab: "dashboard", pos: "center",

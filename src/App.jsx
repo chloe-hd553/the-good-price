@@ -1228,7 +1228,8 @@ function Tar({ data, on, sal, pro, isPaid, theme }) {
   return (
     <div className="fi">
       <div data-tour="tarifs-hours" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, marginBottom: 28 }}>
-        {/* Row 1: Hours first, then vacation */}
+        {/* Row 1: Hours + vacation — spotlit as tarifs-inputs */}
+        <div data-tour="tarifs-inputs" style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 14, gridColumn: "1 / -1" }}>
         <div className="gc" style={{ display: "flex", flexDirection: "column", justifyContent: "center" }}>
           <label style={{ color: data.hs > 0 ? C.light : redAlert, fontSize: 10, display: "block", marginBottom: 8, fontWeight: 500, letterSpacing: 1.5, textTransform: "uppercase" }}>
             Heures de travail / semaine {data.hs === 0 && "*"}
@@ -1241,6 +1242,7 @@ function Tar({ data, on, sal, pro, isPaid, theme }) {
           </label>
           <input className="pi" type="number" value={data.sv || ""} onChange={e => uP("sv", e.target.value)} min="0" onWheel={e => e.target.blur()} placeholder="0" />
         </div>
+        </div>{/* /tarifs-inputs */}
 
         {/* Row 2 */}
         <div className="gc" style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
@@ -1281,7 +1283,7 @@ function Tar({ data, on, sal, pro, isPaid, theme }) {
               <th className="th-main" rowSpan={2} style={{ textAlign: "left", paddingLeft: 16, verticalAlign: "middle" }}>Prestation</th>
               <th className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Durée</th>
               <th className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs actuels</th>
-              <th className="th-min" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs sur mesure</th>
+              <th data-tour="tarifs-results" className="th-min" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs sur mesure</th>
               <th className="th-ec" colSpan={3} style={{ borderRadius: "0 10px 10px 0", paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Écart</th>
             </tr>
             <tr>
