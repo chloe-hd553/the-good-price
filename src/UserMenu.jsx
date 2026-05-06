@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, LogOut, CreditCard, Send, Paperclip, Check } from "lucide-react";
+import { X, LogOut, CreditCard, Send, Paperclip, Check, Smartphone, Monitor } from "lucide-react";
 
 /* ── Couleurs locales (miroir App.jsx) ── */
 const C = {
@@ -331,7 +331,7 @@ const fileToBase64 = (file) =>
 /* ══════════════════════════════════════════
    MON COMPTE PANEL
 ══════════════════════════════════════════ */
-function MonComptePanel({ user, isPaid, userData, onClose }) {
+function MonComptePanel({ user, isPaid, userData, onClose, onInstall, isInstalled, onRestartTour }) {
   const [portalLoading, setPortalLoading] = useState(false);
   const [portalError, setPortalError] = useState(null);
 
@@ -435,7 +435,7 @@ function MonComptePanel({ user, isPaid, userData, onClose }) {
               </div>
             )}
 
-            {isMonthly && hasCustomer && (
+      {isMonthly && hasCustomer && (
               <>
                 {portalError && (
                   <p
@@ -463,6 +463,34 @@ function MonComptePanel({ user, isPaid, userData, onClose }) {
           </div>
         )}
       </div>
+
+      {/* Section installation — visible si pas encore installée */}
+      {!isInstalled && onInstall && (
+        <div className="mpanel-section">
+          <div className="mpanel-section-label">Accès rapide</div>
+          {(() => {
+            const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+            return (
+              <button className="mpanel-btn" onClick={() => { onClose(); setTimeout(onInstall, 150); }}>
+                {isMobile ? <Smartphone size={15} /> : <Monitor size={15} />}
+                {isMobile ? "Ajouter à mon écran d'accueil" : "Installer sur mon bureau"}
+              </button>
+            );
+          })()}
+        </div>
+      )}
+
+      {/* Revoir le tutoriel */}
+      {onRestartTour && (
+        <div className="mpanel-section">
+          <div className="mpanel-section-label">Aide</div>
+          <button className="mpanel-btn" onClick={() => { onClose(); setTimeout(onRestartTour, 150); }}>
+            <Check size={15} />
+            Revoir le tutoriel
+          </button>
+        </div>
+      )}
+
     </div>
   );
 }
@@ -683,7 +711,7 @@ function ContactPanel({ user, onClose }) {
 /* ══════════════════════════════════════════
    USER MENU (export par défaut)
 ══════════════════════════════════════════ */
-export default function UserMenu({ user, isPaid, userData, onLogout, theme }) {
+export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, isInstalled, onRestartTour, theme }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState(null); // null | "compte" | "contact"
   const menuRef = useRef(null);
@@ -712,6 +740,7 @@ export default function UserMenu({ user, isPaid, userData, onLogout, theme }) {
         {/* ── Bouton avatar ── */}
         <button
           className="user-avatar"
+          data-tour="user-menu"
           onClick={() => setOpen((o) => !o)}
           title={user?.email}
           aria-label="Mon compte"
@@ -773,6 +802,9 @@ export default function UserMenu({ user, isPaid, userData, onLogout, theme }) {
               isPaid={isPaid}
               userData={userData}
               onClose={() => setView(null)}
+              onInstall={onInstall}
+              isInstalled={isInstalled}
+              onRestartTour={onRestartTour}
             />
           )}
           {view === "contact" && (
