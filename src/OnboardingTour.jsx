@@ -31,27 +31,35 @@ const STEPS = [
   },
   {
     target: '[data-tour="tab-pro"]', tab: "pro", pos: "bottom",
-    text: "Ensuite, Mon CA Pro.\n\nFais la même chose avec tes charges professionnelles : loyer du salon, produits, formations, assurances... Tout ce que ton activité te coûte chaque mois.",
+    text: "Ensuite, tes dépenses Pro.\n\nFais la même chose avec tes charges professionnelles : loyer du salon, produits, formations, assurances...\nTout ce que ton activité te coûte chaque mois.",
   },
   {
     target: '[data-tour="tarifs-hours"]', tab: "tarifs", pos: "bottom",
-    text: "Ici commence la magie ✨\n\nIndique le nombre d'heures que tu travailles (ou souhaiterais travailler) par semaine, et tes semaines de vacances à l'année.\n\n👥 Plusieurs collaborateurs ? Indique le nombre TOTAL d'heures travaillées et de semaines de vacances de toute l'équipe.",
+    text: "Ici commence la magie ✨\n\n👉 HEURES / SEMAINE : combien d'heures tu travailles (ou voudrais travailler)\n👉 SEMAINES DE VACANCES : combien tu en prends par an\n\n👥 Plusieurs collaborateurs ? Indique le total de toute l'équipe.",
   },
   {
-    target: '[data-tour="tarifs-table"]', tab: "tarifs", pos: "top",
+    target: '[data-tour="tarifs-table"]', tab: "tarifs", pos: "top", anchorRight: true,
     text: "Maintenant, remplis ton tableau de prestations.\n\nPour chaque soin, note le temps passé sur la cliente :\n• Une seule cliente à la fois → le temps total\n• Plusieurs en parallèle → le temps exact passé sur chacune",
   },
   {
-    target: '[data-tour="tarifs-table"]', tab: "tarifs", pos: "top",
+    target: '[data-tour="tarifs-table"]', tab: "tarifs", pos: "top", anchorRight: true,
     text: "Indique aussi ton tarif actuel pour voir l'écart.\n\nPour les durées :\n⏱ 30 min = 0.5\n⏱ 45 min = 0.75\n⏱ 1h = 1\n⏱ 1h30 = 1.5\n⏱ 2h = 2",
   },
   {
-    target: '[data-tour="taux-horaire"]', tab: "dashboard", pos: "bottom",
+    target: '[data-tour="taux-horaire-tarifs"]', tab: "tarifs", pos: "top", anchorRight: true,
     text: "Ce chiffre est ta boussole 🧭\n\nC'est ton tarif sur mesure pour chaque heure de travail, calculé sur la base de tes vrais besoins. Tout ce qui suit est basé sur lui.",
   },
   {
     target: '[data-tour="tarifs-results"]', tab: "tarifs", pos: "top",
-    text: "Et voilà le résultat ! ✨\n\nPour chaque prestation, tu vois le prix que tu devrais appliquer, et l'écart avec ton tarif actuel.\n\nPlus d'approximation, que des chiffres qui ont du sens.",
+    text: "Et voilà le résultat ! ✨\n\nPour chaque prestation, tu vois le prix que tu devrais appliquer, et l'écart avec ton tarif actuel.\n\nPlus d'approximation, que des chiffres précis !",
+  },
+  {
+    target: '[data-tour="dashboard-stats"]', tab: "dashboard", pos: "bottom",
+    text: "Ce bandeau résume l'impact de tes tarifs actuels.\n\nEn rouge : tu laisses de l'argent sur la table chaque mois.\nEn vert : tu es au-dessus de ton objectif. 💪\n\nC'est souvent là que le déclic se fait.",
+  },
+  {
+    target: '[data-tour="dashboard-charts"]', tab: "dashboard", pos: "top",
+    text: "Ces graphiques te donnent une vision claire de la répartition de ton CA et de tes tarifs prestation par prestation.\n\nUn outil pour suivre ta progression dans le temps.",
   },
   {
     target: '[data-tour="dashboard-cards"]', tab: "dashboard", pos: "bottom",
@@ -67,7 +75,7 @@ const STEPS = [
   },
   {
     target: null, tab: "dashboard", pos: "center",
-    text: "Je crois qu'on a fait le tour ! 🎉\n\nMaintenant, c'est à toi de jouer.\nTu n'as plus d'excuse pour sous-facturer 😉",
+    text: "Je crois qu'on a fait le tour ! 🎉\n\nMaintenant, c'est à toi de jouer. Tu n'as plus d'excuse pour sous-facturer 😉\n\n(Pour revoir ce tuto à tout moment, clique sur tes initiales en haut à droite.)",
     cta: "Let's go !",
   },
 ];
@@ -123,6 +131,8 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
     else onComplete();
   };
 
+  const prev = () => { if (step > 0) setStep(v => v - 1); };
+
   const skip = () => onComplete();
 
   if (!visible) return null;
@@ -171,7 +181,7 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
     }
 
     // Horizontal
-    if (s.pos === "bottom-left") {
+    if (s.pos === "bottom-left" || s.anchorRight) {
       style.right = 16;
     } else {
       style.left = Math.max(16, Math.min(rect.left - PAD, vw - bw - 16));
@@ -233,16 +243,26 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
         </div>
 
         {/* Boutons */}
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-          <button
-            onClick={skip}
-            style={{ background: "none", border: "none", color: C.light, fontSize: 12, cursor: "pointer", opacity: 0.65, padding: 0 }}
-          >
-            Passer le tuto
-          </button>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {step > 0 && (
+              <button
+                onClick={prev}
+                style={{ background: "none", border: `1px solid ${C.med}`, color: C.light, borderRadius: 10, padding: "9px 14px", fontSize: 13, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif" }}
+              >
+                ←
+              </button>
+            )}
+            <button
+              onClick={skip}
+              style={{ background: "none", border: "none", color: C.light, fontSize: 12, cursor: "pointer", opacity: 0.65, padding: 0 }}
+            >
+              Passer le tuto
+            </button>
+          </div>
           <button
             onClick={next}
-            style={{ background: C.yellow, color: C.bg, border: "none", borderRadius: 10, padding: "10px 20px", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: "'Instrument Sans', sans-serif" }}
+            style={{ background: C.yellow, color: C.bg, border: "none", borderRadius: 10, padding: "10px 20px", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: "'Instrument Sans', sans-serif", flexShrink: 0 }}
           >
             {s.cta || "Suivant"} <ChevronRight size={16} />
           </button>

@@ -944,7 +944,7 @@ function Dash({ sal, pro, tar, isPaid, theme }) {
 
       {/* Manque à gagner mensuel */}
       {th > 0 && totalDurees > 0 && (
-        <div style={{
+        <div data-tour="dashboard-stats" style={{
           display: "flex", alignItems: "center", gap: 18,
           padding: "18px 28px", borderRadius: 16,
           background: hasManque ? manqueBg : "linear-gradient(135deg, rgba(45,59,40,0.6), rgba(44,31,18,0.5))",
@@ -1058,7 +1058,7 @@ function Dash({ sal, pro, tar, isPaid, theme }) {
         </div>
 
         {/* RIGHT: Charts or ghosts */}
-        <div style={{ display: "flex", flexDirection: "column", gap: 18 }}>
+        <div data-tour="dashboard-charts" style={{ display: "flex", flexDirection: "column", gap: 18 }}>
           <div className="gc">
             <div style={{ color: "var(--accent)", fontSize: 15, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase", marginBottom: 16, display: "flex", alignItems: "center", gap: 8 }}>
               <SectionIcon icon={TrendingUp} />
@@ -1253,7 +1253,7 @@ function Tar({ data, on, sal, pro, isPaid, theme }) {
         </div>
 
         {/* Row 3: Taux horaire — full width */}
-        <div className="tb" style={{ gridColumn: "1 / -1" }}>
+        <div className="tb" data-tour="taux-horaire-tarifs" style={{ gridColumn: "1 / -1" }}>
           <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 16 }}>
             <Ico icon={Crosshair} size={22} color={C.dark} />
             <span style={{ color: C.dark, fontSize: 13, fontWeight: 600, letterSpacing: 2, textTransform: "uppercase" }}>Taux horaire</span>
