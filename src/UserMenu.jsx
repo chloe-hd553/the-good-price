@@ -830,4 +830,11 @@ export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, 
         </div>
         </div>,
         document.body
-     
+      )}
+    </>
+  );
+}
+      )}
+    </>
+  );
+}
