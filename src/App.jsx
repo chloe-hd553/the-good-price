@@ -1280,7 +1280,7 @@ function Tar({ data, on, sal, pro, isPaid, theme }) {
           <thead>
             <tr>
               <th className="th-main" rowSpan={2} style={{ borderRadius: "10px 0 0 10px", width: 40 }}></th>
-              <th className="th-main" rowSpan={2} style={{ textAlign: "left", paddingLeft: 16, verticalAlign: "middle" }}>Prestation</th>
+              <th data-tour="tarifs-head-prestation" className="th-main" rowSpan={2} style={{ textAlign: "left", paddingLeft: 16, verticalAlign: "middle" }}>Prestation</th>
               <th data-tour="tarifs-head-duree" className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Durée</th>
               <th data-tour="tarifs-head-actuels" className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs actuels</th>
               <th data-tour="tarifs-results" className="th-min" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs sur mesure</th>
@@ -1339,7 +1339,7 @@ function Tar({ data, on, sal, pro, isPaid, theme }) {
             })}
           </tbody>
         </table>
-        <AddRow onClick={addPrestation} label="Ajouter une prestation" />
+        <div data-tour="tarifs-add-prestation"><AddRow onClick={addPrestation} label="Ajouter une prestation" /></div>
       </div>
     </div>
   );

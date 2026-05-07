@@ -1,5 +1,4 @@
 // src/OnboardingTour.jsx
-// Tuto guidé, feature flag : visible seulement pour l'email de test
 
 import { useState, useEffect } from "react";
 import { X, ChevronRight } from "lucide-react";
@@ -11,78 +10,117 @@ const C = {
 
 const PAD = 10;
 
+// Props de step :
+//   target        : sélecteur CSS unique
+//   targets       : tableau de sélecteurs → rect = union de tous
+//   extendToBottom: sélecteur → étend rect.bottom jusqu'au bas de cet élément
+//   scrollBlock   : "start" | "center" (défaut "center")
+//   tab           : onglet à activer
+//   pos           : "center" | "bottom" | "bottom-left" | "top"
+//   anchorRight   : bulle collée à droite
+//   anchorLeft    : bulle collée à gauche
+//   cta           : texte du bouton principal
+
 const STEPS = [
-  {
-    target: '[data-tour="theme-toggle"]', tab: "dashboard", pos: "bottom-left",
-    text: "Commence par choisir ton ambiance : mode sombre ou mode clair ☀️🌙\n\nClique sur ce bouton à tout moment pour basculer. Trouve celui qui te correspond le mieux !",
-  },
+  // 1 — Bienvenue
   {
     target: null, tab: "dashboard", pos: "center",
     text: "Hello, c'est Chloé ! 👋\n\nBienvenue dans The Good Price. Dans quelques minutes, tu vas savoir exactement quoi facturer pour faire plus d'argent. Pas plus d'heures.\n\nJe te guide ?",
   },
+  // 2 — Mode clair / sombre
+  {
+    target: '[data-tour="theme-toggle"]', tab: "dashboard", pos: "bottom-left",
+    text: "Commence par choisir ton ambiance : mode sombre ou mode clair ☀️🌙\n\nClique sur ce bouton à tout moment pour basculer. Trouve celui qui te correspond le mieux !",
+  },
+  // 3 — 4 onglets
   {
     target: "nav.nav", tab: "dashboard", pos: "bottom",
     text: "Voilà tes 4 onglets principaux. On va les parcourir ensemble !\n\nChacun a son rôle précis dans le calcul de tes tarifs. Tu verras, c'est simple 😉",
   },
+  // 4 — Mon Salaire
   {
     target: '[data-tour="tab-salaire"]', tab: "salaire", pos: "bottom",
     text: "On commence ici : ton salaire.\n\nPour savoir ce que tu devrais facturer, il faut d'abord savoir ce dont tu as besoin pour vivre. Renseigne TOUTES tes dépenses perso, loyer, courses, épargne...",
   },
+  // 5 — Sections salaire (scroll au début pour voir les titres de colonnes)
   {
     target: '[data-tour="salaire-sections"]', tab: "salaire", pos: "bottom",
+    scrollBlock: "start",
     text: "Tu as 3 catégories :\n• Dépenses fixes : les mêmes chaque mois (loyer, abonnements...)\n• Dépenses variables : qui changent (courses, sorties...)\n• Épargne : ce que tu mets de côté\n\n💡 Astuce : remplis avec des montants un peu plus hauts que la réalité. Qui peut le plus peut le moins !",
   },
+  // 6 — Mon Pro
   {
     target: '[data-tour="tab-pro"]', tab: "pro", pos: "bottom",
     text: "Ensuite, tes dépenses Pro.\n\nFais la même chose avec tes charges professionnelles : loyer du salon, produits, formations, assurances...\nTout ce que ton activité te coûte chaque mois.",
   },
+  // 7 — Heures / Vacances
   {
     target: '[data-tour="tarifs-inputs"]', tab: "tarifs", pos: "bottom",
     text: "Ici commence la magie ✨\n\nIndique d'abord :\n→ HEURES / SEMAINE : combien d'heures tu travailles à la semaine (ou voudrais travailler)\n→ VACANCES : combien tu en prends par an\n\n👥 Plusieurs collaborateurs ? Indique le TOTAL de toute l'équipe.",
   },
+  // 8 — Ajouter les prestations
   {
-    target: '[data-tour="tarifs-head-duree"]', tab: "tarifs", pos: "top", anchorRight: true,
-    text: "Puis, pour chaque prestation, note le temps passé sur la cliente :\n• Une seule cliente à la fois → le temps total\n• Plusieurs en parallèle → le temps exact passé sur chacune",
+    targets: ['[data-tour="tarifs-head-prestation"]'],
+    extendToBottom: '[data-tour="tarifs-add-prestation"]',
+    tab: "tarifs", pos: "top", anchorRight: true,
+    text: "Maintenant, remplis la liste de tes prestations.\n\nTape le nom de chaque soin dans la colonne PRESTATION.\nClique sur « Ajouter une prestation » pour en ajouter autant que tu veux.",
   },
+  // 9 — Durée (colonne entière)
   {
-    targets: ['[data-tour="tarifs-head-duree"]', '[data-tour="tarifs-head-actuels"]'],
+    targets: ['[data-tour="tarifs-head-duree"]'],
     extendToBottom: '[data-tour="tarifs-table"]',
     tab: "tarifs", pos: "top", anchorRight: true,
-    text: "Il ne te reste plus qu'à indiquer ton tarif actuel pour voir l'écart.\n\nPour les durées :\n⏱ 30 min = 0.5\n⏱ 45 min = 0.75\n⏱ 1h = 1\n⏱ 1h30 = 1.5\n⏱ 2h = 2",
+    text: "Puis, pour chaque prestation, note le temps passé sur la cliente :\n• Une seule cliente à la fois → le temps total\n• Plusieurs en parallèle → le temps exact passé sur chacune\n\nPour les durées :\n⏱ 30 min = 0.5\n⏱ 45 min = 0.75\n⏱ 1h = 1\n⏱ 1h30 = 1.5\n⏱ 2h = 2",
   },
+  // 10 — Tarifs actuels (colonne entière)
+  {
+    targets: ['[data-tour="tarifs-head-actuels"]'],
+    extendToBottom: '[data-tour="tarifs-table"]',
+    tab: "tarifs", pos: "top", anchorRight: true,
+    text: "Il ne te reste plus qu'à indiquer ton tarif actuel pour voir l'écart !\n\nRenseigne ce que tu factures actuellement pour chaque prestation.",
+  },
+  // 11 — Résultats : Tarifs sur mesure + Écart
   {
     targets: ['[data-tour="tarifs-results"]', '[data-tour="tarifs-ecart"]'],
     extendToBottom: '[data-tour="tarifs-table"]',
     tab: "tarifs", pos: "bottom", anchorLeft: true,
     text: "Et tadaaaaaam 🎉\n\nPour chaque prestation, tu vois le prix que tu devrais appliquer, et l'écart avec ton tarif actuel.\n\nPlus d'approximation, que des chiffres précis !",
   },
+  // 12 — Taux horaire
   {
     target: '[data-tour="taux-horaire-tarifs"]', tab: "tarifs", pos: "top", anchorRight: true,
     text: "Ce chiffre est ta boussole 🧭\n\nC'est ton tarif sur mesure pour chaque heure de travail, calculé sur la base de tes vrais besoins. Tout ce qui suit est basé sur lui.",
   },
+  // 13 — Dashboard stats
   {
     target: '[data-tour="dashboard-stats"]', tab: "dashboard", pos: "bottom", anchorRight: true,
     text: "Ce bandeau résume l'impact de tes tarifs actuels.\n\nEn rouge : tu laisses de l'argent sur la table chaque mois (et je te dirais combien exactement)\nEn vert : tu es au-dessus de ton objectif 👏🏽",
   },
+  // 14 — Graphiques
   {
     target: '[data-tour="dashboard-charts"]', tab: "dashboard", pos: "top", anchorLeft: true,
     text: "Ces graphiques te donnent une vision claire de la répartition de ton CA et de tes tarifs prestation par prestation.\n\nUn outil pour suivre ta progression dans le temps.",
   },
+  // 15 — Dashboard cards (scrollBehavior instant pour éviter le décalage du spotlight)
   {
     target: '[data-tour="dashboard-cards"]', tab: "dashboard", pos: "bottom",
+    scrollBlock: "start",
     text: "Le Dashboard te donne ta vue d'ensemble : ton salaire net visé, le CA nécessaire pour l'atteindre, ton taux horaire et ton objectif annuel.\n\nC'est ton tableau de bord, à consulter régulièrement.",
   },
+  // 16 — Sauvegarde
   {
     target: '[data-tour="save-btn"]', tab: null, pos: "bottom",
     text: "Et pas de panique, tout est sauvegardé automatiquement 💾\n\nTu peux fermer l'appli et revenir quand tu veux, tes données t'attendent exactement là où tu les as laissées.",
   },
+  // 17 — Menu utilisateur
   {
     target: '[data-tour="user-menu"]', tab: null, pos: "bottom-left",
     text: "En cliquant ici, tu accèdes à :\n• Ton compte & ton abonnement\n• Un accès direct pour me contacter si tu as une question 💌\n• Importer des données depuis l'ancienne version\n• Revoir ce tutoriel à tout moment",
   },
+  // 18 — Final
   {
     target: null, tab: "dashboard", pos: "center",
-    text: "Je crois qu'on a fait le tour ! 🎉\n\nMaintenant, c'est à toi de jouer. Tu n'as plus d'excuse pour sous-facturer 😉\n\n(Pour revoir ce tuto à tout moment, clique sur tes initiales en haut à droite.)",
+    text: "Je crois qu'on a fait le tour ! 🎉\nMaintenant, c'est à toi de jouer.\nTu n'as plus d'excuse pour sous-facturer 😉",
     cta: "Let's go !",
   },
 ];
@@ -113,7 +151,7 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
       setTab(s.tab);
     }
 
-    const delay = s.tab && s.tab !== currentTab ? 350 : 120;
+    const delay = s.tab && s.tab !== currentTab ? 400 : 150;
 
     const timer = setTimeout(() => {
       const selectors = s.targets || (s.target ? [s.target] : null);
@@ -132,8 +170,11 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
         return;
       }
 
-      els[0].scrollIntoView({ behavior: "smooth", block: "center" });
+      // Scroll vers le premier élément — "start" pour voir les titres de colonnes
+      const block = s.scrollBlock || "center";
+      els[0].scrollIntoView({ behavior: "instant", block });
 
+      // Délai après scroll pour laisser le layout se stabiliser
       setTimeout(() => {
         const rects = els.map(el => el.getBoundingClientRect());
         let top    = Math.min(...rects.map(r => r.top));
@@ -149,7 +190,7 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
         setRect({ top, left, right, bottom, width: right - left, height: bottom - top });
         setVisible(true);
         lockScroll();
-      }, 350);
+      }, 200);
     }, delay);
 
     return () => {
@@ -185,7 +226,6 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
     const bw = Math.min(380, vw - 32);
     const style = { position: "fixed", width: bw };
 
-    const spaceBelow = vh - rect.bottom - PAD - 20;
     const spaceAbove = rect.top - PAD - 20;
     const BUBBLE_H = 300;
 
@@ -198,10 +238,9 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
       } else {
         style.top = idealTop;
       }
-    } else if (spaceBelow >= BUBBLE_H) {
-      style.top = rect.bottom + PAD + 12;
     } else {
-      style.top = Math.max(12, (vh - BUBBLE_H) / 2);
+      // fallback : colle au bas du viewport
+      style.bottom = 16;
     }
 
     if (s.anchorLeft) {
