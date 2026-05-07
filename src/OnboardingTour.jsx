@@ -1,6 +1,5 @@
 // src/OnboardingTour.jsx
 // Tuto guidé, feature flag : visible seulement pour l'email de test
-// pour l'activer pour toutes : supprimer la condition FEATURE_FLAG dans App.jsx
 
 import { useState, useEffect } from "react";
 import { X, ChevronRight } from "lucide-react";
@@ -10,9 +9,13 @@ const C = {
   light: "#795A34", yellow: "#fef4b0", beige: "#f4e9d6",
 };
 
-const PAD = 10; // padding autour de l'élément ciblé
+const PAD = 10;
 
 const STEPS = [
+  {
+    target: '[data-tour="theme-toggle"]', tab: "dashboard", pos: "bottom-left",
+    text: "Commence par choisir ton ambiance : mode sombre ou mode clair ☀️🌙\n\nClique sur ce bouton à tout moment pour basculer. Trouve celui qui te correspond le mieux !",
+  },
   {
     target: null, tab: "dashboard", pos: "center",
     text: "Hello, c'est Chloé ! 👋\n\nBienvenue dans The Good Price. Dans quelques minutes, tu vas savoir exactement quoi facturer pour faire plus d'argent. Pas plus d'heures.\n\nJe te guide ?",
@@ -23,7 +26,7 @@ const STEPS = [
   },
   {
     target: '[data-tour="tab-salaire"]', tab: "salaire", pos: "bottom",
-    text: "On commence ici : Mon Salaire.\n\nPour savoir ce que tu devrais facturer, il faut d'abord savoir ce dont tu as besoin pour vivre. Renseigne TOUTES tes dépenses perso, loyer, courses, épargne...",
+    text: "On commence ici : ton salaire.\n\nPour savoir ce que tu devrais facturer, il faut d'abord savoir ce dont tu as besoin pour vivre. Renseigne TOUTES tes dépenses perso, loyer, courses, épargne...",
   },
   {
     target: '[data-tour="salaire-sections"]', tab: "salaire", pos: "bottom",
@@ -35,30 +38,34 @@ const STEPS = [
   },
   {
     target: '[data-tour="tarifs-inputs"]', tab: "tarifs", pos: "bottom",
-    text: "Ici commence la magie ✨\n\n👉 HEURES / SEMAINE : combien d'heures tu travailles (ou voudrais travailler)\n👉 SEMAINES DE VACANCES : combien tu en prends par an\n\n👥 Plusieurs collaborateurs ? Indique le total de toute l'équipe.",
+    text: "Ici commence la magie ✨\n\nIndique d'abord :\n→ HEURES / SEMAINE : combien d'heures tu travailles à la semaine (ou voudrais travailler)\n→ VACANCES : combien tu en prends par an\n\n👥 Plusieurs collaborateurs ? Indique le TOTAL de toute l'équipe.",
   },
   {
-    target: '[data-tour="tarifs-table"]', tab: "tarifs", pos: "top", anchorRight: true,
-    text: "Pour chaque prestation, note le temps passé sur la cliente :\n• Une seule cliente à la fois → le temps total\n• Plusieurs en parallèle → le temps exact passé sur chacune",
+    target: '[data-tour="tarifs-head-duree"]', tab: "tarifs", pos: "top", anchorRight: true,
+    text: "Puis, pour chaque prestation, note le temps passé sur la cliente :\n• Une seule cliente à la fois → le temps total\n• Plusieurs en parallèle → le temps exact passé sur chacune",
   },
   {
-    target: '[data-tour="tarifs-table"]', tab: "tarifs", pos: "top", anchorRight: true,
-    text: "Indique aussi ton tarif actuel pour voir l'écart.\n\nPour les durées :\n⏱ 30 min = 0.5\n⏱ 45 min = 0.75\n⏱ 1h = 1\n⏱ 1h30 = 1.5\n⏱ 2h = 2",
+    targets: ['[data-tour="tarifs-head-duree"]', '[data-tour="tarifs-head-actuels"]'],
+    extendToBottom: '[data-tour="tarifs-table"]',
+    tab: "tarifs", pos: "top", anchorRight: true,
+    text: "Il ne te reste plus qu'à indiquer ton tarif actuel pour voir l'écart.\n\nPour les durées :\n⏱ 30 min = 0.5\n⏱ 45 min = 0.75\n⏱ 1h = 1\n⏱ 1h30 = 1.5\n⏱ 2h = 2",
+  },
+  {
+    targets: ['[data-tour="tarifs-results"]', '[data-tour="tarifs-ecart"]'],
+    extendToBottom: '[data-tour="tarifs-table"]',
+    tab: "tarifs", pos: "bottom", anchorLeft: true,
+    text: "Et tadaaaaaam 🎉\n\nPour chaque prestation, tu vois le prix que tu devrais appliquer, et l'écart avec ton tarif actuel.\n\nPlus d'approximation, que des chiffres précis !",
   },
   {
     target: '[data-tour="taux-horaire-tarifs"]', tab: "tarifs", pos: "top", anchorRight: true,
     text: "Ce chiffre est ta boussole 🧭\n\nC'est ton tarif sur mesure pour chaque heure de travail, calculé sur la base de tes vrais besoins. Tout ce qui suit est basé sur lui.",
   },
   {
-    target: '[data-tour="tarifs-results"]', tab: "tarifs", pos: "top",
-    text: "Et voilà le résultat ! ✨\n\nPour chaque prestation, tu vois le prix que tu devrais appliquer, et l'écart avec ton tarif actuel.\n\nPlus d'approximation, que des chiffres précis !",
-  },
-  {
     target: '[data-tour="dashboard-stats"]', tab: "dashboard", pos: "bottom", anchorRight: true,
     text: "Ce bandeau résume l'impact de tes tarifs actuels.\n\nEn rouge : tu laisses de l'argent sur la table chaque mois (et je te dirais combien exactement)\nEn vert : tu es au-dessus de ton objectif 👏🏽",
   },
   {
-    target: '[data-tour="dashboard-charts"]', tab: "dashboard", pos: "top",
+    target: '[data-tour="dashboard-charts"]', tab: "dashboard", pos: "top", anchorLeft: true,
     text: "Ces graphiques te donnent une vision claire de la répartition de ton CA et de tes tarifs prestation par prestation.\n\nUn outil pour suivre ta progression dans le temps.",
   },
   {
@@ -67,11 +74,11 @@ const STEPS = [
   },
   {
     target: '[data-tour="save-btn"]', tab: null, pos: "bottom",
-    text: "Pas de panique, tout est sauvegardé automatiquement 💾\n\nTu peux fermer l'appli et revenir quand tu veux, tes données t'attendent exactement là où tu les as laissées.",
+    text: "Et pas de panique, tout est sauvegardé automatiquement 💾\n\nTu peux fermer l'appli et revenir quand tu veux, tes données t'attendent exactement là où tu les as laissées.",
   },
   {
     target: '[data-tour="user-menu"]', tab: null, pos: "bottom-left",
-    text: "En cliquant ici, tu accèdes à :\n• Ton compte & ton abonnement\n• Un accès direct pour me contacter si tu as une question 💌",
+    text: "En cliquant ici, tu accèdes à :\n• Ton compte & ton abonnement\n• Un accès direct pour me contacter si tu as une question 💌\n• Importer des données depuis l'ancienne version\n• Revoir ce tutoriel à tout moment",
   },
   {
     target: null, tab: "dashboard", pos: "center",
@@ -79,6 +86,15 @@ const STEPS = [
     cta: "Let's go !",
   },
 ];
+
+function unlockScroll() {
+  document.body.style.overflow = "";
+  document.body.style.touchAction = "";
+}
+function lockScroll() {
+  document.body.style.overflow = "hidden";
+  document.body.style.touchAction = "none";
+}
 
 export default function OnboardingTour({ currentTab, setTab, onComplete }) {
   const [step, setStep] = useState(0);
@@ -88,58 +104,72 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
   const s = STEPS[step];
   const total = STEPS.length;
 
-  // Quand l'étape change : switch tab + trouve l'élément cible
   useEffect(() => {
+    unlockScroll();
     setVisible(false);
     setRect(null);
 
-    // Switch d'onglet si besoin
     if (s.tab && s.tab !== currentTab) {
       setTab(s.tab);
     }
 
-    // Délai pour laisser le DOM se rendre
     const delay = s.tab && s.tab !== currentTab ? 350 : 120;
 
     const timer = setTimeout(() => {
-      if (!s.target) {
+      const selectors = s.targets || (s.target ? [s.target] : null);
+
+      if (!selectors) {
         setVisible(true);
+        lockScroll();
         return;
       }
-      const el = document.querySelector(s.target);
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-        setTimeout(() => {
-          const r = el.getBoundingClientRect();
-          setRect({
-            top: r.top, left: r.left,
-            right: r.right, bottom: r.bottom,
-            width: r.width, height: r.height,
-          });
-          setVisible(true);
-        }, 350);
-      } else {
-        setVisible(true); // pas de target trouvée → bulle sans spotlight
+
+      const els = selectors.map(sel => document.querySelector(sel)).filter(Boolean);
+
+      if (els.length === 0) {
+        setVisible(true);
+        lockScroll();
+        return;
       }
+
+      els[0].scrollIntoView({ behavior: "smooth", block: "center" });
+
+      setTimeout(() => {
+        const rects = els.map(el => el.getBoundingClientRect());
+        let top    = Math.min(...rects.map(r => r.top));
+        let left   = Math.min(...rects.map(r => r.left));
+        let right  = Math.max(...rects.map(r => r.right));
+        let bottom = Math.max(...rects.map(r => r.bottom));
+
+        if (s.extendToBottom) {
+          const bottomEl = document.querySelector(s.extendToBottom);
+          if (bottomEl) bottom = Math.max(bottom, bottomEl.getBoundingClientRect().bottom);
+        }
+
+        setRect({ top, left, right, bottom, width: right - left, height: bottom - top });
+        setVisible(true);
+        lockScroll();
+      }, 350);
     }, delay);
 
-    return () => clearTimeout(timer);
+    return () => {
+      clearTimeout(timer);
+      unlockScroll();
+    };
   }, [step]); // eslint-disable-line
 
   const next = () => {
     if (step < total - 1) setStep(v => v + 1);
-    else onComplete();
+    else { unlockScroll(); onComplete(); }
   };
 
   const prev = () => { if (step > 0) setStep(v => v - 1); };
-
-  const skip = () => onComplete();
+  const skip = () => { unlockScroll(); onComplete(); };
 
   if (!visible) return null;
 
   const isCenter = s.pos === "center" || !rect;
 
-  // ── Calcul position de la bulle ──────────────────────────────
   const getBubbleStyle = () => {
     if (isCenter) {
       return {
@@ -155,20 +185,15 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
     const bw = Math.min(380, vw - 32);
     const style = { position: "fixed", width: bw };
 
-    // Vertical, always keep bubble inside viewport
     const spaceBelow = vh - rect.bottom - PAD - 20;
     const spaceAbove = rect.top - PAD - 20;
-    const BUBBLE_H = 280; // estimated bubble height
+    const BUBBLE_H = 300;
 
     if (s.pos === "top" && spaceAbove > BUBBLE_H) {
-      // Place above
       style.bottom = vh - (rect.top - PAD - 12);
     } else if (s.pos === "bottom" || s.pos === "bottom-left") {
-      // Place below the target, clamped so bubble never exits viewport
       const idealTop = rect.bottom + PAD + 12;
-      // Use bottom anchor if placing below would overflow
       if (idealTop + BUBBLE_H > vh - 16) {
-        // Anchor from bottom of viewport instead
         style.bottom = 16;
       } else {
         style.top = idealTop;
@@ -176,12 +201,12 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
     } else if (spaceBelow >= BUBBLE_H) {
       style.top = rect.bottom + PAD + 12;
     } else {
-      // Center vertically as last resort
       style.top = Math.max(12, (vh - BUBBLE_H) / 2);
     }
 
-    // Horizontal
-    if (s.pos === "bottom-left" || s.anchorRight) {
+    if (s.anchorLeft) {
+      style.left = 16;
+    } else if (s.pos === "bottom-left" || s.anchorRight) {
       style.right = 16;
     } else {
       style.left = Math.max(16, Math.min(rect.left - PAD, vw - bw - 16));
@@ -192,30 +217,22 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
 
   return (
     <>
-      {/* ── Overlay spotlight ── */}
       {rect ? (
         <>
           <div style={{ position: "fixed", top: 0, left: 0, right: 0, height: Math.max(0, rect.top - PAD), background: "rgba(0,0,0,0.68)", zIndex: 9998, pointerEvents: "none" }} />
           <div style={{ position: "fixed", top: rect.bottom + PAD, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.68)", zIndex: 9998, pointerEvents: "none" }} />
           <div style={{ position: "fixed", top: Math.max(0, rect.top - PAD), left: 0, width: Math.max(0, rect.left - PAD), height: rect.height + PAD * 2, background: "rgba(0,0,0,0.68)", zIndex: 9998, pointerEvents: "none" }} />
           <div style={{ position: "fixed", top: Math.max(0, rect.top - PAD), left: rect.right + PAD, right: 0, height: rect.height + PAD * 2, background: "rgba(0,0,0,0.68)", zIndex: 9998, pointerEvents: "none" }} />
-          {/* Bordure jaune autour de l'élément */}
-          <div style={{ position: "fixed", top: rect.top - PAD, left: rect.left - PAD, width: rect.width + PAD * 2, height: rect.height + PAD * 2, border: `2px solid ${C.yellow}`, borderRadius: 10, zIndex: 9999, pointerEvents: "none", boxShadow: `0 0 16px rgba(254,244,176,0.2)` }} />
+          <div style={{ position: "fixed", top: rect.top - PAD, left: rect.left - PAD, width: rect.width + PAD * 2, height: rect.height + PAD * 2, border: `2px solid ${C.yellow}`, borderRadius: 10, zIndex: 9999, pointerEvents: "none", boxShadow: "0 0 16px rgba(254,244,176,0.2)" }} />
         </>
       ) : (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.68)", zIndex: 9998, pointerEvents: "none" }} />
       )}
 
-      {/* ── Bulle ── */}
       <div style={{ ...getBubbleStyle(), zIndex: 10000, background: C.dark, border: `1px solid ${C.med}`, borderRadius: 18, padding: "20px 22px 18px", boxShadow: "0 24px 64px rgba(0,0,0,0.55)", fontFamily: "'Instrument Sans', sans-serif", display: "flex", flexDirection: "column", maxHeight: "calc(100vh - 40px)", overflow: "hidden" }}>
 
-        {/* En-tête : photo + nom + compteur + croix */}
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-          <img
-            src="/chloe.png"
-            alt="Chloé"
-            style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover", border: `2px solid ${C.yellow}`, flexShrink: 0 }}
-          />
+          <img src="/chloe.png" alt="Chloé" style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover", border: `2px solid ${C.yellow}`, flexShrink: 0 }} />
           <div style={{ flex: 1 }}>
             <div style={{ color: C.yellow, fontSize: 13, fontWeight: 700, lineHeight: 1.2 }}>Chloé</div>
             <div style={{ color: C.light, fontSize: 11 }}>Your Hair Business</div>
@@ -223,47 +240,31 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
           <div style={{ color: C.light, fontSize: 12, opacity: 0.8, marginRight: 4, flexShrink: 0 }}>
             {step + 1} / {total}
           </div>
-          <button
-            onClick={skip}
-            title="Fermer le tuto"
-            style={{ background: "none", border: "none", color: C.light, cursor: "pointer", padding: 2, opacity: 0.5, display: "flex", alignItems: "center" }}
-          >
+          <button onClick={skip} title="Fermer le tuto" style={{ background: "none", border: "none", color: C.light, cursor: "pointer", padding: 2, opacity: 0.5, display: "flex", alignItems: "center" }}>
             <X size={15} />
           </button>
         </div>
 
-        {/* Texte */}
         <div style={{ color: C.beige, fontSize: 14, lineHeight: 1.7, marginBottom: 18, whiteSpace: "pre-line", overflowY: "auto", maxHeight: "min(200px, 40vh)", flexShrink: 1 }}>
           {s.text}
         </div>
 
-        {/* Barre de progression */}
         <div style={{ height: 3, borderRadius: 3, background: C.med, marginBottom: 16, overflow: "hidden" }}>
           <div style={{ height: "100%", width: `${((step + 1) / total) * 100}%`, background: C.yellow, borderRadius: 3, transition: "width 0.3s" }} />
         </div>
 
-        {/* Boutons */}
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", gap: 8 }}>
           <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
             {step > 0 && (
-              <button
-                onClick={prev}
-                style={{ background: "none", border: `1px solid ${C.med}`, color: C.light, borderRadius: 10, padding: "9px 14px", fontSize: 13, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif" }}
-              >
+              <button onClick={prev} style={{ background: "none", border: `1px solid ${C.med}`, color: C.light, borderRadius: 10, padding: "9px 14px", fontSize: 13, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif" }}>
                 ←
               </button>
             )}
-            <button
-              onClick={skip}
-              style={{ background: "none", border: "none", color: C.light, fontSize: 12, cursor: "pointer", opacity: 0.65, padding: 0 }}
-            >
+            <button onClick={skip} style={{ background: "none", border: "none", color: C.light, fontSize: 12, cursor: "pointer", opacity: 0.65, padding: 0 }}>
               Passer le tuto
             </button>
           </div>
-          <button
-            onClick={next}
-            style={{ background: C.yellow, color: C.bg, border: "none", borderRadius: 10, padding: "10px 20px", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: "'Instrument Sans', sans-serif", flexShrink: 0 }}
-          >
+          <button onClick={next} style={{ background: C.yellow, color: C.bg, border: "none", borderRadius: 10, padding: "10px 20px", fontSize: 14, fontWeight: 700, cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontFamily: "'Instrument Sans', sans-serif", flexShrink: 0 }}>
             {s.cta || "Suivant"} <ChevronRight size={16} />
           </button>
         </div>

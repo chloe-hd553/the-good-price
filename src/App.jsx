@@ -1281,10 +1281,10 @@ function Tar({ data, on, sal, pro, isPaid, theme }) {
             <tr>
               <th className="th-main" rowSpan={2} style={{ borderRadius: "10px 0 0 10px", width: 40 }}></th>
               <th className="th-main" rowSpan={2} style={{ textAlign: "left", paddingLeft: 16, verticalAlign: "middle" }}>Prestation</th>
-              <th className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Durée</th>
-              <th className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs actuels</th>
+              <th data-tour="tarifs-head-duree" className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Durée</th>
+              <th data-tour="tarifs-head-actuels" className="th-main" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs actuels</th>
               <th data-tour="tarifs-results" className="th-min" colSpan={3} style={{ paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Tarifs sur mesure</th>
-              <th className="th-ec" colSpan={3} style={{ borderRadius: "0 10px 10px 0", paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Écart</th>
+              <th data-tour="tarifs-ecart" className="th-ec" colSpan={3} style={{ borderRadius: "0 10px 10px 0", paddingBottom: 2, fontSize: 13, borderLeft: "6px solid #2C1F12" }}>Écart</th>
             </tr>
             <tr>
               <th className="th-main" style={{ fontSize: 10, fontWeight: 400, paddingTop: 0, borderLeft: "6px solid #2C1F12" }}>Courte</th>
@@ -1774,6 +1774,7 @@ export default function App() {
         </div>
         <div className="hdr-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <button
+            data-tour="theme-toggle"
             onClick={toggleTheme}
             title={theme === "dark" ? "Mode clair" : "Mode sombre"}
             style={{
@@ -1790,41 +1791,7 @@ export default function App() {
           >
             {theme === "dark" ? <Sun size={13} strokeWidth={2} /> : <Moon size={13} strokeWidth={2} />}
           </button>
-          <button
-            onClick={() => importRef.current?.click()}
-            title="Importer depuis l'ancienne version"
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px", borderRadius: 20,
-              border: `1px solid rgba(121,90,52,0.15)`,
-              background: "rgba(121,90,52,0.06)",
-              color: C.light, fontSize: 12, cursor: "pointer",
-              fontFamily: "'Instrument Sans', sans-serif",
-              transition: "all 0.3s",
-            }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(254,244,176,0.25)"; e.currentTarget.style.color = C.yellow; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
-          >
-            <Upload size={13} strokeWidth={2} /><span className="hdr-btn-text"> Importer</span>
-          </button>
           <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleHeaderImport} style={{ display: "none" }} />
-          <button
-            onClick={handleReset}
-            title="Repartir à zéro"
-            style={{
-              display: "flex", alignItems: "center", gap: 6,
-              padding: "6px 12px", borderRadius: 20,
-              border: `1px solid rgba(121,90,52,0.15)`,
-              background: "rgba(121,90,52,0.06)",
-              color: C.light, fontSize: 12, cursor: "pointer",
-              fontFamily: "'Instrument Sans', sans-serif",
-              transition: "all 0.3s",
-            }}
-            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(181,74,58,0.3)"; e.currentTarget.style.color = C.redText; }}
-            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
-          >
-            <RotateCcw size={13} strokeWidth={2} /><span className="hdr-btn-text"> Réinitialiser</span>
-          </button>
           <div data-tour="save-btn" className={`hdr-save${sv ? " on" : ""}`}>
             {sv ? <><Ico icon={Save} size={13} color={C.yellow} /><span className="hdr-save-text"> Sauvegarde...</span></> : <><Ico icon={Check} size={13} color={C.light} /><span className="hdr-save-text"> Sauvegardé</span></>}
           </div>
@@ -1855,6 +1822,8 @@ export default function App() {
             isInstalled={window.matchMedia("(display-mode: standalone)").matches || !!window.navigator.standalone}
             onRestartTour={() => { localStorage.removeItem(`tgp-tour-done-${user?.id}`); setShowTour(true); }}
             theme={theme}
+            onImportClick={() => importRef.current?.click()}
+            onReset={handleReset}
           />
         </div>
       </header>

@@ -711,7 +711,7 @@ function ContactPanel({ user, onClose }) {
 /* ══════════════════════════════════════════
    USER MENU (export par défaut)
 ══════════════════════════════════════════ */
-export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, isInstalled, onRestartTour, theme }) {
+export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, isInstalled, onRestartTour, theme, onImportClick, onReset }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState(null); // null | "compte" | "contact"
   const menuRef = useRef(null);
@@ -776,6 +776,18 @@ export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, 
                 <Check size={15} /> Revoir le tutoriel
               </button>
             )}
+            {onImportClick && (
+              <button className="udrop-item" onClick={() => { setOpen(false); onImportClick(); }}>
+                <Upload size={15} /> Importer
+              </button>
+            )}
+            <div className="udrop-div" />
+            <button
+              className="udrop-item udrop-danger"
+              onClick={() => { setOpen(false); if (window.confirm("Remettre toutes les données à zéro ?")) onReset?.(); }}
+            >
+              <RotateCcw size={15} /> Réinitialiser
+            </button>
             <div className="udrop-div" />
             <button
               className="udrop-item udrop-danger"
