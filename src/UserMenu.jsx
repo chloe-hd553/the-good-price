@@ -771,14 +771,14 @@ export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, 
             >
               <Send size={15} /> Contact
             </button>
-            {onRestartTour && (
-              <button className="udrop-item" onClick={() => { setOpen(false); setTimeout(onRestartTour, 150); }}>
-                <Check size={15} /> Revoir le tutoriel
-              </button>
-            )}
             {onImportClick && (
               <button className="udrop-item" onClick={() => { setOpen(false); onImportClick(); }}>
                 <Upload size={15} /> Importer
+              </button>
+            )}
+            {onRestartTour && (
+              <button className="udrop-item" onClick={() => { setOpen(false); setTimeout(onRestartTour, 150); }}>
+                <Check size={15} /> Revoir le tutoriel
               </button>
             )}
             <div className="udrop-div" />
@@ -830,7 +830,4 @@ export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, 
         </div>
         </div>,
         document.body
-      )}
-    </>
-  );
-}
+     

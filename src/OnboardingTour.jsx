@@ -10,120 +10,130 @@ const C = {
 
 const PAD = 10;
 
-// Props de step :
-//   target        : sélecteur CSS unique
-//   targets       : tableau de sélecteurs → rect = union de tous
-//   extendToBottom: sélecteur → étend rect.bottom jusqu'au bas de cet élément
-//   scrollBlock   : "start" | "center" (défaut "center")
-//   tab           : onglet à activer
-//   pos           : "center" | "bottom" | "bottom-left" | "top"
-//   anchorRight   : bulle collée à droite
-//   anchorLeft    : bulle collée à gauche
-//   cta           : texte du bouton principal
-
 const STEPS = [
-  // 1 — Bienvenue
+  // 1
   {
     target: null, tab: "dashboard", pos: "center",
     text: "Hello, c'est Chloé ! 👋\n\nBienvenue dans The Good Price. Dans quelques minutes, tu vas savoir exactement quoi facturer pour faire plus d'argent. Pas plus d'heures.\n\nJe te guide ?",
   },
-  // 2 — Mode clair / sombre
+  // 2
   {
     target: '[data-tour="theme-toggle"]', tab: "dashboard", pos: "bottom-left",
     text: "Commence par choisir ton ambiance : mode sombre ou mode clair ☀️🌙\n\nClique sur ce bouton à tout moment pour basculer. Trouve celui qui te correspond le mieux !",
   },
-  // 3 — 4 onglets
+  // 3
   {
     target: "nav.nav", tab: "dashboard", pos: "bottom",
     text: "Voilà tes 4 onglets principaux. On va les parcourir ensemble !\n\nChacun a son rôle précis dans le calcul de tes tarifs. Tu verras, c'est simple 😉",
   },
-  // 4 — Mon Salaire
+  // 4
   {
     target: '[data-tour="tab-salaire"]', tab: "salaire", pos: "bottom",
-    text: "On commence ici : ton salaire.\n\nPour savoir ce que tu devrais facturer, il faut d'abord savoir ce dont tu as besoin pour vivre. Renseigne TOUTES tes dépenses perso, loyer, courses, épargne...",
+    text: "On commence ici : ton salaire.\n\nRenseigne TOUTES tes dépenses perso : loyer, courses, épargne... **en TTC**. C'est la base de tout le calcul.",
   },
-  // 5 — Sections salaire (scroll au début pour voir les titres de colonnes)
+  // 5
   {
     target: '[data-tour="salaire-sections"]', tab: "salaire", pos: "bottom",
     scrollBlock: "start",
-    text: "Tu as 3 catégories :\n• Dépenses fixes : les mêmes chaque mois (loyer, abonnements...)\n• Dépenses variables : qui changent (courses, sorties...)\n• Épargne : ce que tu mets de côté\n\n💡 Astuce : remplis avec des montants un peu plus hauts que la réalité. Qui peut le plus peut le moins !",
+    text: "Tu as 3 catégories :\n• Dépenses fixes : les mêmes chaque mois (loyer, abonnements...)\n• Dépenses variables : qui changent (courses, sorties...)\n• Épargne : ce que tu mets de côté\n\nToujours en TTC 😉\n\n💡 Astuce : remplis avec des montants un peu plus hauts que la réalité. Qui peut le plus peut le moins !",
   },
-  // 6 — Mon Pro
+  // 6
   {
     target: '[data-tour="tab-pro"]', tab: "pro", pos: "bottom",
-    text: "Ensuite, tes dépenses Pro.\n\nFais la même chose avec tes charges professionnelles : loyer du salon, produits, formations, assurances...\nTout ce que ton activité te coûte chaque mois.",
+    text: "Ensuite, tes dépenses Pro.\n\nFais la même chose avec tes charges professionnelles : loyer du salon, produits, formations, assurances... En TTC évidemment.\n\nTout ce que ton activité te coûte chaque mois.",
   },
-  // 7 — Heures / Vacances
+  // 7
   {
     target: '[data-tour="tarifs-inputs"]', tab: "tarifs", pos: "bottom",
     text: "Ici commence la magie ✨\n\nIndique d'abord :\n→ HEURES / SEMAINE : combien d'heures tu travailles à la semaine (ou voudrais travailler)\n→ VACANCES : combien tu en prends par an\n\n👥 Plusieurs collaborateurs ? Indique le TOTAL de toute l'équipe.",
   },
-  // 8 — Ajouter les prestations
+  // 8
   {
     targets: ['[data-tour="tarifs-head-prestation"]'],
     extendToBottom: '[data-tour="tarifs-add-prestation"]',
     tab: "tarifs", pos: "top", anchorRight: true,
-    text: "Maintenant, remplis la liste de tes prestations.\n\nTape le nom de chaque soin dans la colonne PRESTATION.\nClique sur « Ajouter une prestation » pour en ajouter autant que tu veux.",
+    text: "Maintenant, remplis la liste de tes prestations.\n\nTape le nom de chaque soin dans la colonne PRESTATION.\nClique sur « Ajouter une prestation » pour en ajouter autant que tu veux.",
   },
-  // 9 — Durée (colonne entière)
+  // 9
   {
     targets: ['[data-tour="tarifs-head-duree"]'],
     extendToBottom: '[data-tour="tarifs-table"]',
     tab: "tarifs", pos: "top", anchorRight: true,
     text: "Puis, pour chaque prestation, note le temps passé sur la cliente :\n• Une seule cliente à la fois → le temps total\n• Plusieurs en parallèle → le temps exact passé sur chacune\n\nPour les durées :\n⏱ 30 min = 0.5\n⏱ 45 min = 0.75\n⏱ 1h = 1\n⏱ 1h30 = 1.5\n⏱ 2h = 2",
   },
-  // 10 — Tarifs actuels (colonne entière)
+  // 10
   {
     targets: ['[data-tour="tarifs-head-actuels"]'],
     extendToBottom: '[data-tour="tarifs-table"]',
     tab: "tarifs", pos: "top", anchorRight: true,
-    text: "Il ne te reste plus qu'à indiquer ton tarif actuel pour voir l'écart !\n\nRenseigne ce que tu factures actuellement pour chaque prestation.",
+    text: "Il ne te reste plus qu'à indiquer ton tarif actuel **en TTC** !\n\nRenseigne ce que tu factures actuellement pour chaque prestation, tu verras alors s'il est OK (s'affiche en vert) ou non (s'affiche en rouge).",
   },
-  // 11 — Résultats : Tarifs sur mesure + Écart
+  // 11
   {
     targets: ['[data-tour="tarifs-results"]', '[data-tour="tarifs-ecart"]'],
     extendToBottom: '[data-tour="tarifs-table"]',
     tab: "tarifs", pos: "bottom", anchorLeft: true,
     text: "Et tadaaaaaam 🎉\n\nPour chaque prestation, tu vois le prix que tu devrais appliquer, et l'écart avec ton tarif actuel.\n\nPlus d'approximation, que des chiffres précis !",
   },
-  // 12 — Taux horaire
+  // 12
   {
     target: '[data-tour="taux-horaire-tarifs"]', tab: "tarifs", pos: "top", anchorRight: true,
-    text: "Ce chiffre est ta boussole 🧭\n\nC'est ton tarif sur mesure pour chaque heure de travail, calculé sur la base de tes vrais besoins. Tout ce qui suit est basé sur lui.",
+    text: "Au fait, ce chiffre est ta boussole 🧭\n\nC'est ton tarif sur mesure pour chaque heure de travail, calculé sur la base de tes vrais besoins. Tout ce qui suit est basé sur lui.",
   },
-  // 13 — Dashboard stats
+  // 13
   {
     target: '[data-tour="dashboard-stats"]', tab: "dashboard", pos: "bottom", anchorRight: true,
-    text: "Ce bandeau résume l'impact de tes tarifs actuels.\n\nEn rouge : tu laisses de l'argent sur la table chaque mois (et je te dirais combien exactement)\nEn vert : tu es au-dessus de ton objectif 👏🏽",
+    text: "Ce bandeau dans ton Dashboard résume l'impact de tes tarifs actuels.\n\nEn rouge : tu laisses de l'argent sur la table chaque mois (et je te dirais combien exactement)\nEn vert : tu es au-dessus de ton objectif 👏🏽",
   },
-  // 14 — Graphiques
+  // 14
   {
     target: '[data-tour="dashboard-charts"]', tab: "dashboard", pos: "top", anchorLeft: true,
     text: "Ces graphiques te donnent une vision claire de la répartition de ton CA et de tes tarifs prestation par prestation.\n\nUn outil pour suivre ta progression dans le temps.",
   },
-  // 15 — Dashboard cards (scrollBehavior instant pour éviter le décalage du spotlight)
+  // 15
   {
     target: '[data-tour="dashboard-cards"]', tab: "dashboard", pos: "bottom",
     scrollBlock: "start",
     text: "Le Dashboard te donne ta vue d'ensemble : ton salaire net visé, le CA nécessaire pour l'atteindre, ton taux horaire et ton objectif annuel.\n\nC'est ton tableau de bord, à consulter régulièrement.",
   },
-  // 16 — Sauvegarde
+  // 16
   {
     target: '[data-tour="save-btn"]', tab: null, pos: "bottom",
     text: "Et pas de panique, tout est sauvegardé automatiquement 💾\n\nTu peux fermer l'appli et revenir quand tu veux, tes données t'attendent exactement là où tu les as laissées.",
   },
-  // 17 — Menu utilisateur
+  // 17
   {
     target: '[data-tour="user-menu"]', tab: null, pos: "bottom-left",
     text: "En cliquant ici, tu accèdes à :\n• Ton compte & ton abonnement\n• Un accès direct pour me contacter si tu as une question 💌\n• Importer des données depuis l'ancienne version\n• Revoir ce tutoriel à tout moment",
   },
-  // 18 — Final
+  // 18
   {
     target: null, tab: "dashboard", pos: "center",
-    text: "Je crois qu'on a fait le tour ! 🎉\nMaintenant, c'est à toi de jouer.\nTu n'as plus d'excuse pour sous-facturer 😉",
+    text: "Je crois qu'on a fait le tour ! 🎉\n\nMaintenant, c'est à toi de jouer.\nTu n'as plus d'excuse pour sous-facturer 😉",
     cta: "Let's go !",
   },
 ];
+
+// Renderer : **texte** → <strong>
+function RichText({ text }) {
+  return (
+    <>
+      {text.split('\n').map((line, i, arr) => {
+        const parts = line.split(/(\*\*[^*]+\*\*)/g);
+        return (
+          <span key={i}>
+            {parts.map((p, j) =>
+              p.startsWith('**') && p.endsWith('**')
+                ? <strong key={j} style={{ color: "#fef4b0", fontWeight: 700 }}>{p.slice(2, -2)}</strong>
+                : p
+            )}
+            {i < arr.length - 1 && '\n'}
+          </span>
+        );
+      })}
+    </>
+  );
+}
 
 function unlockScroll() {
   document.body.style.overflow = "";
@@ -170,11 +180,9 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
         return;
       }
 
-      // Scroll vers le premier élément — "start" pour voir les titres de colonnes
       const block = s.scrollBlock || "center";
       els[0].scrollIntoView({ behavior: "instant", block });
 
-      // Délai après scroll pour laisser le layout se stabiliser
       setTimeout(() => {
         const rects = els.map(el => el.getBoundingClientRect());
         let top    = Math.min(...rects.map(r => r.top));
@@ -239,7 +247,6 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
         style.top = idealTop;
       }
     } else {
-      // fallback : colle au bas du viewport
       style.bottom = 16;
     }
 
@@ -262,7 +269,7 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
           <div style={{ position: "fixed", top: rect.bottom + PAD, left: 0, right: 0, bottom: 0, background: "rgba(0,0,0,0.68)", zIndex: 9998, pointerEvents: "none" }} />
           <div style={{ position: "fixed", top: Math.max(0, rect.top - PAD), left: 0, width: Math.max(0, rect.left - PAD), height: rect.height + PAD * 2, background: "rgba(0,0,0,0.68)", zIndex: 9998, pointerEvents: "none" }} />
           <div style={{ position: "fixed", top: Math.max(0, rect.top - PAD), left: rect.right + PAD, right: 0, height: rect.height + PAD * 2, background: "rgba(0,0,0,0.68)", zIndex: 9998, pointerEvents: "none" }} />
-          <div style={{ position: "fixed", top: rect.top - PAD, left: rect.left - PAD, width: rect.width + PAD * 2, height: rect.height + PAD * 2, border: `2px solid ${C.yellow}`, borderRadius: 10, zIndex: 9999, pointerEvents: "none", boxShadow: "0 0 16px rgba(254,244,176,0.2)" }} />
+          <div style={{ position: "fixed", top: rect.top - PAD, left: rect.left - PAD, width: rect.width + PAD * 2, height: rect.height + PAD * 2, border: "2px solid #fef4b0", borderRadius: 10, zIndex: 9999, pointerEvents: "none", boxShadow: "0 0 16px rgba(254,244,176,0.2)" }} />
         </>
       ) : (
         <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.68)", zIndex: 9998, pointerEvents: "none" }} />
@@ -271,7 +278,7 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
       <div style={{ ...getBubbleStyle(), zIndex: 10000, background: C.dark, border: `1px solid ${C.med}`, borderRadius: 18, padding: "20px 22px 18px", boxShadow: "0 24px 64px rgba(0,0,0,0.55)", fontFamily: "'Instrument Sans', sans-serif", display: "flex", flexDirection: "column", maxHeight: "calc(100vh - 40px)", overflow: "hidden" }}>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, marginBottom: 14 }}>
-          <img src="/chloe.png" alt="Chloé" style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover", border: `2px solid ${C.yellow}`, flexShrink: 0 }} />
+          <img src="/chloe.png" alt="Chloé" style={{ width: 44, height: 44, borderRadius: "50%", objectFit: "cover", border: "2px solid #fef4b0", flexShrink: 0 }} />
           <div style={{ flex: 1 }}>
             <div style={{ color: C.yellow, fontSize: 13, fontWeight: 700, lineHeight: 1.2 }}>Chloé</div>
             <div style={{ color: C.light, fontSize: 11 }}>Your Hair Business</div>
@@ -285,7 +292,7 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
         </div>
 
         <div style={{ color: C.beige, fontSize: 14, lineHeight: 1.7, marginBottom: 18, whiteSpace: "pre-line", overflowY: "auto", maxHeight: "min(200px, 40vh)", flexShrink: 1 }}>
-          {s.text}
+          <RichText text={s.text} />
         </div>
 
         <div style={{ height: 3, borderRadius: 3, background: C.med, marginBottom: 16, overflow: "hidden" }}>
