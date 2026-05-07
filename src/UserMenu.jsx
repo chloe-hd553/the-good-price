@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, LogOut, CreditCard, Send, Paperclip, Check, Smartphone, Monitor } from "lucide-react";
+import { X, LogOut, CreditCard, Send, Paperclip, Check, Smartphone, Monitor, Upload, RotateCcw } from "lucide-react";
 
 /* ── Couleurs locales (miroir App.jsx) ── */
 const C = {
