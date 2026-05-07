@@ -1383,18 +1383,18 @@ function InstallPromptIOS({ onDismiss, onSnooze, showDismiss }) {
   return (
     <div style={{ position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", zIndex: 9999, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
       <div style={{ background: C.dark, borderRadius: 20, maxWidth: 340, width: "100%", textAlign: "center", border: `1px solid ${C.med}`, overflow: "hidden" }}>
-        <img src="/install-preview.png" alt="App sur l\'écran d\'accueil" style={{ width: "100%", maxHeight: 340, objectFit: "contain", display: "block", margin: "0 auto" }} />
+        <img src="/install-preview.png" alt="App sur l'écran d'accueil" style={{ width: "100%", maxHeight: 340, objectFit: "contain", display: "block", margin: "0 auto" }} />
         <div style={{ padding: "20px 24px 24px" }}>
           {step === "preview" ? (
             <>
               <button onClick={() => setStep("tutorial")} style={{ width: "100%", background: C.yellow, color: C.bg, border: "none", borderRadius: 12, padding: "14px 20px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif", marginBottom: 12 }}>
-                Ajouter à mon écran d\'accueil
+                Ajouter à mon écran d'accueil
               </button>
               <button onClick={onSnooze} style={{ background: "none", border: "none", color: C.light, fontSize: 13, cursor: "pointer", display: "block", width: "100%", marginBottom: 6 }}>
                 Plus tard
               </button>
               {showDismiss && <button onClick={onDismiss} style={{ background: "none", border: "none", color: C.light, fontSize: 12, cursor: "pointer", opacity: 0.6 }}>
-                Non merci, je n\'en ai pas besoin
+                Non merci, je n'en ai pas besoin
               </button>}
             </>
           ) : (
@@ -1402,7 +1402,7 @@ function InstallPromptIOS({ onDismiss, onSnooze, showDismiss }) {
               <div style={{ textAlign: "left", marginBottom: 20 }}>
                 {[
                   { num: "1", text: <><strong style={{color:C.beige}}>Appuie sur le bouton partage</strong> en bas de Safari</> },
-                  { num: "2", text: <>Fais défiler et appuie sur <strong style={{color:C.beige}}>"Sur l\'écran d\'accueil"</strong></> },
+                  { num: "2", text: <>Fais défiler et appuie sur <strong style={{color:C.beige}}>"Sur l'écran d'accueil"</strong></> },
                   { num: "3", text: <>Appuie sur <strong style={{color:C.beige}}>"Ajouter"</strong> en haut à droite</> },
                 ].map(({ num, text }) => (
                   <div key={num} style={{ display: "flex", alignItems: "flex-start", gap: 12, marginBottom: 14 }}>
@@ -1415,7 +1415,7 @@ function InstallPromptIOS({ onDismiss, onSnooze, showDismiss }) {
                 Plus tard
               </button>
               {showDismiss && <button onClick={onDismiss} style={{ background: "none", border: "none", color: C.light, fontSize: 12, cursor: "pointer", opacity: 0.6 }}>
-                Non merci, je n\'en ai pas besoin
+                Non merci, je n'en ai pas besoin
               </button>}
             </>
           )}
@@ -1435,20 +1435,20 @@ function InstallPrompt({ onInstall, onDismiss, onSnooze, isDesktop, showDismiss 
               <Scissors size={32} color={C.yellow} strokeWidth={1.5} />
             </div>
             <div style={{ color: C.yellow, fontFamily: "'Cormorant Garamond', serif", fontSize: 22, fontWeight: 700 }}>The Good Price</div>
-            <div style={{ color: C.light, fontSize: 13, lineHeight: 1.5 }}>Installe l\'app sur ton bureau pour y accéder en un clic, sans passer par le navigateur.</div>
+            <div style={{ color: C.light, fontSize: 13, lineHeight: 1.5 }}>Installe l'app sur ton bureau pour y accéder en un clic, sans passer par le navigateur.</div>
           </div>
         ) : (
-          <img src="/install-preview.png" alt="App sur l\'écran d\'accueil" style={{ width: "100%", maxHeight: 340, objectFit: "contain", display: "block" }} />
+          <img src="/install-preview.png" alt="App sur l'écran d'accueil" style={{ width: "100%", maxHeight: 340, objectFit: "contain", display: "block" }} />
         )}
         <div style={{ padding: "20px 24px 24px" }}>
           <button onClick={onInstall} style={{ width: "100%", background: C.yellow, color: C.bg, border: "none", borderRadius: 12, padding: "14px 20px", fontSize: 15, fontWeight: 700, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif", marginBottom: 12 }}>
-            {isDesktop ? "Installer sur mon bureau" : "Ajouter à mon écran d\'accueil"}
+            {isDesktop ? "Installer sur mon bureau" : "Ajouter à mon écran d'accueil"}
           </button>
           <button onClick={onSnooze} style={{ background: "none", border: "none", color: C.light, fontSize: 13, cursor: "pointer", display: "block", width: "100%", marginBottom: 6 }}>
             Plus tard
           </button>
           {showDismiss && <button onClick={onDismiss} style={{ background: "none", border: "none", color: C.light, fontSize: 12, cursor: "pointer", opacity: 0.6 }}>
-            Non merci, je n\'en ai pas besoin
+            Non merci, je n'en ai pas besoin
           </button>}
         </div>
       </div>
@@ -1480,6 +1480,7 @@ export default function App() {
   const [showInstall, setShowInstall] = useState(false);
   const [showInstallIOS, setShowInstallIOS] = useState(false);
   const [showTour, setShowTour] = useState(false);
+  const [pendingTour, setPendingTour] = useState(false);
   const deferredPrompt = useRef(null);
   const importRef = useRef(null);
 
@@ -1562,11 +1563,24 @@ export default function App() {
   }, [user]);
 
   // Démarre le tuto pour les nouveaux utilisateurs (avec feature flag)
+  // Si une popup install va s'afficher, on met le tuto en attente (pendingTour)
   useEffect(() => {
     if (!user) return;
     if (!TOUR_ENABLED(user.email)) return;
     const done = localStorage.getItem(`tgp-tour-done-${user.id}`);
-    if (!done) setShowTour(true);
+    if (!done) {
+      const uid = user.id;
+      const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
+      const installWillShow = !standalone && (
+        (isIOS && !localStorage.getItem(`tgp-install-ios-dismissed-${uid}`)) ||
+        (!isIOS && !localStorage.getItem(`tgp-install-dismissed-${uid}`) && !localStorage.getItem(`tgp-install-installed-${uid}`))
+      );
+      if (installWillShow) {
+        setPendingTour(true);
+      } else {
+        setShowTour(true);
+      }
+    }
   }, [user]);
 
   // Load data from Supabase when user logs in
@@ -1703,11 +1717,13 @@ export default function App() {
       window.__deferredInstallPrompt = null;
     }
     setShowInstall(false);
+    setTimeout(triggerPendingTour, 100);
   };
-  const handleInstallDismiss = () => { if (user?.id) localStorage.setItem(`tgp-install-dismissed-${user.id}`, "true"); setShowInstall(false); };
-  const handleInstallSnooze = () => { setShowInstall(false); };
-  const handleInstallIOSDismiss = () => { if (user?.id) localStorage.setItem(`tgp-install-ios-dismissed-${user.id}`, "true"); setShowInstallIOS(false); };
-  const handleInstallIOSSnooze = () => { setShowInstallIOS(false); };
+  const triggerPendingTour = () => { if (pendingTour) { setPendingTour(false); setShowTour(true); } };
+  const handleInstallDismiss = () => { if (user?.id) localStorage.setItem(`tgp-install-dismissed-${user.id}`, "true"); setShowInstall(false); setTimeout(triggerPendingTour, 100); };
+  const handleInstallSnooze = () => { setShowInstall(false); setTimeout(triggerPendingTour, 100); };
+  const handleInstallIOSDismiss = () => { if (user?.id) localStorage.setItem(`tgp-install-ios-dismissed-${user.id}`, "true"); setShowInstallIOS(false); setTimeout(triggerPendingTour, 100); };
+  const handleInstallIOSSnooze = () => { setShowInstallIOS(false); setTimeout(triggerPendingTour, 100); };
 
   // Confirmation email
   if (emailJustConfirmed) {
