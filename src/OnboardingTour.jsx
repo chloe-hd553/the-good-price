@@ -51,38 +51,38 @@ const STEPS = [
   {
     targets: ['[data-tour="tarifs-head-prestation"]'],
     extendToBottom: '[data-tour="tarifs-add-prestation"]',
-    tab: "tarifs", pos: "top", anchorRight: true,
+    tab: "tarifs", pos: "top", anchorRight: true, mobileForceTop: true,
     text: "Maintenant, remplis la liste de tes prestations.\n\nTape le nom de chaque soin dans la colonne PRESTATION.\nClique sur « Ajouter une prestation » pour en ajouter autant que tu veux.",
   },
   // 9
   {
     targets: ['[data-tour="tarifs-head-duree"]'],
     extendToBottom: '[data-tour="tarifs-table"]',
-    tab: "tarifs", pos: "top", anchorRight: true,
+    tab: "tarifs", pos: "top", anchorRight: true, mobileForceTop: true,
     text: "Puis, pour chaque prestation, note le temps passé sur la cliente :\n• Une seule cliente à la fois → le temps total\n• Plusieurs en parallèle → le temps exact passé sur chacune\n\nPour les durées :\n⏱ 30 min = 0.5\n⏱ 45 min = 0.75\n⏱ 1h = 1\n⏱ 1h30 = 1.5\n⏱ 2h = 2, et ainsi de suite...\n\n💡 Astuce : sois généreuse et ne pars pas sur des créneaux trop petits. Il vaut mieux prévoir plus que pas assez !",
   },
   // 10
   {
     targets: ['[data-tour="tarifs-head-actuels"]'],
     extendToBottom: '[data-tour="tarifs-table"]',
-    tab: "tarifs", pos: "top", anchorRight: true,
+    tab: "tarifs", pos: "top", anchorRight: true, mobileForceTop: true,
     text: "Il ne te reste plus qu'à indiquer ton tarif actuel !\n(rappel : toujours **en TTC**)\n\nTu verras alors s'il est OK (s'affiche en vert) ou non (s'affiche en rouge).",
   },
   // 11
   {
     targets: ['[data-tour="tarifs-results"]', '[data-tour="tarifs-ecart"]'],
     extendToBottom: '[data-tour="tarifs-table"]',
-    tab: "tarifs", pos: "bottom", anchorLeft: true,
+    tab: "tarifs", pos: "bottom", anchorLeft: true, mobileForceTop: true,
     text: "Et tadaaaaaam 🎉\n\nPour chaque prestation, tu vois le prix que tu devrais appliquer, et l'écart avec ton tarif actuel.\n\nPlus d'approximation, que des chiffres précis !",
   },
   // 12
   {
-    target: '[data-tour="taux-horaire-tarifs"]', tab: "tarifs", pos: "top", anchorRight: true,
+    target: '[data-tour="taux-horaire-tarifs"]', tab: "tarifs", pos: "top", anchorRight: true, mobileScrollBlock: "start",
     text: "Au fait, ce chiffre est ta boussole 🧭\n\nC'est ton tarif sur mesure pour chaque heure de travail, calculé sur la base de tes vrais besoins. Tout ce qui suit est basé sur lui.",
   },
   // 13
   {
-    target: '[data-tour="dashboard-stats"]', tab: "dashboard", pos: "bottom", anchorRight: true,
+    target: '[data-tour="dashboard-stats"]', tab: "dashboard", pos: "bottom", anchorRight: true, mobileScrollBlock: "start",
     text: "Ce bandeau dans ton Dashboard résume l'impact de tes tarifs actuels.\n\nEn rouge : tu laisses de l'argent sur la table chaque mois (et je te dirais combien exactement)\nEn vert : tu es au-dessus de ton objectif 👏🏽",
   },
   // 14
@@ -180,10 +180,19 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
         return;
       }
 
-      const block = s.scrollBlock || "center";
+      const isMobileScroll = window.innerWidth < 640;
+      const block = (isMobileScroll && s.mobileScrollBlock) ? s.mobileScrollBlock : (s.scrollBlock || "center");
       els[0].scrollIntoView({ behavior: "instant", block });
 
       setTimeout(() => {
+        // mobileForceTop: push element below estimated bubble bottom (top:16 + ~320px height)
+        if (window.innerWidth < 640 && s.mobileForceTop) {
+          const r0 = els[0].getBoundingClientRect();
+          const BUBBLE_END = 16 + 320 + PAD;
+          if (r0.top < BUBBLE_END) {
+            window.scrollBy({ top: -(BUBBLE_END - r0.top + 12), behavior: "instant" });
+          }
+        }
         const rects = els.map(el => el.getBoundingClientRect());
         let top    = Math.min(...rects.map(r => r.top));
         let left   = Math.min(...rects.map(r => r.left));
@@ -230,6 +239,10 @@ export default function OnboardingTour({ currentTab, setTab, onComplete }) {
     }
 
     const vw = window.innerWidth;
+    // Mobile: mobileForceTop steps → bubble at top of screen, above spotlight
+    if (vw < 640 && s.mobileForceTop) {
+      return { position: "fixed", top: 16, left: 16, right: 16 };
+    }
     const vh = window.innerHeight;
     const bw = Math.min(380, vw - 32);
     const style = { position: "fixed", width: bw };
