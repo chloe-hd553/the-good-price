@@ -40,7 +40,7 @@ const STEPS = [
   // 6
   {
     target: '[data-tour="tab-pro"]', tab: "pro", pos: "bottom",
-    text: "Ensuite, tes dépenses Pro.\n\nFais la même chose avec tes charges professionnelles : loyer du salon, produits, formations, assurances... En TTC évidemment.\n\nTout ce que ton activité te coûte chaque mois.",
+    text: "Ensuite, tes dépenses Pro.\n\nFais la même chose avec tes charges professionnelles : loyer du salon, produits, formations, assurances... (en TTC évidemment).\n\nTout ce que ton activité te coûte chaque mois.",
   },
   // 7
   {
@@ -59,14 +59,14 @@ const STEPS = [
     targets: ['[data-tour="tarifs-head-duree"]'],
     extendToBottom: '[data-tour="tarifs-table"]',
     tab: "tarifs", pos: "top", anchorRight: true,
-    text: "Puis, pour chaque prestation, note le temps passé sur la cliente :\n• Une seule cliente à la fois → le temps total\n• Plusieurs en parallèle → le temps exact passé sur chacune\n\nPour les durées :\n⏱ 30 min = 0.5\n⏱ 45 min = 0.75\n⏱ 1h = 1\n⏱ 1h30 = 1.5\n⏱ 2h = 2",
+    text: "Puis, pour chaque prestation, note le temps passé sur la cliente :\n• Une seule cliente à la fois → le temps total\n• Plusieurs en parallèle → le temps exact passé sur chacune\n\nPour les durées :\n⏱ 30 min = 0.5\n⏱ 45 min = 0.75\n⏱ 1h = 1\n⏱ 1h30 = 1.5\n⏱ 2h = 2, et ainsi de suite...\n\n💡 Astuce : sois généreuse et ne pars pas sur des créneaux trop petits. Il vaut mieux prévoir plus que pas assez !",
   },
   // 10
   {
     targets: ['[data-tour="tarifs-head-actuels"]'],
     extendToBottom: '[data-tour="tarifs-table"]',
     tab: "tarifs", pos: "top", anchorRight: true,
-    text: "Il ne te reste plus qu'à indiquer ton tarif actuel **en TTC** !\n\nRenseigne ce que tu factures actuellement pour chaque prestation, tu verras alors s'il est OK (s'affiche en vert) ou non (s'affiche en rouge).",
+    text: "Il ne te reste plus qu'à indiquer ton tarif actuel !\n(rappel : **en TTC**)\n\nTu verras alors s'il est OK (s'affiche en vert) ou non (s'affiche en rouge).",
   },
   // 11
   {
