@@ -40,7 +40,7 @@ const STEPS = [
   // 6
   {
     target: '[data-tour="tab-pro"]', tab: "pro", pos: "bottom",
-    text: "Ensuite, tes dépenses Pro.\n\nFais la même chose avec tes charges professionnelles : loyer du salon, produits, formations, assurances... (en TTC évidemment).\n\nTout ce que ton activité te coûte chaque mois.",
+    text: "Ensuite, tes dépenses Pro.\n\nFais la même chose avec tes charges professionnelles : loyer du salon, produits, formations, assurances... (en TTC également).\n\nTout ce que ton activité te coûte chaque mois.",
   },
   // 7
   {
@@ -66,7 +66,7 @@ const STEPS = [
     targets: ['[data-tour="tarifs-head-actuels"]'],
     extendToBottom: '[data-tour="tarifs-table"]',
     tab: "tarifs", pos: "top", anchorRight: true,
-    text: "Il ne te reste plus qu'à indiquer ton tarif actuel !\n(rappel : **en TTC**)\n\nTu verras alors s'il est OK (s'affiche en vert) ou non (s'affiche en rouge).",
+    text: "Il ne te reste plus qu'à indiquer ton tarif actuel !\n(rappel : toujours **en TTC**)\n\nTu verras alors s'il est OK (s'affiche en vert) ou non (s'affiche en rouge).",
   },
   // 11
   {
