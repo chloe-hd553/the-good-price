@@ -834,7 +834,3 @@ export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, 
     </>
   );
 }
-      )}
-    </>
-  );
-}
