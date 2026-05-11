@@ -1703,7 +1703,10 @@ export default function App() {
   };
 
   const handleTourComplete = () => {
-    if (user?.id) localStorage.setItem(`tgp-tour-done-${user.id}`, "true");
+    if (user?.id) {
+      localStorage.setItem(`tgp-tour-done-${user.id}`, "true");
+      supabase.from("user_data").upsert({ id: user.id, tour_done: true }).then(() => {});
+    }
     setShowTour(false);
   };
 
@@ -1713,7 +1716,10 @@ export default function App() {
     if (prompt) {
       prompt.prompt();
       const { outcome } = await prompt.userChoice;
-      if (outcome === "accepted" && uid) localStorage.setItem(`tgp-install-installed-${uid}`, "true");
+      if (outcome === "accepted" && uid) {
+        localStorage.setItem(`tgp-install-installed-${uid}`, "true");
+        supabase.from("user_data").upsert({ id: uid, pwa_installed: true }).then(() => {});
+      }
       deferredPrompt.current = null;
       window.__deferredInstallPrompt = null;
     }

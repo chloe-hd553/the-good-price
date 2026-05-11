@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
-import { Users, CreditCard, TrendingUp, Activity, UserPlus, ArrowLeft, RefreshCw } from "lucide-react";
+import { Users, CreditCard, TrendingUp, Activity, UserPlus, ArrowLeft, RefreshCw, BookOpen, Smartphone } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
 
 const C = {
@@ -98,6 +98,8 @@ export default function AdminPage({ user, onBack }) {
           <KpiCard icon={<TrendingUp size={13} />} label="Taux de conversion" value={loading ? "…" : `${conversion}%`} color="#f0d0a8" />
           <KpiCard icon={<Activity size={13} />} label="Actives 7 jours" value={loading ? "…" : stats?.active_7d ?? 0} sub={`${stats?.active_30d ?? "…"} ce mois`} />
           <KpiCard icon={<UserPlus size={13} />} label="Nouvelles 7 jours" value={loading ? "…" : stats?.new_7d ?? 0} sub={`${stats?.new_30d ?? "…"} ce mois`} />
+          <KpiCard icon={<BookOpen size={13} />} label="Tuto complété" value={loading ? "…" : stats?.tour_done_count ?? 0} sub={stats && stats.total_users > 0 ? `${Math.round((stats.tour_done_count / stats.total_users) * 100)}% des inscrits` : ""} color="#b0d4f0" />
+          <KpiCard icon={<Smartphone size={13} />} label="PWA installée" value={loading ? "…" : stats?.pwa_installed_count ?? 0} sub={stats && stats.total_users > 0 ? `${Math.round((stats.pwa_installed_count / stats.total_users) * 100)}% des inscrits` : ""} color="#d4b0f0" />
         </div>
 
         {/* Chart */}
