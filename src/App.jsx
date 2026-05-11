@@ -8,6 +8,7 @@ import ThankYouPage from "./ThankYouPage.jsx";
 import CancelPage from "./CancelPage.jsx";
 import UserMenu from "./UserMenu.jsx";
 import OnboardingTour from "./OnboardingTour.jsx";
+import AdminPage from "./AdminPage.jsx";
 
 // 🚩 Feature flag : tuto visible seulement pour cet email pendant les tests
 // Pour l'activer pour toutes les clientes, changer en : () => true
@@ -1736,6 +1737,10 @@ export default function App() {
   }
 
   // Redirection retour Stripe
+  if (route === "/admin") {
+    if (!user) { window.history.replaceState({}, "", "/"); setRoute("/"); return null; }
+    return <AdminPage user={user} onBack={() => { window.history.replaceState({}, "", "/"); setRoute("/"); }} />;
+  }
   if (route === "/merci") {
     return <ThankYouPage onContinue={() => { window.history.replaceState({}, "", "/"); setRoute("/"); }} />;
   }
