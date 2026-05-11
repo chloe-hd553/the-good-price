@@ -1738,6 +1738,8 @@ export default function App() {
 
   // Redirection retour Stripe
   if (route === "/admin") {
+    // Wait for auth before deciding
+    if (authLoading) return null;
     if (!user) { window.history.replaceState({}, "", "/"); setRoute("/"); return null; }
     return <AdminPage user={user} onBack={() => { window.history.replaceState({}, "", "/"); setRoute("/"); }} />;
   }
