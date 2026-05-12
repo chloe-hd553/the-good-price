@@ -631,6 +631,20 @@ function AuthPage({ onAuth }) {
   const [error, setError] = useState(null);
   const [success, setSuccess] = useState(null);
 
+  const handleReset = async (e) => {
+    e.preventDefault();
+    setLoading(true); setError(null); setSuccess(null);
+    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin,
+    });
+    if (err) {
+      setError("Impossible d'envoyer l'email. Vérifie l'adresse saisie.");
+    } else {
+      setSuccess("Un lien de réinitialisation vient de t'être envoyé. Pense à vérifier tes spams !");
+    }
+    setLoading(false);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true); setError(null); setSuccess(null);
@@ -682,49 +696,130 @@ function AuthPage({ onAuth }) {
 
           <div style={{ textAlign: "left" }}>
             <div style={{ color: C.beige, fontSize: 20, fontWeight: 600, marginBottom: 4, fontFamily: "'Cormorant Garamond',serif" }}>
-              {mode === "login" ? "Connexion" : "Créer ton compte"}
+              {mode === "login" ? "Connexion" : mode === "reset" ? "Mot de passe oublié" : "Créer ton compte"}
             </div>
             <div style={{ color: C.light, fontSize: 14, marginBottom: 24 }}>
-              {mode === "login" ? "Retrouve tes données là où tu les avais laissées" : "Gratuit — commence à calculer tes tarifs"}
+              {mode === "login" ? "Retrouve tes données là où tu les avais laissées" : mode === "reset" ? "Saisis ton email pour recevoir un lien de réinitialisation" : "Gratuit — commence à calculer tes tarifs"}
             </div>
 
             {error && <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>{error}</div>}
             {success && <div style={{ color: C.greenText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(45,59,40,0.3)", borderRadius: 8, lineHeight: 1.5 }}>{success}</div>}
 
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div style={{ position: "relative" }}>
-                <Mail size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
-                <input className="auth-input" type="email" placeholder="Ton email" value={email} onChange={e => setEmail(e.target.value)} required style={{ paddingLeft: 42 }} />
-              </div>
-              <div style={{ position: "relative" }}>
-                <KeyRound size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
-                <input className="auth-input" type={showPw ? "text" : "password"} placeholder={mode === "signup" ? "Choisis un mot de passe (6 car. min)" : "Ton mot de passe"} value={password} onChange={e => setPassword(e.target.value)} required minLength={6} style={{ paddingLeft: 42, paddingRight: 42 }} />
-                <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4 }}>
-                  {showPw ? <EyeOff size={16} color={C.light} /> : <Eye size={16} color={C.light} />}
+            {mode === "reset" ? (
+              <form onSubmit={handleReset} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ position: "relative" }}>
+                  <Mail size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+                  <input className="auth-input" type="email" placeholder="Ton email" value={email} onChange={e => setEmail(e.target.value)} required style={{ paddingLeft: 42 }} />
+                </div>
+                <button className="auth-btn" type="submit" disabled={loading} style={{ marginTop: 4 }}>
+                  {loading ? "Envoi..." : "Recevoir le lien de réinitialisation"}
                 </button>
-              </div>
-              {mode === "login" && (
-                <label className="auth-remember" style={{ marginTop: 4 }}>
-                  <input
-                    type="checkbox"
-                    checked={remember}
-                    onChange={e => setRemember(e.target.checked)}
-                  />
-                  Rester connectée
-                </label>
-              )}
-              <button className="auth-btn" type="submit" disabled={loading} style={{ marginTop: 4 }}>
-                {loading ? "Chargement..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
-              </button>
-            </form>
+              </form>
+            ) : (
+              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ position: "relative" }}>
+                  <Mail size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+                  <input className="auth-input" type="email" placeholder="Ton email" value={email} onChange={e => setEmail(e.target.value)} required style={{ paddingLeft: 42 }} />
+                </div>
+                <div style={{ position: "relative" }}>
+                  <KeyRound size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+                  <input className="auth-input" type={showPw ? "text" : "password"} placeholder={mode === "signup" ? "Choisis un mot de passe (6 car. min)" : "Ton mot de passe"} value={password} onChange={e => setPassword(e.target.value)} required minLength={6} style={{ paddingLeft: 42, paddingRight: 42 }} />
+                  <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4 }}>
+                    {showPw ? <EyeOff size={16} color={C.light} /> : <Eye size={16} color={C.light} />}
+                  </button>
+                </div>
+                {mode === "login" && (
+                  <label className="auth-remember" style={{ marginTop: 4 }}>
+                    <input type="checkbox" checked={remember} onChange={e => setRemember(e.target.checked)} />
+                    Rester connectée
+                  </label>
+                )}
+                <button className="auth-btn" type="submit" disabled={loading} style={{ marginTop: 4 }}>
+                  {loading ? "Chargement..." : mode === "login" ? "Se connecter" : "Créer mon compte"}
+                </button>
+              </form>
+            )}
 
-            <div style={{ textAlign: "center", marginTop: 18 }}>
-              {mode === "login" ? (
+            <div style={{ textAlign: "center", marginTop: 18, display: "flex", flexDirection: "column", gap: 8 }}>
+              {mode === "login" && (
+                <button className="auth-link" onClick={() => { setMode("reset"); setError(null); setSuccess(null); }} style={{ fontSize: 13, color: C.light }}>
+                  J&apos;ai oublié mon mot de passe
+                </button>
+              )}
+              {mode === "reset" ? (
+                <span style={{ color: C.light, fontSize: 14 }}>
+                  <button className="auth-link" onClick={() => { setMode("login"); setError(null); setSuccess(null); }}>Retour à la connexion</button>
+                </span>
+              ) : mode === "login" ? (
                 <span style={{ color: C.light, fontSize: 14 }}>Pas encore de compte ? <button className="auth-link" onClick={() => { setMode("signup"); setError(null); setSuccess(null); }}>Inscris-toi</button></span>
               ) : (
                 <span style={{ color: C.light, fontSize: 14 }}>Déjà un compte ? <button className="auth-link" onClick={() => { setMode("login"); setError(null); setSuccess(null); }}>Connecte-toi</button></span>
               )}
             </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── RESET PASSWORD SCREEN ── */
+function ResetPasswordScreen({ onDone }) {
+  const [password, setPassword] = useState("");
+  const [confirm, setConfirm] = useState("");
+  const [showPw, setShowPw] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (password !== confirm) { setError("Les mots de passe ne correspondent pas."); return; }
+    if (password.length < 6) { setError("Minimum 6 caractères requis."); return; }
+    setLoading(true); setError(null);
+    const { error: err } = await supabase.auth.updateUser({ password });
+    if (err) { setError("Erreur : " + err.message); setLoading(false); return; }
+    setSuccess(true);
+    setTimeout(onDone, 2000);
+    setLoading(false);
+  };
+
+  return (
+    <div className="tgp" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <style>{styles}</style>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ maxWidth: 400, width: "100%", textAlign: "center" }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+            <div className="hdr-logo" style={{ width: 56, height: 56 }}>
+              <Scissors size={24} strokeWidth={2} />
+            </div>
+          </div>
+          <div className="hdr-name" style={{ fontSize: 28, marginBottom: 4, color: C.beige }}>The Good Price</div>
+          <div style={{ textAlign: "left", marginTop: 24 }}>
+            <div style={{ color: C.beige, fontSize: 20, fontWeight: 600, marginBottom: 4, fontFamily: "'Cormorant Garamond',serif" }}>
+              Nouveau mot de passe
+            </div>
+            <div style={{ color: C.light, fontSize: 14, marginBottom: 24 }}>Choisis un nouveau mot de passe pour ton compte</div>
+            {error && <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>{error}</div>}
+            {success && <div style={{ color: C.greenText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(45,59,40,0.3)", borderRadius: 8 }}>Mot de passe mis a jour ! Connexion en cours...</div>}
+            {!success && (
+              <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ position: "relative" }}>
+                  <KeyRound size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+                  <input className="auth-input" type={showPw ? "text" : "password"} placeholder="Nouveau mot de passe (6 car. min)" value={password} onChange={e => setPassword(e.target.value)} required minLength={6} style={{ paddingLeft: 42, paddingRight: 42 }} />
+                  <button type="button" onClick={() => setShowPw(!showPw)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", cursor: "pointer", padding: 4 }}>
+                    {showPw ? <EyeOff size={16} color={C.light} /> : <Eye size={16} color={C.light} />}
+                  </button>
+                </div>
+                <div style={{ position: "relative" }}>
+                  <KeyRound size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+                  <input className="auth-input" type={showPw ? "text" : "password"} placeholder="Confirme le mot de passe" value={confirm} onChange={e => setConfirm(e.target.value)} required minLength={6} style={{ paddingLeft: 42 }} />
+                </div>
+                <button className="auth-btn" type="submit" disabled={loading} style={{ marginTop: 4 }}>
+                  {loading ? "Mise a jour..." : "Enregistrer le nouveau mot de passe"}
+                </button>
+              </form>
+            )}
           </div>
         </div>
       </div>
@@ -1478,6 +1573,10 @@ export default function App() {
     const hash = window.location.hash;
     return hash.includes("type=signup") || hash.includes("type=email_change");
   });
+  const [isRecovery, setIsRecovery] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.location.hash.includes("type=recovery");
+  });
   const [showInstall, setShowInstall] = useState(false);
   const [showInstallIOS, setShowInstallIOS] = useState(false);
   const [showTour, setShowTour] = useState(false);
@@ -1732,6 +1831,11 @@ export default function App() {
   const handleInstallIOSDismiss = () => { if (user?.id) localStorage.setItem(`tgp-install-ios-dismissed-${user.id}`, "true"); setShowInstallIOS(false); setTimeout(triggerPendingTour, 100); };
   const handleInstallIOSSnooze = () => { setShowInstallIOS(false); setTimeout(triggerPendingTour, 100); };
 
+  // Reset mot de passe (lien email type=recovery)
+  if (isRecovery && user) {
+    return <ResetPasswordScreen onDone={() => { window.history.replaceState({}, "/", "/"); setIsRecovery(false); }} />;
+  }
+
   // Confirmation email
   if (emailJustConfirmed) {
     return (
@@ -1769,6 +1873,128 @@ export default function App() {
     );
   }
 
+  // Not logged in → Auth page
+  if (!user) {
+    return <AuthPage onAuth={(u) => setUser(u)} />;
+  }
+
+  // Logged in but no data → Welcome page
+  if (ok && !started) {
+    return (
+      <>
+        <style>{styles}</style>
+        <WelcomePage
+          onImport={(buf) => handleImport(buf)}
+          onSkip={() => setStarted(true)}
+        />
+      </>
+    );
+  }
+
+  return (
+    <div className={`tgp${theme === "light" ? " light" : ""}`}>
+      <style>{styles}</style>
+      {showTour && <OnboardingTour currentTab={tab} setTab={setTab} onComplete={handleTourComplete} />}
+      {showInstall && <InstallPrompt onInstall={handleInstall} onDismiss={handleInstallDismiss} onSnooze={handleInstallSnooze} isDesktop={!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)} showDismiss={parseInt(localStorage.getItem(`tgp-install-count-${user?.id}`) || "0") >= 3} />}
+      {showInstallIOS && <InstallPromptIOS onDismiss={handleInstallIOSDismiss} onSnooze={handleInstallIOSSnooze} showDismiss={parseInt(localStorage.getItem(`tgp-install-ios-count-${user?.id}`) || "0") >= 3} />}
+      <header className="hdr">
+        <div className="hdr-left">
+          <div className="hdr-logo"><Scissors size={20} strokeWidth={2} /></div>
+          <div className="hdr-title-block">
+            <div className="hdr-name">The Good Price</div>
+            <div className="hdr-by">Your Hair Business</div>
+          </div>
+        </div>
+        <div className="hdr-actions" style={{ display: "flex", alignItems: "center", gap: 12 }}>
+          <button
+            data-tour="theme-toggle"
+            onClick={toggleTheme}
+            title={theme === "dark" ? "Mode clair" : "Mode sombre"}
+            style={{
+              display: "flex", alignItems: "center", gap: 6,
+              padding: "6px 12px", borderRadius: 20,
+              border: `1px solid rgba(121,90,52,0.15)`,
+              background: "rgba(121,90,52,0.06)",
+              color: C.light, fontSize: 12, cursor: "pointer",
+              fontFamily: "'Instrument Sans', sans-serif",
+              transition: "all 0.3s",
+            }}
+            onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(254,244,176,0.25)"; e.currentTarget.style.color = C.yellow; }}
+            onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
+          >
+            {theme === "dark" ? <Sun size={13} strokeWidth={2} /> : <Moon size={13} strokeWidth={2} />}
+          </button>
+          <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleHeaderImport} style={{ display: "none" }} />
+          <div data-tour="save-btn" className={`hdr-save${sv ? " on" : ""}`}>
+            {sv ? <><Ico icon={Save} size={13} color={C.yellow} /><span className="hdr-save-text"> Sauvegarde...</span></> : <><Ico icon={Check} size={13} color={C.light} /><span className="hdr-save-text"> Sauvegardé</span></>}
+          </div>
+          {!window.matchMedia("(display-mode: standalone)").matches && !window.navigator.standalone && !localStorage.getItem(`tgp-install-dismissed-${user?.id}`) && (
+            <button
+              onClick={() => isIOS ? setShowInstallIOS(true) : setShowInstall(true)}
+              title={isIOS || /Android/i.test(navigator.userAgent) ? "Ajouter à mon écran d'accueil" : "Installer sur mon bureau"}
+              style={{
+                display: "flex", alignItems: "center", justifyContent: "center",
+                width: 32, height: 32, borderRadius: "50%",
+                border: `1px solid rgba(121,90,52,0.15)`,
+                background: "rgba(121,90,52,0.06)",
+                color: C.light, cursor: "pointer",
+                flexShrink: 0,
+              }}
+              onMouseOver={e => { e.currentTarget.style.borderColor = "rgba(254,244,176,0.25)"; e.currentTarget.style.color = C.yellow; }}
+              onMouseOut={e => { e.currentTarget.style.borderColor = "rgba(121,90,52,0.15)"; e.currentTarget.style.color = C.light; }}
+            >
+              {isIOS || /Android/i.test(navigator.userAgent) ? <Smartphone size={14} strokeWidth={2} /> : <Monitor size={14} strokeWidth={2} />}
+            </button>
+          )}
+          <UserMenu
+            user={user}
+            isPaid={isPaid}
+            userData={userData}
+            onLogout={handleLogout}
+            onInstall={() => isIOS ? setShowInstallIOS(true) : setShowInstall(true)}
+            isInstalled={window.matchMedia("(display-mode: standalone)").matches || !!window.navigator.standalone}
+            onRestartTour={() => { localStorage.removeItem(`tgp-tour-done-${user?.id}`); setShowTour(true); }}
+            theme={theme}
+            onImportClick={() => importRef.current?.click()}
+            onReset={handleReset}
+          />
+        </div>
+      </header>
+
+      <nav className="nav">
+        {[{ id: "dashboard", icon: LayoutDashboard, l: "Dashboard" }, { id: "salaire", icon: Wallet, l: "Mon Salaire" },
+          { id: "pro", icon: Briefcase, l: "Mon CA Pro" }, { id: "tarifs", icon: Scissors, l: "Mes Tarifs" }
+        ].map(t => (
+          <button key={t.id} data-tour={`tab-${t.id}`} className={`nt${tab === t.id ? " on" : ""}`} onClick={() => setTab(t.id)}>
+            <Ico icon={t.icon} size={16} color="currentColor" />{t.l}
+          </button>
+        ))}
+      </nav>
+
+      <main className="main" style={{ paddingBottom: (!isPaid && tab === "tarifs" && tar.hs > 0) ? 100 : 32 }}>
+        {tab === "dashboard" && <Dash sal={sal} pro={pro} tar={tar} isPaid={isPaid} theme={theme} />}
+        {tab === "salaire" && <Sal data={sal} on={setSal} />}
+        {tab === "pro" && <Pro data={pro} on={setPro} sal={sal} />}
+        {tab === "tarifs" && <Tar data={tar} on={setTar} sal={sal} pro={pro} isPaid={isPaid} theme={theme} />}
+      </main>
+
+      {/* Unlock CTA — only on tarifs tab when both params filled */}
+      {!isPaid && tab === "tarifs" && tar.hs > 0 && (() => {
+        const totalAny = sum(sal.fixes) + sum(sal.variables) + sum(sal.epargnes) + sum(pro.fixes) + sum(pro.variables) + sum(pro.charges) + sum(pro.tresorerie);
+        return totalAny > 0;
+      })() && (
+        <div className="unlock-bar">
+          <button className="unlock-btn" onClick={() => setShowPaywall(true)}>
+            <Lock size={18} /> Débloquer mes tarifs sur mesure
+          </button>
+        </div>
+      )}
+
+      {/* Paywall modal */}
+      {showPaywall && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
+    </div>
+  );
+}
   // Not logged in → Auth page
   if (!user) {
     return <AuthPage onAuth={(u) => setUser(u)} />;
