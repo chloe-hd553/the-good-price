@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
 import { Users, CreditCard, TrendingUp, Activity, UserPlus, ArrowLeft, RefreshCw, BookOpen, Smartphone } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell } from "recharts";
+import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from "recharts";
 
 const C = {
   bg: "#2C1F12", dark: "#3D2D1A", med: "#553F24",
@@ -65,6 +65,27 @@ export default function AdminPage({ user, onBack }) {
   const conversion = stats ? ((stats.paid_users / Math.max(stats.total_users, 1)) * 100).toFixed(1) : "—";
   const weekData = stats?.signups_by_week?.map(w => ({ week: fmtWeek(w.week), count: Number(w.count) })) || [];
 
+  // Graphique évolution cumulée inscrits + payantes
+  const evolutionData = (() => {
+    if (!stats) return [];
+    const map = {};
+    (stats.signups_by_week || []).forEach(w => {
+      if (!map[w.week]) map[w.week] = { week: w.week, inscrits: 0, payantes: 0 };
+      map[w.week].inscrits = Number(w.count);
+    });
+    (stats.paid_by_week || []).forEach(w => {
+      if (!map[w.week]) map[w.week] = { week: w.week, inscrits: 0, payantes: 0 };
+      map[w.week].payantes = Number(w.count);
+    });
+    const sorted = Object.values(map).sort((a, b) => a.week.localeCompare(b.week));
+    let cumInscrits = 0, cumPayantes = 0;
+    return sorted.map(d => {
+      cumInscrits += d.inscrits;
+      cumPayantes += d.payantes;
+      return { week: fmtWeek(d.week), inscrits: cumInscrits, payantes: cumPayantes };
+    });
+  })();
+
   return (
     <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "'Instrument Sans', sans-serif", padding: "24px 20px 60px" }}>
 
@@ -102,64 +123,51 @@ export default function AdminPage({ user, onBack }) {
           <KpiCard icon={<Smartphone size={13} />} label="PWA installée" value={loading ? "…" : stats?.pwa_installed_count ?? 0} sub={stats && stats.total_users > 0 ? `${Math.round((stats.pwa_installed_count / stats.total_users) * 100)}% des inscrits` : ""} color="#d4b0f0" />
         </div>
 
-        {/* Chart */}
-        {!loading && weekData.length > 0 && (
+        {/* Chart évolution cumulée */}
+        {!loading && evolutionData.length > 0 && (
           <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, padding: "20px", marginBottom: 24 }}>
-            <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, marginBottom: 16 }}>Inscriptions par semaine</div>
-            <ResponsiveContainer width="100%" height={160}>
-              <BarChart data={weekData} barSize={18}>
+            <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+              Évolution des inscrits & payantes
+            </div>
+            <div style={{ color: C.light, fontSize: 11, marginBottom: 16 }}>Cumulatif sur les 12 dernières semaines</div>
+            <ResponsiveContainer width="100%" height={180}>
+              <LineChart data={evolutionData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
                 <XAxis dataKey="week" tick={{ fill: C.light, fontSize: 11 }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fill: C.light, fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} width={24} />
+                <YAxis tick={{ fill: C.light, fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} width={28} />
                 <Tooltip
                   contentStyle={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 8, fontSize: 12, color: C.beige }}
-                  cursor={{ fill: "rgba(254,244,176,0.06)" }}
+                  cursor={{ stroke: C.med, strokeWidth: 1 }}
+                  formatter={(value, name) => [value, name === "inscrits" ? "Inscrits total" : "Payantes total"]}
                 />
-                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
-                  {weekData.map((_, i) => (
-                    <Cell key={i} fill={i === weekData.length - 1 ? C.yellow : C.med} />
-                  ))}
-                </Bar>
-              </BarChart>
+                <Legend
+                  formatter={(value) => (
+                    <span style={{ color: C.light, fontSize: 11 }}>
+                      {value === "inscrits" ? "Inscrits" : "Payantes"}
+                    </span>
+                  )}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="inscrits"
+                  stroke={C.yellow}
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4, fill: C.yellow }}
+                />
+                <Line
+                  type="monotone"
+                  dataKey="payantes"
+                  stroke="#a8f0b0"
+                  strokeWidth={2}
+                  dot={false}
+                  activeDot={{ r: 4, fill: "#a8f0b0" }}
+                />
+              </LineChart>
             </ResponsiveContainer>
           </div>
         )}
 
-        {/* Recent users table */}
-        <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, overflow: "hidden" }}>
-          <div style={{ padding: "16px 20px", borderBottom: `1px solid ${C.med}`, color: C.beige, fontSize: 13, fontWeight: 600 }}>
-            Dernières inscrites
-          </div>
-          {loading ? (
-            <div style={{ padding: 24, color: C.light, fontSize: 13, textAlign: "center" }}>Chargement…</div>
-          ) : (
-            <div style={{ overflowX: "auto" }}>
-              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
-                <thead>
-                  <tr style={{ borderBottom: `1px solid ${C.med}` }}>
-                    {["Email", "Inscription", "Statut", "Dernière activité"].map(h => (
-                      <th key={h} style={{ padding: "10px 16px", textAlign: "left", color: C.light, fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {(stats?.recent_users || []).map((u, i) => (
-                    <tr key={i} style={{ borderBottom: `1px solid ${C.med}22` }}>
-                      <td style={{ padding: "10px 16px", color: C.beige }}>{u.email}</td>
-                      <td style={{ padding: "10px 16px", color: C.light, whiteSpace: "nowrap" }}>{fmt(u.created_at)}</td>
-                      <td style={{ padding: "10px 16px" }}>
-                        <span style={{ background: u.paid ? "#1e4d2a" : C.med, color: u.paid ? "#a8f0b0" : C.light, borderRadius: 6, padding: "3px 9px", fontSize: 12, fontWeight: 600 }}>
-                          {u.paid ? "Payante" : "Gratuit"}
-                        </span>
-                      </td>
-                      <td style={{ padding: "10px 16px", color: C.light, whiteSpace: "nowrap" }}>{fmt(u.last_active)}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-        </div>
-      </div>
-    </div>
-  );
-}
+        {/* Chart inscriptions par semaine */}
+        {!loading && weekData.length > 0 && (
+          <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, padding: "20px", marginBottom: 24 }}>
+            <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, marginBotto
