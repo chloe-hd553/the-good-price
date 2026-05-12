@@ -57,7 +57,7 @@ export default function AdminPage({ user, onBack }) {
   if (!user || user.email !== ADMIN_EMAIL) {
     return (
       <div style={{ background: C.bg, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: "'Instrument Sans', sans-serif" }}>
-        <div style={{ color: C.light }}>Accès non autorisé.</div>
+        <div style={{ color: C.light }}>Acces non autorise.</div>
       </div>
     );
   }
@@ -65,7 +65,6 @@ export default function AdminPage({ user, onBack }) {
   const conversion = stats ? ((stats.paid_users / Math.max(stats.total_users, 1)) * 100).toFixed(1) : "—";
   const weekData = stats?.signups_by_week?.map(w => ({ week: fmtWeek(w.week), count: Number(w.count) })) || [];
 
-  // Graphique évolution cumulée inscrits + payantes
   const evolutionData = (() => {
     if (!stats) return [];
     const map = {};
@@ -88,9 +87,8 @@ export default function AdminPage({ user, onBack }) {
 
   return (
     <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "'Instrument Sans', sans-serif", padding: "24px 20px 60px" }}>
-
-      {/* Header */}
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
+
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <button onClick={onBack} style={{ background: "none", border: `1px solid ${C.med}`, borderRadius: 8, color: C.light, padding: "7px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
@@ -100,34 +98,31 @@ export default function AdminPage({ user, onBack }) {
               Dashboard Admin
             </div>
           </div>
-          <button onClick={load} title="Rafraîchir" style={{ background: "none", border: `1px solid ${C.med}`, borderRadius: 8, color: C.light, padding: "7px 10px", cursor: "pointer", display: "flex", alignItems: "center" }}>
+          <button onClick={load} title="Rafraichir" style={{ background: "none", border: `1px solid ${C.med}`, borderRadius: 8, color: C.light, padding: "7px 10px", cursor: "pointer", display: "flex", alignItems: "center" }}>
             <RefreshCw size={14} className={loading ? "spin" : ""} />
           </button>
         </div>
 
         {error && (
           <div style={{ background: "#5c1c1c", border: "1px solid #a83232", borderRadius: 10, padding: "14px 18px", color: "#f4b0b0", fontSize: 13, marginBottom: 20 }}>
-            ⚠️ {error}<br />
-            <span style={{ opacity: 0.7, fontSize: 12 }}>Assure-toi d'avoir créé la fonction SQL admin_stats() dans Supabase.</span>
+            {error}
           </div>
         )}
 
-        {/* KPI Cards */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 24 }}>
-          <KpiCard icon={<Users size={13} />} label="Total inscrits" value={loading ? "…" : stats?.total_users ?? 0} />
-          <KpiCard icon={<CreditCard size={13} />} label="Payantes actives" value={loading ? "…" : stats?.paid_users ?? 0} color="#a8f0b0" />
-          <KpiCard icon={<TrendingUp size={13} />} label="Taux de conversion" value={loading ? "…" : `${conversion}%`} color="#f0d0a8" />
-          <KpiCard icon={<Activity size={13} />} label="Actives 7 jours" value={loading ? "…" : stats?.active_7d ?? 0} sub={`${stats?.active_30d ?? "…"} ce mois`} />
-          <KpiCard icon={<UserPlus size={13} />} label="Nouvelles 7 jours" value={loading ? "…" : stats?.new_7d ?? 0} sub={`${stats?.new_30d ?? "…"} ce mois`} />
-          <KpiCard icon={<BookOpen size={13} />} label="Tuto complété" value={loading ? "…" : stats?.tour_done_count ?? 0} sub={stats && stats.total_users > 0 ? `${Math.round((stats.tour_done_count / stats.total_users) * 100)}% des inscrits` : ""} color="#b0d4f0" />
-          <KpiCard icon={<Smartphone size={13} />} label="PWA installée" value={loading ? "…" : stats?.pwa_installed_count ?? 0} sub={stats && stats.total_users > 0 ? `${Math.round((stats.pwa_installed_count / stats.total_users) * 100)}% des inscrits` : ""} color="#d4b0f0" />
+          <KpiCard icon={<Users size={13} />} label="Total inscrits" value={loading ? "..." : stats?.total_users ?? 0} />
+          <KpiCard icon={<CreditCard size={13} />} label="Payantes actives" value={loading ? "..." : stats?.paid_users ?? 0} color="#a8f0b0" />
+          <KpiCard icon={<TrendingUp size={13} />} label="Taux de conversion" value={loading ? "..." : `${conversion}%`} color="#f0d0a8" />
+          <KpiCard icon={<Activity size={13} />} label="Actives 7 jours" value={loading ? "..." : stats?.active_7d ?? 0} sub={`${stats?.active_30d ?? "..."} ce mois`} />
+          <KpiCard icon={<UserPlus size={13} />} label="Nouvelles 7 jours" value={loading ? "..." : stats?.new_7d ?? 0} sub={`${stats?.new_30d ?? "..."} ce mois`} />
+          <KpiCard icon={<BookOpen size={13} />} label="Tuto complete" value={loading ? "..." : stats?.tour_done_count ?? 0} sub={stats && stats.total_users > 0 ? `${Math.round((stats.tour_done_count / stats.total_users) * 100)}% des inscrits` : ""} color="#b0d4f0" />
+          <KpiCard icon={<Smartphone size={13} />} label="PWA installee" value={loading ? "..." : stats?.pwa_installed_count ?? 0} sub={stats && stats.total_users > 0 ? `${Math.round((stats.pwa_installed_count / stats.total_users) * 100)}% des inscrits` : ""} color="#d4b0f0" />
         </div>
 
-        {/* Chart évolution cumulée */}
         {!loading && evolutionData.length > 0 && (
           <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, padding: "20px", marginBottom: 24 }}>
             <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
-              Évolution des inscrits & payantes
+              Evolution des inscrits et payantes
             </div>
             <div style={{ color: C.light, fontSize: 11, marginBottom: 16 }}>Cumulatif sur les 12 dernières semaines</div>
             <ResponsiveContainer width="100%" height={180}>
@@ -139,35 +134,72 @@ export default function AdminPage({ user, onBack }) {
                   cursor={{ stroke: C.med, strokeWidth: 1 }}
                   formatter={(value, name) => [value, name === "inscrits" ? "Inscrits total" : "Payantes total"]}
                 />
-                <Legend
-                  formatter={(value) => (
-                    <span style={{ color: C.light, fontSize: 11 }}>
-                      {value === "inscrits" ? "Inscrits" : "Payantes"}
-                    </span>
-                  )}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="inscrits"
-                  stroke={C.yellow}
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, fill: C.yellow }}
-                />
-                <Line
-                  type="monotone"
-                  dataKey="payantes"
-                  stroke="#a8f0b0"
-                  strokeWidth={2}
-                  dot={false}
-                  activeDot={{ r: 4, fill: "#a8f0b0" }}
-                />
+                <Legend formatter={(value) => <span style={{ color: C.light, fontSize: 11 }}>{value === "inscrits" ? "Inscrits" : "Payantes"}</span>} />
+                <Line type="monotone" dataKey="inscrits" stroke={C.yellow} strokeWidth={2} dot={false} activeDot={{ r: 4, fill: C.yellow }} />
+                <Line type="monotone" dataKey="payantes" stroke="#a8f0b0" strokeWidth={2} dot={false} activeDot={{ r: 4, fill: "#a8f0b0" }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
         )}
 
-        {/* Chart inscriptions par semaine */}
         {!loading && weekData.length > 0 && (
           <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, padding: "20px", marginBottom: 24 }}>
-            <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, marginBotto
+            <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Nouvelles inscriptions par semaine</div>
+            <div style={{ color: C.light, fontSize: 11, marginBottom: 16 }}>12 dernières semaines</div>
+            <ResponsiveContainer width="100%" height={140}>
+              <BarChart data={weekData} barSize={18}>
+                <XAxis dataKey="week" tick={{ fill: C.light, fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: C.light, fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} width={24} />
+                <Tooltip
+                  contentStyle={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 8, fontSize: 12, color: C.beige }}
+                  cursor={{ fill: "rgba(254,244,176,0.06)" }}
+                />
+                <Bar dataKey="count" radius={[4, 4, 0, 0]}>
+                  {weekData.map((_, i) => (
+                    <Cell key={i} fill={i === weekData.length - 1 ? C.yellow : C.med} />
+                  ))}
+                </Bar>
+              </BarChart>
+            </ResponsiveContainer>
+          </div>
+        )}
+
+        <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, overflow: "hidden" }}>
+          <div style={{ padding: "16px 20px", borderBottom: `1px solid ${C.med}`, color: C.beige, fontSize: 13, fontWeight: 600 }}>
+            Dernières inscrites
+          </div>
+          {loading ? (
+            <div style={{ padding: 24, color: C.light, fontSize: 13, textAlign: "center" }}>Chargement...</div>
+          ) : (
+            <div style={{ overflowX: "auto" }}>
+              <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 13 }}>
+                <thead>
+                  <tr style={{ borderBottom: `1px solid ${C.med}` }}>
+                    {["Email", "Inscription", "Statut", "Dernière activité"].map(h => (
+                      <th key={h} style={{ padding: "10px 16px", textAlign: "left", color: C.light, fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {(stats?.recent_users || []).map((u, i) => (
+                    <tr key={i} style={{ borderBottom: `1px solid ${C.med}22` }}>
+                      <td style={{ padding: "10px 16px", color: C.beige }}>{u.email}</td>
+                      <td style={{ padding: "10px 16px", color: C.light, whiteSpace: "nowrap" }}>{fmt(u.created_at)}</td>
+                      <td style={{ padding: "10px 16px" }}>
+                        <span style={{ background: u.paid ? "#1e4d2a" : C.med, color: u.paid ? "#a8f0b0" : C.light, borderRadius: 6, padding: "3px 9px", fontSize: 12, fontWeight: 600 }}>
+                          {u.paid ? "Payante" : "Gratuit"}
+                        </span>
+                      </td>
+                      <td style={{ padding: "10px 16px", color: C.light, whiteSpace: "nowrap" }}>{fmt(u.last_active)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+      </div>
+    </div>
+  );
+}
