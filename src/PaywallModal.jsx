@@ -36,6 +36,8 @@ export default function PaywallModal({ user, onClose }) {
       if (!res.ok || !data.url) {
         throw new Error(data.error || "Erreur de création du paiement");
       }
+      // Sauvegarder le plan pour le tracking Meta Pixel
+      localStorage.setItem('tgp-pending-plan', plan);
       // Redirection vers la page de paiement Stripe
       window.location.href = data.url;
     } catch (err) {

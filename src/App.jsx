@@ -653,9 +653,11 @@ function AuthPage({ onAuth }) {
         const { data, error: err } = await supabase.auth.signUp({ email, password });
         if (err) throw err;
         if (data.user && !data.user.email_confirmed_at) {
+          if (window.fbq) window.fbq('track', 'CompleteRegistration');
           setSuccess("Un email de confirmation vient de t'être envoyé. Clique sur le lien qu'il contient pour activer ton compte — pense à vérifier tes spams si tu ne le vois pas. Une fois confirmé, reviens ici pour te connecter.");
           setMode("login");
         } else if (data.user) {
+          if (window.fbq) window.fbq('track', 'CompleteRegistration');
           if (remember) {
             localStorage.setItem("tgp-remember", "true");
           } else {

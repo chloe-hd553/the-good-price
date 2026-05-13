@@ -2,7 +2,7 @@
 // Page de retour après paiement Stripe réussi (success_url)
 
 import { useEffect, useState } from "react";
-import { Scissors, Check, ArrowRight, Sparkles } from "lucide-react";
+import { Scissors, Check, ArrowRight } from "lucide-react";
 import { supabase } from "./supabase.js";
 
 const C = {
@@ -40,7 +40,16 @@ export default function ThankYouPage({ onContinue }) {
         .maybeSingle();
       const ok = data?.paid && data?.expires_at && new Date(data.expires_at) > new Date();
       if (ok) {
-        if (!cancel) setConfirmed(true);
+        if (!cancel) {
+          setConfirmed(true);
+          // Meta Pixel — Purchase event
+          if (window.fbq) {
+            const plan = localStorage.getItem('tgp-pending-plan');
+            const value = plan === 'monthly' ? 9.99 : 97.00;
+            window.fbq('track', 'Purchase', { value, currency: 'EUR' });
+            localStorage.removeItem('tgp-pending-plan');
+          }
+        }
       } else if (attempts < 6 && !cancel) {
         setTimeout(check, 1500);
       }
@@ -83,15 +92,9 @@ export default function ThankYouPage({ onContinue }) {
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            position: "relative",
           }}
         >
           <Check size={36} color={C.bg} strokeWidth={3} />
-          <Sparkles
-            size={20}
-            color={C.beige}
-            style={{ position: "absolute", top: -4, right: -4, opacity: 0.8 }}
-          />
         </div>
 
         {/* Titre */}
@@ -105,47 +108,21 @@ export default function ThankYouPage({ onContinue }) {
             marginBottom: 12,
           }}
         >
-          Bienvenue chez les bien payées
+          Fini de travailler pour rien.
         </div>
 
         <div
           style={{
             color: C.beige,
             fontSize: 16,
-            lineHeight: 1.55,
+            lineHeight: 1.65,
             marginBottom: 28,
             opacity: 0.92,
           }}
         >
-          Tes tarifs sur mesure sont déverrouillés. <br />
-          Tu peux maintenant voir, au centime près, ce que tu devrais facturer pour vivre de ton métier sans t'épuiser.
-        </div>
-
-        {/* Statut webhook */}
-        <div
-          style={{
-            background: C.bg,
-            borderRadius: 12,
-            padding: "14px 18px",
-            marginBottom: 28,
-            border: `1px solid ${C.med}`,
-            display: "flex",
-            alignItems: "center",
-            gap: 10,
-            justifyContent: "center",
-            color: confirmed ? C.yellow : C.light,
-            fontSize: 13,
-          }}
-        >
-          {confirmed ? (
-            <>
-              <Check size={16} /> Paiement confirmé. Tout est prêt côté app.
-            </>
-          ) : (
-            <>
-              <span className="ty-spin">⌛</span> Activation en cours... (quelques secondes)
-            </>
-          )}
+          Tes tarifs sur mesure sont déverrouillés.<br />
+          Tu peux maintenant voir, au centime près,<br />
+          ce que tu devrais facturer pour vivre de ton métier sans t'épuiser.
         </div>
 
         {/* CTA */}
