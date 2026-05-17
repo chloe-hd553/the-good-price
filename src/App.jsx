@@ -1609,12 +1609,23 @@ export default function App() {
     localStorage.setItem("tgp-demo-data", JSON.stringify({ sal, pro, tar }));
   }, [sal, pro, tar, demoMode, user]); // eslint-disable-line
 
-  // Mode démo : lance le tuto automatiquement après 10 secondes
+  // Mode démo : lance le tuto automatiquement après 10 secondes (seulement si aucune popup ouverte)
+  const demoPaywallOpenRef = useRef(false);
+  useEffect(() => { demoPaywallOpenRef.current = showDemoPaywall || showPaywall; }, [showDemoPaywall, showPaywall]);
   useEffect(() => {
     if (!demoMode || user) return;
-    const t = setTimeout(() => setShowTour(true), 10000);
+    const t = setTimeout(() => {
+      if (!demoPaywallOpenRef.current) setShowTour(true);
+    }, 10000);
     return () => clearTimeout(t);
   }, [demoMode, user]); // eslint-disable-line
+
+  // Retour depuis Stripe via bouton "précédent" du navigateur (bfcache) → recharge proprement
+  useEffect(() => {
+    const handler = (e) => { if (e.persisted) window.location.reload(); };
+    window.addEventListener("pageshow", handler);
+    return () => window.removeEventListener("pageshow", handler);
+  }, []);
 
   // Mode démo : transfère les données localStorage vers Supabase quand l'utilisatrice se connecte après paiement
   useEffect(() => {
