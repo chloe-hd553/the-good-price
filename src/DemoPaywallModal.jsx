@@ -38,36 +38,21 @@ export default function DemoPaywallModal({ onClose, onSignedUp }) {
     onSignedUp?.(); // ferme la modale — App.jsx détecte le nouvel user et transfère les données
   }
 
-  // ── Débloquer : étape email ──
+  // ── Débloquer : étape email (pas de création de compte avant paiement)──
   async function handlePayEmail(e) {
     e.preventDefault();
     if (!payEmail || !payEmail.includes("@")) { setError("Entre une adresse email valide."); return; }
-    setLoading(true); setError(null);
-    const res = await fetch("/api/create-demo-user", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email: payEmail }),
-    });
-    const data = await res.json();
-    if (res.status === 409) {
-      setError("Tu as déjà un compte ! Ferme cette fenêtre et connecte-toi.");
-      setLoading(false); return;
-    }
-    if (!res.ok) { setError(data.error || "Erreur. Réessaie."); setLoading(false); return; }
     localStorage.setItem("tgp-demo-email", payEmail.toLowerCase().trim());
-    setUserId(data.userId);
     setStep("plan");
-    setLoading(false);
   }
 
-  // ── Checkout Stripe ──
+  // ── Checkout Stripe (email comme référence — compte créé par le webhook après paiement) ──
   async function startCheckout(plan) {
-    if (!userId) return;
     setPlanLoading(plan); setError(null);
     const res = await fetch("/api/create-checkout", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ plan, userId, email: payEmail }),
+      body: JSON.stringify({ plan, email: payEmail, demoMode: true }),
     });
     const data = await res.json();
     if (!res.ok || !data.url) { setError(data.error || "Erreur paiement"); setPlanLoading(null); return; }

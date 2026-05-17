@@ -77,11 +77,49 @@ export default async function handler(req, res) {
     switch (event.type) {
       case 'checkout.session.completed': {
         const session = event.data.object;
-        const userId = session.client_reference_id || session.metadata?.userId;
-        const email = session.customer_details?.email || session.customer_email;
+        const ref = session.client_reference_id || session.metadata?.userId;
+        const email = session.customer_details?.email || session.customer_email || session.metadata?.email;
+        const isDemoMode = session.metadata?.demoMode === 'true';
+
+        let userId = ref;
+
+        // Mode démo : ref = email → on crée le compte Supabase maintenant
+        if (isDemoMode || (ref && ref.includes('@'))) {
+          const demoEmail = ref.includes('@') ? ref : email;
+          // Chercher si le compte existe déjà
+          const { data: existing } = await supabase
+            .from('user_data')
+            .select('id')
+            .eq('email', demoEmail)
+            .maybeSingle();
+
+          if (existing) {
+            userId = existing.id;
+          } else {
+            // Créer le compte Supabase
+            const { data: newUser, error: createErr } = await supabase.auth.admin.createUser({
+              email: demoEmail,
+              email_confirm: true,
+            });
+            if (createErr) {
+              console.error('Failed to create demo user:', createErr);
+            } else {
+              userId = newUser.user.id;
+              await supabase.from('user_data').upsert({
+                id: userId, email: demoEmail,
+                created_at: new Date().toISOString(),
+                updated_at: new Date().toISOString(),
+              });
+            }
+          }
+
+          // Envoyer l'email de création de mot de passe
+          const appUrl = process.env.APP_URL || 'https://the-good-price.vercel.app';
+          await supabase.auth.resetPasswordForEmail(demoEmail, { redirectTo: appUrl });
+        }
 
         if (!userId) {
-          console.error('No userId in session', session.id);
+          console.error('No userId resolved in session', session.id);
           break;
         }
 

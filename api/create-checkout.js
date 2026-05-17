@@ -13,10 +13,13 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { plan, userId, email } = req.body;
+    const { plan, userId, email, demoMode } = req.body;
 
-    if (!plan || !userId || !email) {
-      return res.status(400).json({ error: 'Missing plan, userId or email' });
+    if (!plan || !email) {
+      return res.status(400).json({ error: 'Missing plan or email' });
+    }
+    if (!demoMode && !userId) {
+      return res.status(400).json({ error: 'Missing userId' });
     }
 
     if (plan !== 'oneshot' && plan !== 'monthly') {
@@ -36,8 +39,9 @@ export default async function handler(req, res) {
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
       customer_email: email,
-      client_reference_id: userId,
-      metadata: { userId, plan },
+      // En mode démo : l'email sert de référence (le compte sera créé par le webhook)
+      client_reference_id: userId || email,
+      metadata: { userId: userId || '', email, plan, demoMode: demoMode ? 'true' : 'false' },
       allow_promotion_codes: true,
       success_url: `${appUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: `${appUrl}/annule`,
