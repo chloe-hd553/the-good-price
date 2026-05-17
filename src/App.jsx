@@ -1949,24 +1949,23 @@ export default function App() {
       {demoMode && !user && (
         <div style={{
           position: "sticky", top: 0, zIndex: 60,
-          background: "#3D2D1A", borderBottom: `1px solid ${C.med}`,
+          background: C.yellow, borderBottom: `1px solid #e8d88a`,
           padding: "10px 16px", display: "flex", alignItems: "center",
           justifyContent: "space-between", gap: 12, flexWrap: "wrap",
           fontFamily: "'Instrument Sans', sans-serif",
         }}>
-          <div style={{ color: C.beige, fontSize: 13 }}>
-            <span style={{ color: C.yellow, fontWeight: 600 }}>Mode démo</span>
-            {" — "}Tes saisies ne sont pas encore sauvegardées.
+          <div style={{ color: C.bg, fontSize: 13, fontWeight: 500 }}>
+            ⚠️ <strong>Mode démo</strong> — tes saisies ne seront pas sauvegardées.
           </div>
           <button
             onClick={() => setShowDemoPaywall(true)}
             style={{
-              background: C.yellow, color: C.bg, border: "none", borderRadius: 8,
+              background: C.bg, color: C.yellow, border: "none", borderRadius: 8,
               padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer",
               whiteSpace: "nowrap", fontFamily: "'Instrument Sans', sans-serif",
             }}
           >
-            Sauvegarder & débloquer mes tarifs
+            M'inscrire pour sauvegarder mes données
           </button>
         </div>
       )}
@@ -2003,7 +2002,12 @@ export default function App() {
           </button>
           <input ref={importRef} type="file" accept=".xlsx,.xls" onChange={handleHeaderImport} style={{ display: "none" }} />
           <div data-tour="save-btn" className={`hdr-save${sv ? " on" : ""}`}>
-            {sv ? <><Ico icon={Save} size={13} color={C.yellow} /><span className="hdr-save-text"> Sauvegarde...</span></> : <><Ico icon={Check} size={13} color={C.light} /><span className="hdr-save-text"> Sauvegardé</span></>}
+            {demoMode && !user
+              ? <><Ico icon={X} size={13} color={C.light} /><span className="hdr-save-text"> Non sauvegardé</span></>
+              : sv
+                ? <><Ico icon={Save} size={13} color={C.yellow} /><span className="hdr-save-text"> Sauvegarde...</span></>
+                : <><Ico icon={Check} size={13} color={C.light} /><span className="hdr-save-text"> Sauvegardé</span></>
+            }
           </div>
           {!window.matchMedia("(display-mode: standalone)").matches && !window.navigator.standalone && !localStorage.getItem(`tgp-install-dismissed-${user?.id}`) && (
             <button
@@ -2023,6 +2027,20 @@ export default function App() {
               {isIOS || /Android/i.test(navigator.userAgent) ? <Smartphone size={14} strokeWidth={2} /> : <Monitor size={14} strokeWidth={2} />}
             </button>
           )}
+          {demoMode && !user ? (
+            <button
+              onClick={() => setShowDemoPaywall(true)}
+              style={{
+                background: "rgba(254,244,176,0.1)", border: `1px solid ${C.med}`,
+                borderRadius: 20, padding: "6px 14px", color: C.yellow,
+                fontSize: 13, fontWeight: 600, cursor: "pointer",
+                fontFamily: "'Instrument Sans', sans-serif",
+                whiteSpace: "nowrap",
+              }}
+            >
+              S'inscrire
+            </button>
+          ) : (
           <UserMenu
             user={user}
             isPaid={isPaid}
@@ -2035,6 +2053,7 @@ export default function App() {
             onImportClick={() => importRef.current?.click()}
             onReset={handleReset}
           />
+          )}
         </div>
       </header>
 
