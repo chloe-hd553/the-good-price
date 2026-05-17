@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, LogOut, CreditCard, Send, Paperclip, Check, Smartphone, Monitor, Upload, RotateCcw } from "lucide-react";
+import { X, LogOut, CreditCard, Send, Paperclip, Check, Smartphone, Monitor, Upload, RotateCcw, UserPlus } from "lucide-react";
 
 /* ── Couleurs locales (miroir App.jsx) ── */
 const C = {
@@ -711,7 +711,7 @@ function ContactPanel({ user, onClose }) {
 /* ══════════════════════════════════════════
    USER MENU (export par défaut)
 ══════════════════════════════════════════ */
-export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, isInstalled, onRestartTour, theme, onImportClick, onReset }) {
+export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, isInstalled, onRestartTour, theme, onImportClick, onReset, demoMode, onSignup }) {
   const [open, setOpen] = useState(false);
   const [view, setView] = useState(null); // null | "compte" | "contact"
   const menuRef = useRef(null);
@@ -751,27 +751,32 @@ export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, 
         {/* ── Dropdown ── */}
         {open && (
           <div className="udrop">
-            <div className="udrop-email">{user?.email}</div>
+            <div className="udrop-email">{demoMode ? "Mode démo" : user?.email}</div>
             <div className="udrop-div" />
-            <button
-              className="udrop-item"
-              onClick={() => {
-                setView("compte");
-                setOpen(false);
-              }}
-            >
-              <CreditCard size={15} /> Mon compte
-            </button>
-            <button
-              className="udrop-item"
-              onClick={() => {
-                setView("contact");
-                setOpen(false);
-              }}
-            >
-              <Send size={15} /> Contact
-            </button>
-            {onImportClick && (
+            {demoMode ? (
+              <button
+                className="udrop-item"
+                onClick={() => { setOpen(false); onSignup?.(); }}
+              >
+                <UserPlus size={15} /> S'inscrire
+              </button>
+            ) : (
+              <button
+                className="udrop-item"
+                onClick={() => { setView("compte"); setOpen(false); }}
+              >
+                <CreditCard size={15} /> Mon compte
+              </button>
+            )}
+            {!demoMode && (
+              <button
+                className="udrop-item"
+                onClick={() => { setView("contact"); setOpen(false); }}
+              >
+                <Send size={15} /> Contact
+              </button>
+            )}
+            {!demoMode && onImportClick && (
               <button className="udrop-item" onClick={() => { setOpen(false); onImportClick(); }}>
                 <Upload size={15} /> Importer
               </button>
@@ -781,23 +786,24 @@ export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, 
                 <Check size={15} /> Revoir le tutoriel
               </button>
             )}
-            <div className="udrop-div" />
-            <button
-              className="udrop-item udrop-danger"
-              onClick={() => { setOpen(false); if (window.confirm("Remettre toutes les données à zéro ?")) onReset?.(); }}
-            >
-              <RotateCcw size={15} /> Réinitialiser
-            </button>
-            <div className="udrop-div" />
-            <button
-              className="udrop-item udrop-danger"
-              onClick={() => {
-                setOpen(false);
-                onLogout();
-              }}
-            >
-              <LogOut size={15} /> Se déconnecter
-            </button>
+            {!demoMode && (
+              <>
+                <div className="udrop-div" />
+                <button
+                  className="udrop-item udrop-danger"
+                  onClick={() => { setOpen(false); if (window.confirm("Remettre toutes les données à zéro ?")) onReset?.(); }}
+                >
+                  <RotateCcw size={15} /> Réinitialiser
+                </button>
+                <div className="udrop-div" />
+                <button
+                  className="udrop-item udrop-danger"
+                  onClick={() => { setOpen(false); onLogout(); }}
+                >
+                  <LogOut size={15} /> Se déconnecter
+                </button>
+              </>
+            )}
           </div>
         )}
       </div>

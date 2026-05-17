@@ -1960,8 +1960,8 @@ export default function App() {
           <button
             onClick={() => setShowDemoPaywall(true)}
             style={{
-              background: C.bg, color: C.yellow, border: "none", borderRadius: 8,
-              padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer",
+              background: "rgba(44,31,18,0.25)", color: C.bg, border: "1px solid rgba(44,31,18,0.3)",
+              borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer",
               whiteSpace: "nowrap", fontFamily: "'Instrument Sans', sans-serif",
             }}
           >
@@ -2027,20 +2027,6 @@ export default function App() {
               {isIOS || /Android/i.test(navigator.userAgent) ? <Smartphone size={14} strokeWidth={2} /> : <Monitor size={14} strokeWidth={2} />}
             </button>
           )}
-          {demoMode && !user ? (
-            <button
-              onClick={() => setShowDemoPaywall(true)}
-              style={{
-                background: "rgba(254,244,176,0.1)", border: `1px solid ${C.med}`,
-                borderRadius: 20, padding: "6px 14px", color: C.yellow,
-                fontSize: 13, fontWeight: 600, cursor: "pointer",
-                fontFamily: "'Instrument Sans', sans-serif",
-                whiteSpace: "nowrap",
-              }}
-            >
-              S'inscrire
-            </button>
-          ) : (
           <UserMenu
             user={user}
             isPaid={isPaid}
@@ -2052,8 +2038,9 @@ export default function App() {
             theme={theme}
             onImportClick={() => importRef.current?.click()}
             onReset={handleReset}
+            demoMode={demoMode && !user}
+            onSignup={() => setShowDemoPaywall(true)}
           />
-          )}
         </div>
       </header>
 
