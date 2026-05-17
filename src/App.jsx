@@ -2076,7 +2076,10 @@ export default function App() {
       {/* Paywall modal */}
       {showPaywall && user && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
       {(showPaywall || showDemoPaywall) && !user && demoMode && (
-        <DemoPaywallModal onClose={() => { setShowPaywall(false); setShowDemoPaywall(false); }} />
+        <DemoPaywallModal
+          onClose={() => { setShowPaywall(false); setShowDemoPaywall(false); }}
+          onSignedUp={() => { setShowPaywall(false); setShowDemoPaywall(false); }}
+        />
       )}
     </div>
   );
