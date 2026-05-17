@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from "react";
 import { createPortal } from "react-dom";
-import { X, LogOut, CreditCard, Send, Paperclip, Check, Smartphone, Monitor, Upload, RotateCcw, UserPlus } from "lucide-react";
+import { X, LogOut, CreditCard, Send, Paperclip, Check, Smartphone, Monitor, Upload, RotateCcw, UserPlus, User } from "lucide-react";
 
 /* ── Couleurs locales (miroir App.jsx) ── */
 const C = {
@@ -719,7 +719,7 @@ export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, 
   /* Initiales : 2 premières lettres de la partie locale de l'email */
   const initials = user?.email
     ? user.email.split("@")[0].slice(0, 2).toUpperCase()
-    : "??";
+    : null;
 
   /* Fermer le dropdown si clic en dehors */
   useEffect(() => {
@@ -742,10 +742,10 @@ export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, 
           className="user-avatar"
           data-tour="user-menu"
           onClick={() => setOpen((o) => !o)}
-          title={user?.email}
+          title={user?.email || "Menu"}
           aria-label="Mon compte"
         >
-          {initials}
+          {initials ?? <User size={16} strokeWidth={2} />}
         </button>
 
         {/* ── Dropdown ── */}
