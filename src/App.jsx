@@ -9,6 +9,7 @@ import CancelPage from "./CancelPage.jsx";
 import UserMenu from "./UserMenu.jsx";
 import OnboardingTour from "./OnboardingTour.jsx";
 import AdminPage from "./AdminPage.jsx";
+import DemoPaywallModal from "./DemoPaywallModal.jsx";
 
 const TOUR_ENABLED = () => true;
 
@@ -1582,9 +1583,55 @@ export default function App() {
   const [showTour, setShowTour] = useState(false);
   const [pendingTour, setPendingTour] = useState(false);
   const deferredPrompt = useRef(null);
+
+  // Mode démo : activé via ?demo=true dans l'URL (stocké en sessionStorage pour la durée de la session)
+  const [demoMode, setDemoMode] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("demo") === "true") { sessionStorage.setItem("tgp-demo", "1"); return true; }
+    return sessionStorage.getItem("tgp-demo") === "1";
+  });
+  const [showDemoPaywall, setShowDemoPaywall] = useState(false);
   const importRef = useRef(null);
 
   const isIOS = typeof window !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.navigator.standalone;
+
+  // Mode démo : initialise ok+started immédiatement (pas de WelcomePage ni AuthPage)
+  useEffect(() => {
+    if (!demoMode || user) return;
+    setOk(true);
+    setStarted(true);
+  }, [demoMode, user]); // eslint-disable-line
+
+  // Mode démo : sauvegarde les données en localStorage au fur et à mesure
+  useEffect(() => {
+    if (!demoMode || user) return;
+    localStorage.setItem("tgp-demo-data", JSON.stringify({ sal, pro, tar }));
+  }, [sal, pro, tar, demoMode, user]); // eslint-disable-line
+
+  // Mode démo : lance le tuto automatiquement après 3 secondes
+  useEffect(() => {
+    if (!demoMode || user) return;
+    const t = setTimeout(() => setShowTour(true), 3000);
+    return () => clearTimeout(t);
+  }, [demoMode, user]); // eslint-disable-line
+
+  // Mode démo : transfère les données localStorage vers Supabase quand l'utilisatrice se connecte après paiement
+  useEffect(() => {
+    if (!user || !demoMode) return;
+    const raw = localStorage.getItem("tgp-demo-data");
+    if (!raw) { setDemoMode(false); sessionStorage.removeItem("tgp-demo"); return; }
+    try {
+      const { sal: dSalDemo, pro: dProDemo, tar: dTarDemo } = JSON.parse(raw);
+      if (dSalDemo) setSal(dSalDemo);
+      if (dProDemo) setPro(dProDemo);
+      if (dTarDemo) setTar(dTarDemo);
+    } catch {}
+    localStorage.removeItem("tgp-demo-data");
+    localStorage.removeItem("tgp-demo-email");
+    sessionStorage.removeItem("tgp-demo");
+    setDemoMode(false);
+  }, [user]); // eslint-disable-line
 
   // Check auth session on mount — gestion "rester connectée"
   useEffect(() => {
@@ -1873,13 +1920,16 @@ export default function App() {
     );
   }
 
-  // Not logged in → Auth page
+  // Not logged in → Demo mode (app vide) ou Auth page
   if (!user) {
-    return <AuthPage onAuth={(u) => setUser(u)} />;
+    if (!demoMode) {
+      return <AuthPage onAuth={(u) => setUser(u)} />;
+    }
+    // demoMode : on continue le rendu vers l'app
   }
 
-  // Logged in but no data → Welcome page
-  if (ok && !started) {
+  // Logged in but no data → Welcome page (pas en mode démo)
+  if (ok && !started && !demoMode) {
     return (
       <>
         <style>{styles}</style>
@@ -1894,6 +1944,33 @@ export default function App() {
   return (
     <div className={`tgp${theme === "light" ? " light" : ""}`}>
       <style>{styles}</style>
+
+      {/* Bannière mode démo */}
+      {demoMode && !user && (
+        <div style={{
+          position: "sticky", top: 0, zIndex: 60,
+          background: "#3D2D1A", borderBottom: `1px solid ${C.med}`,
+          padding: "10px 16px", display: "flex", alignItems: "center",
+          justifyContent: "space-between", gap: 12, flexWrap: "wrap",
+          fontFamily: "'Instrument Sans', sans-serif",
+        }}>
+          <div style={{ color: C.beige, fontSize: 13 }}>
+            <span style={{ color: C.yellow, fontWeight: 600 }}>Mode démo</span>
+            {" — "}Tes saisies ne sont pas encore sauvegardées.
+          </div>
+          <button
+            onClick={() => setShowDemoPaywall(true)}
+            style={{
+              background: C.yellow, color: C.bg, border: "none", borderRadius: 8,
+              padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer",
+              whiteSpace: "nowrap", fontFamily: "'Instrument Sans', sans-serif",
+            }}
+          >
+            Sauvegarder & débloquer mes tarifs
+          </button>
+        </div>
+      )}
+
       {showTour && <OnboardingTour currentTab={tab} setTab={setTab} onComplete={handleTourComplete} />}
       {showInstall && <InstallPrompt onInstall={handleInstall} onDismiss={handleInstallDismiss} onSnooze={handleInstallSnooze} isDesktop={!/Android|iPhone|iPad|iPod/i.test(navigator.userAgent)} showDismiss={parseInt(localStorage.getItem(`tgp-install-count-${user?.id}`) || "0") >= 3} />}
       {showInstallIOS && <InstallPromptIOS onDismiss={handleInstallIOSDismiss} onSnooze={handleInstallIOSSnooze} showDismiss={parseInt(localStorage.getItem(`tgp-install-ios-count-${user?.id}`) || "0") >= 3} />}
@@ -1991,7 +2068,10 @@ export default function App() {
       )}
 
       {/* Paywall modal */}
-      {showPaywall && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
+      {showPaywall && user && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
+      {(showPaywall || showDemoPaywall) && !user && demoMode && (
+        <DemoPaywallModal onClose={() => { setShowPaywall(false); setShowDemoPaywall(false); }} />
+      )}
     </div>
   );
 }

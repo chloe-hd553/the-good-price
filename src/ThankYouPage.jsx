@@ -2,7 +2,7 @@
 // Page de retour après paiement Stripe réussi (success_url)
 
 import { useEffect, useState } from "react";
-import { Scissors, Check, ArrowRight } from "lucide-react";
+import { Scissors, Check, ArrowRight, Mail } from "lucide-react";
 import { supabase } from "./supabase.js";
 
 const C = {
@@ -17,6 +17,8 @@ const C = {
 export default function ThankYouPage({ onContinue }) {
   const [confirmed, setConfirmed] = useState(false);
   const [waited, setWaited] = useState(false);
+  const [demoEmail] = useState(() => localStorage.getItem("tgp-demo-email") || null);
+  const [passwordSent, setPasswordSent] = useState(false);
 
   // On laisse 1,5s au webhook Stripe pour traiter le paiement, puis on recharge
   // user_data pour vérifier que paid=true
@@ -42,6 +44,12 @@ export default function ThankYouPage({ onContinue }) {
       if (ok) {
         if (!cancel) {
           setConfirmed(true);
+          // Mode démo : envoyer l'email de création de mot de passe
+          if (demoEmail && !passwordSent) {
+            supabase.auth.resetPasswordForEmail(demoEmail, {
+              redirectTo: window.location.origin,
+            }).then(() => setPasswordSent(true));
+          }
           // Meta Pixel — Purchase event
           if (window.fbq) {
             const plan = localStorage.getItem('tgp-pending-plan');
@@ -125,26 +133,41 @@ export default function ThankYouPage({ onContinue }) {
           ce que tu devrais facturer pour vivre de ton métier sans t'épuiser.
         </div>
 
-        {/* CTA */}
-        <button
-          onClick={onContinue}
-          style={{
-            background: C.yellow,
-            color: C.bg,
-            border: "none",
-            borderRadius: 12,
-            padding: "14px 28px",
-            fontSize: 15,
-            fontWeight: 700,
-            cursor: "pointer",
-            display: "inline-flex",
-            alignItems: "center",
-            gap: 8,
-            fontFamily: "'Instrument Sans', sans-serif",
-          }}
-        >
-          Voir mes tarifs sur mesure <ArrowRight size={18} />
-        </button>
+        {/* CTA — variante démo (créer mot de passe) ou normale */}
+        {demoEmail ? (
+          <div style={{ textAlign: "center" }}>
+            <div style={{
+              background: "rgba(254,244,176,0.08)", border: `1px solid ${C.med}`,
+              borderRadius: 12, padding: "16px 20px", marginBottom: 20,
+              display: "flex", alignItems: "flex-start", gap: 12,
+            }}>
+              <Mail size={20} color={C.yellow} style={{ flexShrink: 0, marginTop: 2 }} />
+              <div style={{ textAlign: "left" }}>
+                <div style={{ color: C.yellow, fontWeight: 600, fontSize: 14, marginBottom: 4 }}>
+                  Vérifie ta boîte mail
+                </div>
+                <div style={{ color: C.beige, fontSize: 13, lineHeight: 1.5 }}>
+                  Un email a été envoyé à <strong>{demoEmail}</strong> pour créer ton mot de passe et accéder à ton compte.
+                </div>
+              </div>
+            </div>
+            <div style={{ color: C.light, fontSize: 12, lineHeight: 1.5 }}>
+              Tes données sont sauvegardées et t'attendent.
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={onContinue}
+            style={{
+              background: C.yellow, color: C.bg, border: "none", borderRadius: 12,
+              padding: "14px 28px", fontSize: 15, fontWeight: 700, cursor: "pointer",
+              display: "inline-flex", alignItems: "center", gap: 8,
+              fontFamily: "'Instrument Sans', sans-serif",
+            }}
+          >
+            Voir mes tarifs sur mesure <ArrowRight size={18} />
+          </button>
+        )}
 
         {/* Footer */}
         <div style={{ marginTop: 32, color: C.light, fontSize: 12, lineHeight: 1.5 }}>
