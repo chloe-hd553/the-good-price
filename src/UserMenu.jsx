@@ -768,14 +768,12 @@ export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, 
                 <CreditCard size={15} /> Mon compte
               </button>
             )}
-            {!demoMode && (
-              <button
-                className="udrop-item"
-                onClick={() => { setView("contact"); setOpen(false); }}
-              >
-                <Send size={15} /> Contact
-              </button>
-            )}
+            <button
+              className="udrop-item"
+              onClick={() => { setView("contact"); setOpen(false); }}
+            >
+              <Send size={15} /> Contact
+            </button>
             {!demoMode && onImportClick && (
               <button className="udrop-item" onClick={() => { setOpen(false); onImportClick(); }}>
                 <Upload size={15} /> Importer
@@ -831,7 +829,7 @@ export default function UserMenu({ user, isPaid, userData, onLogout, onInstall, 
             />
           )}
           {view === "contact" && (
-            <ContactPanel user={user} onClose={() => setView(null)} />
+            <ContactPanel user={user || { email: "visiteur (mode démo)" }} onClose={() => setView(null)} />
           )}
         </div>
         </div>,

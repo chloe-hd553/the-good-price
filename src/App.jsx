@@ -1609,10 +1609,10 @@ export default function App() {
     localStorage.setItem("tgp-demo-data", JSON.stringify({ sal, pro, tar }));
   }, [sal, pro, tar, demoMode, user]); // eslint-disable-line
 
-  // Mode démo : lance le tuto automatiquement après 3 secondes
+  // Mode démo : lance le tuto automatiquement après 10 secondes
   useEffect(() => {
     if (!demoMode || user) return;
-    const t = setTimeout(() => setShowTour(true), 3000);
+    const t = setTimeout(() => setShowTour(true), 10000);
     return () => clearTimeout(t);
   }, [demoMode, user]); // eslint-disable-line
 
