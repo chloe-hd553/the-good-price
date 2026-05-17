@@ -58,7 +58,7 @@ export default function CancelPage({ onContinue }) {
             opacity: 0.9,
           }}
         >
-          Aucun paiement n'a été pris. Tu peux continuer à tester, et débloquer tes tarifs sur mesure quand tu te sens prête.
+          Aucun paiement n'a été validé. Tu peux continuer à tester, et débloquer tes tarifs sur mesure quand tu en as envie.
         </div>
 
         <button
