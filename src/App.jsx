@@ -10,9 +10,7 @@ import UserMenu from "./UserMenu.jsx";
 import OnboardingTour from "./OnboardingTour.jsx";
 import AdminPage from "./AdminPage.jsx";
 
-// 🚩 Feature flag : tuto visible seulement pour cet email pendant les tests
-// Pour l'activer pour toutes les clientes, changer en : () => true
-const TOUR_ENABLED = (email) => email === "chloe-huissoud@hotmail.fr";
+const TOUR_ENABLED = () => true;
 
 /* ── PALETTE STRICTE ── */
 const C = {
