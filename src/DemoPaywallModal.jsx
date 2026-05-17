@@ -142,7 +142,17 @@ export default function DemoPaywallModal({ onClose, onSignedUp }) {
 
             {/* Upsell discret */}
             <div style={{ marginTop: 20, textAlign: "center" }}>
-              <button onClick={() => { setStep("pay-email"); setError(null); }} style={{
+              <button onClick={() => {
+                setError(null);
+                if (email && email.includes("@")) {
+                  // Email déjà saisi → on saute l'étape email
+                  setPayEmail(email);
+                  localStorage.setItem("tgp-demo-email", email.toLowerCase().trim());
+                  setStep("plan");
+                } else {
+                  setStep("pay-email");
+                }
+              }} style={{
                 background: "none", border: "none", color: C.light, fontSize: 13,
                 cursor: "pointer", textDecoration: "underline", fontFamily: "'Instrument Sans', sans-serif",
               }}>
