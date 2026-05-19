@@ -1591,7 +1591,17 @@ export default function App() {
     if (params.get("demo") === "true") { sessionStorage.setItem("tgp-demo", "1"); return true; }
     return sessionStorage.getItem("tgp-demo") === "1";
   });
-  const [showDemoPaywall, setShowDemoPaywall] = useState(false);
+  // Si on revient depuis Stripe annulation en mode démo → rouvrir directement à l'étape plan
+  const [demoPaylwallInitialStep] = useState(() => {
+    if (typeof window === "undefined") return "signup";
+    const params = new URLSearchParams(window.location.search);
+    return params.get("paywall") === "plan" ? "plan" : "signup";
+  });
+  const [showDemoPaywall, setShowDemoPaywall] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const params = new URLSearchParams(window.location.search);
+    return params.get("paywall") === "plan";
+  });
   const importRef = useRef(null);
 
   const isIOS = typeof window !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.navigator.standalone;
@@ -2088,6 +2098,7 @@ export default function App() {
       {showPaywall && user && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
       {(showPaywall || showDemoPaywall) && !user && demoMode && (
         <DemoPaywallModal
+          initialStep={demoPaylwallInitialStep}
           onClose={() => { setShowPaywall(false); setShowDemoPaywall(false); }}
           onSignedUp={() => { setShowPaywall(false); setShowDemoPaywall(false); }}
         />

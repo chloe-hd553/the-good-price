@@ -12,12 +12,13 @@ const C = {
   light: "#795A34", yellow: "#fef4b0", beige: "#f4e9d6",
 };
 
-export default function DemoPaywallModal({ onClose, onSignedUp }) {
-  const [step, setStep] = useState("signup"); // "signup" | "pay-email" | "plan"
+export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "signup" }) {
+  const [step, setStep] = useState(initialStep); // "signup" | "pay-email" | "plan"
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
-  const [payEmail, setPayEmail] = useState("");
+  // Pré-remplir l'email depuis localStorage si on revient depuis Stripe
+  const [payEmail, setPayEmail] = useState(() => localStorage.getItem("tgp-demo-email") || "");
   const [userId, setUserId] = useState(null);
   const [loading, setLoading] = useState(false);
   const [planLoading, setPlanLoading] = useState(null);
