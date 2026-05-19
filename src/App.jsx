@@ -1640,6 +1640,8 @@ export default function App() {
   // Mode démo : transfère les données localStorage vers Supabase quand l'utilisatrice se connecte après paiement
   useEffect(() => {
     if (!user || !demoMode) return;
+    // Ne pas quitter le mode démo si le paywall est ouvert (ex : retour depuis Stripe cancel)
+    if (demoPaywallOpenRef.current) return;
     const raw = localStorage.getItem("tgp-demo-data");
     if (!raw) { setDemoMode(false); sessionStorage.removeItem("tgp-demo"); return; }
     try {
@@ -2096,7 +2098,7 @@ export default function App() {
 
       {/* Paywall modal */}
       {showPaywall && user && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
-      {demoMode && (showDemoPaywall || (showPaywall && !user)) && (
+      {(showDemoPaywall || (showPaywall && !user && demoMode)) && (
         <DemoPaywallModal
           initialStep={demoPaylwallInitialStep}
           onClose={() => { setShowPaywall(false); setShowDemoPaywall(false); }}
