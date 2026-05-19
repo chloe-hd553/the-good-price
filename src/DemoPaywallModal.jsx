@@ -233,8 +233,7 @@ export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "s
                   <div style={{ flex: 1, paddingRight: 12 }}>
                     <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Paiement unique</div>
                     <div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>
-                      Accès complet pendant 1 an<br/>
-                      <span style={{ opacity: 0.85 }}>(vs 9,99 €/mois — soit 119,90 €/an)</span>
+                      Accès complet pendant 1 an
                     </div>
                   </div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
@@ -252,7 +251,7 @@ export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "s
                 onMouseEnter={(e) => { if (!planLoading) { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.borderColor = C.beige; } }}
                 onMouseLeave={(e) => { e.currentTarget.style.transform = "translateY(0)"; e.currentTarget.style.borderColor = C.light; }}>
                 <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-                  <div><div style={{ fontWeight: 700, fontSize: 16, marginBottom: 2 }}>Mensuel sur 12 mois</div><div style={{ fontSize: 13, opacity: 0.75 }}>S'arrête automatiquement après 1 an</div></div>
+                  <div><div style={{ fontWeight: 700, fontSize: 16, marginBottom: 2 }}>Mensuel sur 12 mois</div><div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>S'arrête automatiquement après 1 an<br/><span style={{ opacity: 0.85 }}>soit 119,90 €/an</span></div></div>
                   <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
                     <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 700, color: C.yellow }}>9,99 €<span style={{ fontSize: 14, opacity: 0.7, marginLeft: 4 }}>/mois</span></div>
                     {planLoading === "monthly" && <Loader2 size={18} className="dm-spin" />}
