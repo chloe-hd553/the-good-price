@@ -1985,7 +1985,7 @@ export default function App() {
           <button
             onClick={() => setShowDemoPaywall(true)}
             style={{
-              background: C.bg, color: C.yellow, border: "none",
+              background: "#553F24", color: C.yellow, border: "none",
               borderRadius: 8, padding: "8px 16px", fontSize: 13, fontWeight: 700, cursor: "pointer",
               whiteSpace: "nowrap", fontFamily: "'Instrument Sans', sans-serif",
             }}
