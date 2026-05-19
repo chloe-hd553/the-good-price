@@ -121,13 +121,19 @@ export default function ChoixPlanPage({ onBack }) {
             onMouseEnter={(e) => !planLoading && (e.currentTarget.style.transform = "translateY(-1px)")}
             onMouseLeave={(e) => (e.currentTarget.style.transform = "translateY(0)")}
           >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
-              <div>
-                <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 2 }}>Paiement unique</div>
-                <div style={{ fontSize: 13, opacity: 0.75 }}>Accès complet pendant 1 an</div>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
+              <div style={{ flex: 1, paddingRight: 12 }}>
+                <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 4 }}>Paiement unique</div>
+                <div style={{ fontSize: 12, opacity: 0.7, lineHeight: 1.4 }}>
+                  Accès complet pendant 1 an<br/>
+                  <span style={{ opacity: 0.85 }}>(vs 9,99 €/mois — soit 119,90 €/an)</span>
+                </div>
               </div>
-              <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
-                <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 700 }}>97 €</div>
+              <div style={{ display: "flex", alignItems: "center", gap: 8, flexShrink: 0 }}>
+                <div style={{ textAlign: "right" }}>
+                  <div style={{ fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 700, lineHeight: 1 }}>97 €</div>
+                  <div style={{ fontSize: 12, opacity: 0.6, textDecoration: "line-through", marginTop: 2 }}>119,90 €</div>
+                </div>
                 {planLoading === "oneshot" && <Loader2 size={18} style={{ animation: "spin 0.8s linear infinite" }} />}
               </div>
             </div>
