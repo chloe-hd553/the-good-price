@@ -46,7 +46,7 @@ export default function CancelPage({ onContinue }) {
             marginBottom: 12,
           }}
         >
-          Pas de souci, on retourne au calculateur
+          Retour au calculateur
         </div>
 
         <div
