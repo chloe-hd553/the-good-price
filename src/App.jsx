@@ -1585,13 +1585,8 @@ export default function App() {
   const [pendingTour, setPendingTour] = useState(false);
   const deferredPrompt = useRef(null);
 
-  // Mode démo : activé via ?demo=true dans l'URL (stocké en sessionStorage pour la durée de la session)
-  const [demoMode, setDemoMode] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("demo") === "true") { sessionStorage.setItem("tgp-demo", "1"); return true; }
-    return sessionStorage.getItem("tgp-demo") === "1";
-  });
+  // Mode démo : actif par défaut pour toutes les visiteuses non connectées
+  const [demoMode, setDemoMode] = useState(true);
   const [showDemoPaywall, setShowDemoPaywall] = useState(false);
   const importRef = useRef(null);
 
