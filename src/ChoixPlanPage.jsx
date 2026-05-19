@@ -66,6 +66,9 @@ export default function ChoixPlanPage({ onBack }) {
       fontFamily: "'Instrument Sans', sans-serif",
     }}>
       <div style={{
+        background: C.dark,
+        borderRadius: 20,
+        padding: "40px 32px",
         maxWidth: 480,
         width: "100%",
       }}>
