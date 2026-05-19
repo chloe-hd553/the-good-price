@@ -206,6 +206,8 @@ export default function ChoixPlanPage({ onBack }) {
 
       <style>{`
         @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@700&family=Instrument+Sans:wght@400;600;700&display=swap');
+        *{box-sizing:border-box;margin:0;padding:0}
+        html,body{margin:0;padding:0;background:${C.dark}}
         @keyframes spin { to { transform: rotate(360deg) } }
       `}</style>
     </div>
