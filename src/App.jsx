@@ -10,6 +10,7 @@ import UserMenu from "./UserMenu.jsx";
 import OnboardingTour from "./OnboardingTour.jsx";
 import AdminPage from "./AdminPage.jsx";
 import DemoPaywallModal from "./DemoPaywallModal.jsx";
+import ChoixPlanPage from "./ChoixPlanPage.jsx";
 
 const TOUR_ENABLED = () => true;
 
@@ -1591,21 +1592,7 @@ export default function App() {
     if (params.get("demo") === "true") { sessionStorage.setItem("tgp-demo", "1"); return true; }
     return sessionStorage.getItem("tgp-demo") === "1";
   });
-  // Si on revient depuis Stripe annulation en mode démo → rouvrir directement à l'étape plan
-  const [demoPaylwallInitialStep] = useState(() => {
-    if (typeof window === "undefined") return "signup";
-    const params = new URLSearchParams(window.location.search);
-    return params.get("paywall") === "plan" ? "plan" : "signup";
-  });
-  const [showDemoPaywall, setShowDemoPaywall] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("paywall") === "plan") {
-      sessionStorage.setItem("tgp-paywall-open", "1");
-      return true;
-    }
-    return sessionStorage.getItem("tgp-paywall-open") === "1";
-  });
+  const [showDemoPaywall, setShowDemoPaywall] = useState(false);
   const importRef = useRef(null);
 
   const isIOS = typeof window !== "undefined" && /iPhone|iPad|iPod/.test(navigator.userAgent) && !window.navigator.standalone;
@@ -1644,8 +1631,6 @@ export default function App() {
   // Mode démo : transfère les données localStorage vers Supabase quand l'utilisatrice se connecte après paiement
   useEffect(() => {
     if (!user || !demoMode) return;
-    // Ne pas quitter le mode démo si le paywall est ouvert (ex : retour depuis Stripe cancel)
-    if (demoPaywallOpenRef.current) return;
     const raw = localStorage.getItem("tgp-demo-data");
     if (!raw) { setDemoMode(false); sessionStorage.removeItem("tgp-demo"); return; }
     try {
@@ -1933,6 +1918,9 @@ export default function App() {
   if (route === "/annule") {
     return <CancelPage onContinue={() => { window.history.replaceState({}, "", "/"); setRoute("/"); }} />;
   }
+  if (route === "/choix-plan") {
+    return <ChoixPlanPage onBack={() => { window.history.replaceState({}, "", "/"); setRoute("/"); }} />;
+  }
 
   // Loading state
   if (authLoading) {
@@ -1949,11 +1937,10 @@ export default function App() {
 
   // Not logged in → Demo mode (app vide) ou Auth page
   if (!user) {
-    // Ne pas aller sur AuthPage si le paywall est ouvert (ex: retour depuis Stripe cancel)
-    if (!demoMode && !showDemoPaywall) {
+    if (!demoMode) {
       return <AuthPage onAuth={(u) => setUser(u)} />;
     }
-    // demoMode ou showDemoPaywall : on continue le rendu vers l'app
+    // demoMode : on continue le rendu vers l'app
   }
 
   // Logged in but no data → Welcome page (pas en mode démo)
@@ -2105,9 +2092,8 @@ export default function App() {
       {showPaywall && user && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
       {(showDemoPaywall || (showPaywall && !user && demoMode)) && (
         <DemoPaywallModal
-          initialStep={demoPaylwallInitialStep}
-          onClose={() => { sessionStorage.removeItem("tgp-paywall-open"); setShowPaywall(false); setShowDemoPaywall(false); }}
-          onSignedUp={() => { sessionStorage.removeItem("tgp-paywall-open"); setShowPaywall(false); setShowDemoPaywall(false); }}
+          onClose={() => { setShowPaywall(false); setShowDemoPaywall(false); }}
+          onSignedUp={() => { setShowPaywall(false); setShowDemoPaywall(false); }}
         />
       )}
     </div>

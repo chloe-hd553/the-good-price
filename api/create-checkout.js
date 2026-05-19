@@ -44,7 +44,7 @@ export default async function handler(req, res) {
       metadata: { userId: userId || '', email, plan, demoMode: demoMode ? 'true' : 'false' },
       allow_promotion_codes: true,
       success_url: `${appUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: demoMode ? `${appUrl}?demo=true&paywall=plan` : `${appUrl}/annule`,
+      cancel_url: demoMode ? `${appUrl}/choix-plan` : `${appUrl}/annule`,
       locale: 'fr',
     };
 
