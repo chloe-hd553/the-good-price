@@ -58,6 +58,7 @@ export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "s
     const data = await res.json();
     if (!res.ok || !data.url) { setError(data.error || "Erreur paiement"); setPlanLoading(null); return; }
     localStorage.setItem("tgp-pending-plan", plan);
+    sessionStorage.setItem("tgp-going-to-stripe", "1");
     window.location.href = data.url;
   }
 

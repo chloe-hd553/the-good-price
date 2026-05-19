@@ -1623,7 +1623,17 @@ export default function App() {
 
   // Retour depuis Stripe via bouton "précédent" du navigateur (bfcache) → recharge proprement
   useEffect(() => {
-    const handler = (e) => { if (e.persisted) window.location.reload(); };
+    const handler = (e) => {
+      if (e.persisted) {
+        // Si on revient depuis Stripe en mode démo, aller sur /choix-plan
+        if (sessionStorage.getItem("tgp-going-to-stripe") === "1") {
+          sessionStorage.removeItem("tgp-going-to-stripe");
+          window.location.href = "/choix-plan";
+        } else {
+          window.location.reload();
+        }
+      }
+    };
     window.addEventListener("pageshow", handler);
     return () => window.removeEventListener("pageshow", handler);
   }, []);

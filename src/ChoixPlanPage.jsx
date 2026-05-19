@@ -47,6 +47,7 @@ export default function ChoixPlanPage({ onBack }) {
         return;
       }
       localStorage.setItem("tgp-pending-plan", plan);
+      sessionStorage.setItem("tgp-going-to-stripe", "1");
       window.location.href = data.url;
     } catch {
       setError("Erreur réseau. Réessaie dans un instant.");
