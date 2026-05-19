@@ -71,6 +71,9 @@ export default function ChoixPlanPage({ onBack }) {
         padding: "40px 32px",
         maxWidth: 480,
         width: "100%",
+        border: `2px solid ${C.dark}`,
+        outline: `2px solid ${C.dark}`,
+        outlineOffset: 1,
       }}>
         {/* Titre */}
         <div style={{
