@@ -2096,7 +2096,7 @@ export default function App() {
 
       {/* Paywall modal */}
       {showPaywall && user && <PaywallModal user={user} onClose={() => setShowPaywall(false)} />}
-      {(showPaywall || showDemoPaywall) && !user && demoMode && (
+      {demoMode && (showDemoPaywall || (showPaywall && !user)) && (
         <DemoPaywallModal
           initialStep={demoPaylwallInitialStep}
           onClose={() => { setShowPaywall(false); setShowDemoPaywall(false); }}
