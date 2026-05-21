@@ -13,7 +13,8 @@ const C = {
 };
 
 export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "signup" }) {
-  const [step, setStep] = useState(initialStep); // "signup" | "pay-email" | "plan"
+  const [step, setStep] = useState(initialStep); // "signup" | "login" | "pay-email" | "plan"
+  const [authTab, setAuthTab] = useState("signup"); // "signup" | "login" — onglet actif sur les étapes auth
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -32,11 +33,31 @@ export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "s
     setLoading(true); setError(null);
     const { error: err } = await supabase.auth.signUp({ email, password });
     if (err) {
-      setError(err.message.includes("already") ? "Tu as déjà un compte. Ferme cette fenêtre et connecte-toi." : err.message);
+      if (err.message.includes("already")) {
+        setError("Tu as déjà un compte.");
+        setAuthTab("login");
+        setLoading(false); return;
+      }
+      setError(err.message);
       setLoading(false); return;
     }
     setLoading(false);
     onSignedUp?.(); // ferme la modale — App.jsx détecte le nouvel user et transfère les données
+  }
+
+  // ── Connexion ──
+  async function handleLogin(e) {
+    e.preventDefault();
+    if (!email || !email.includes("@")) { setError("Entre une adresse email valide."); return; }
+    if (!password) { setError("Entre ton mot de passe."); return; }
+    setLoading(true); setError(null);
+    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+    if (err) {
+      setError("Email ou mot de passe incorrect.");
+      setLoading(false); return;
+    }
+    setLoading(false);
+    onSignedUp?.();
   }
 
   // ── Débloquer : étape email (pas de création de compte avant paiement)──
@@ -89,65 +110,139 @@ export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "s
           <X size={22} />
         </button>
 
-        {/* ── ÉTAPE : Inscription gratuite ── */}
+        {/* ── ÉTAPE : Inscription / Connexion ── */}
         {step === "signup" && (
           <>
-            <div style={{ color: C.yellow, fontFamily: "'Cormorant Garamond', serif", fontSize: 28, fontWeight: 700, lineHeight: 1.15, marginBottom: 8, paddingRight: 24 }}>
-              Sauvegarde tes données
-            </div>
-            <div style={{ color: C.beige, fontSize: 14, lineHeight: 1.5, marginBottom: 24, opacity: 0.9 }}>
-              Crée ton compte gratuitement pour ne pas perdre ce que tu as saisi et reprendre où tu t'es arrêtée.
-            </div>
-
-            <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
-              <div style={{ position: "relative" }}>
-                <Mail size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: C.light }} />
-                <input
-                  type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }}
-                  placeholder="ton@email.fr" required autoFocus
-                  style={{ width: "100%", padding: "13px 14px 13px 38px", background: C.bg, border: `1px solid ${C.med}`, borderRadius: 10, color: C.beige, fontSize: 15, fontFamily: "'Instrument Sans', sans-serif", outline: "none", boxSizing: "border-box" }}
-                  onFocus={(e) => (e.target.style.borderColor = C.yellow)}
-                  onBlur={(e) => (e.target.style.borderColor = C.med)}
-                />
-              </div>
-
-              <div style={{ position: "relative" }}>
-                <input
-                  type={showPw ? "text" : "password"} value={password}
-                  onChange={(e) => { setPassword(e.target.value); setError(null); }}
-                  placeholder="Mot de passe (6 caractères min.)" required
-                  style={{ width: "100%", padding: "13px 40px 13px 14px", background: C.bg, border: `1px solid ${C.med}`, borderRadius: 10, color: C.beige, fontSize: 15, fontFamily: "'Instrument Sans', sans-serif", outline: "none", boxSizing: "border-box" }}
-                  onFocus={(e) => (e.target.style.borderColor = C.yellow)}
-                  onBlur={(e) => (e.target.style.borderColor = C.med)}
-                />
-                <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: C.light, cursor: "pointer", padding: 2 }}>
-                  {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
-                </button>
-              </div>
-
-              {error && (
-                <div style={{ padding: "10px 14px", background: "rgba(181,74,58,0.15)", border: "1px solid rgba(181,74,58,0.4)", borderRadius: 8, color: "#F4B8A8", fontSize: 13 }}>
-                  {error}
-                </div>
-              )}
-
-              <button type="submit" disabled={loading} style={{
-                background: C.yellow, color: C.bg, border: "none", borderRadius: 12,
-                padding: "14px 20px", fontSize: 15, fontWeight: 700, cursor: loading ? "wait" : "pointer",
-                fontFamily: "'Instrument Sans', sans-serif",
-                display: "flex", alignItems: "center", justifyContent: "center", gap: 8,
-                opacity: loading ? 0.7 : 1,
-              }}>
-                {loading ? <Loader2 size={18} className="dm-spin" /> : <>Créer mon compte gratuitement <ArrowRight size={18} /></>}
+            {/* Onglets */}
+            <div style={{ display: "flex", borderRadius: 10, overflow: "hidden", border: `1px solid ${C.med}`, marginBottom: 24 }}>
+              <button
+                onClick={() => { setAuthTab("signup"); setError(null); }}
+                style={{
+                  flex: 1, padding: "11px 0", border: "none", cursor: "pointer",
+                  fontFamily: "'Instrument Sans', sans-serif", fontSize: 14, fontWeight: 600,
+                  background: authTab === "signup" ? C.yellow : "transparent",
+                  color: authTab === "signup" ? C.bg : C.light,
+                  transition: "background 0.2s, color 0.2s",
+                }}>
+                S'inscrire
               </button>
-            </form>
+              <button
+                onClick={() => { setAuthTab("login"); setError(null); }}
+                style={{
+                  flex: 1, padding: "11px 0", border: "none", cursor: "pointer",
+                  fontFamily: "'Instrument Sans', sans-serif", fontSize: 14, fontWeight: 600,
+                  background: authTab === "login" ? C.yellow : "transparent",
+                  color: authTab === "login" ? C.bg : C.light,
+                  borderLeft: `1px solid ${C.med}`,
+                  transition: "background 0.2s, color 0.2s",
+                }}>
+                Se connecter
+              </button>
+            </div>
+
+            {authTab === "signup" && (
+              <>
+                <div style={{ color: C.yellow, fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 700, lineHeight: 1.15, marginBottom: 6, paddingRight: 24 }}>
+                  Sauvegarde tes données
+                </div>
+                <div style={{ color: C.beige, fontSize: 14, lineHeight: 1.5, marginBottom: 20, opacity: 0.9 }}>
+                  Crée ton compte gratuitement pour ne pas perdre ce que tu as saisi.
+                </div>
+                <form onSubmit={handleSignup} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ position: "relative" }}>
+                    <Mail size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: C.light }} />
+                    <input
+                      type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }}
+                      placeholder="ton@email.fr" required autoFocus
+                      style={{ width: "100%", padding: "13px 14px 13px 38px", background: C.bg, border: `1px solid ${C.med}`, borderRadius: 10, color: C.beige, fontSize: 15, fontFamily: "'Instrument Sans', sans-serif", outline: "none", boxSizing: "border-box" }}
+                      onFocus={(e) => (e.target.style.borderColor = C.yellow)}
+                      onBlur={(e) => (e.target.style.borderColor = C.med)}
+                    />
+                  </div>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPw ? "text" : "password"} value={password}
+                      onChange={(e) => { setPassword(e.target.value); setError(null); }}
+                      placeholder="Mot de passe (6 caractères min.)" required
+                      style={{ width: "100%", padding: "13px 40px 13px 14px", background: C.bg, border: `1px solid ${C.med}`, borderRadius: 10, color: C.beige, fontSize: 15, fontFamily: "'Instrument Sans', sans-serif", outline: "none", boxSizing: "border-box" }}
+                      onFocus={(e) => (e.target.style.borderColor = C.yellow)}
+                      onBlur={(e) => (e.target.style.borderColor = C.med)}
+                    />
+                    <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: C.light, cursor: "pointer", padding: 2 }}>
+                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {error && (
+                    <div style={{ padding: "10px 14px", background: "rgba(181,74,58,0.15)", border: "1px solid rgba(181,74,58,0.4)", borderRadius: 8, color: "#F4B8A8", fontSize: 13 }}>
+                      {error}
+                    </div>
+                  )}
+                  <button type="submit" disabled={loading} style={{
+                    background: C.yellow, color: C.bg, border: "none", borderRadius: 12,
+                    padding: "14px 20px", fontSize: 15, fontWeight: 700, cursor: loading ? "wait" : "pointer",
+                    fontFamily: "'Instrument Sans', sans-serif",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1,
+                  }}>
+                    {loading ? <Loader2 size={18} className="dm-spin" /> : <>Créer mon compte gratuitement <ArrowRight size={18} /></>}
+                  </button>
+                </form>
+              </>
+            )}
+
+            {authTab === "login" && (
+              <>
+                <div style={{ color: C.yellow, fontFamily: "'Cormorant Garamond', serif", fontSize: 26, fontWeight: 700, lineHeight: 1.15, marginBottom: 6, paddingRight: 24 }}>
+                  Content de te revoir !
+                </div>
+                <div style={{ color: C.beige, fontSize: 14, lineHeight: 1.5, marginBottom: 20, opacity: 0.9 }}>
+                  Connecte-toi pour retrouver tes données et accéder à l'app complète.
+                </div>
+                <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                  <div style={{ position: "relative" }}>
+                    <Mail size={15} style={{ position: "absolute", left: 13, top: "50%", transform: "translateY(-50%)", color: C.light }} />
+                    <input
+                      type="email" value={email} onChange={(e) => { setEmail(e.target.value); setError(null); }}
+                      placeholder="ton@email.fr" required autoFocus
+                      style={{ width: "100%", padding: "13px 14px 13px 38px", background: C.bg, border: `1px solid ${C.med}`, borderRadius: 10, color: C.beige, fontSize: 15, fontFamily: "'Instrument Sans', sans-serif", outline: "none", boxSizing: "border-box" }}
+                      onFocus={(e) => (e.target.style.borderColor = C.yellow)}
+                      onBlur={(e) => (e.target.style.borderColor = C.med)}
+                    />
+                  </div>
+                  <div style={{ position: "relative" }}>
+                    <input
+                      type={showPw ? "text" : "password"} value={password}
+                      onChange={(e) => { setPassword(e.target.value); setError(null); }}
+                      placeholder="Mot de passe" required
+                      style={{ width: "100%", padding: "13px 40px 13px 14px", background: C.bg, border: `1px solid ${C.med}`, borderRadius: 10, color: C.beige, fontSize: 15, fontFamily: "'Instrument Sans', sans-serif", outline: "none", boxSizing: "border-box" }}
+                      onFocus={(e) => (e.target.style.borderColor = C.yellow)}
+                      onBlur={(e) => (e.target.style.borderColor = C.med)}
+                    />
+                    <button type="button" onClick={() => setShowPw(v => !v)} style={{ position: "absolute", right: 12, top: "50%", transform: "translateY(-50%)", background: "none", border: "none", color: C.light, cursor: "pointer", padding: 2 }}>
+                      {showPw ? <EyeOff size={16} /> : <Eye size={16} />}
+                    </button>
+                  </div>
+                  {error && (
+                    <div style={{ padding: "10px 14px", background: "rgba(181,74,58,0.15)", border: "1px solid rgba(181,74,58,0.4)", borderRadius: 8, color: "#F4B8A8", fontSize: 13 }}>
+                      {error}
+                    </div>
+                  )}
+                  <button type="submit" disabled={loading} style={{
+                    background: C.yellow, color: C.bg, border: "none", borderRadius: 12,
+                    padding: "14px 20px", fontSize: 15, fontWeight: 700, cursor: loading ? "wait" : "pointer",
+                    fontFamily: "'Instrument Sans', sans-serif",
+                    display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1,
+                  }}>
+                    {loading ? <Loader2 size={18} className="dm-spin" /> : <>Se connecter <ArrowRight size={18} /></>}
+                  </button>
+                </form>
+              </>
+            )}
 
             {/* Upsell discret */}
             <div style={{ marginTop: 20, textAlign: "center" }}>
               <button onClick={() => {
                 setError(null);
                 if (email && email.includes("@")) {
-                  // Email déjà saisi → on saute l'étape email
                   setPayEmail(email);
                   localStorage.setItem("tgp-demo-email", email.toLowerCase().trim());
                   setStep("plan");
