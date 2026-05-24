@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { supabase } from "./supabase";
-import { Users, CreditCard, TrendingUp, Activity, UserPlus, ArrowLeft, RefreshCw, BookOpen, Smartphone } from "lucide-react";
+import { Users, CreditCard, TrendingUp, Activity, UserPlus, ArrowLeft, RefreshCw, BookOpen, Smartphone, Eye, MousePointerClick } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from "recharts";
 
 const C = {
@@ -117,6 +117,42 @@ export default function AdminPage({ user, onBack }) {
           <KpiCard icon={<UserPlus size={13} />} label="Nouvelles 7 jours" value={loading ? "..." : stats?.new_7d ?? 0} sub={`${stats?.new_30d ?? "..."} ce mois`} />
           <KpiCard icon={<BookOpen size={13} />} label="Tuto complete" value={loading ? "..." : stats?.tour_done_count ?? 0} sub={stats && stats.total_users > 0 ? `${Math.round((stats.tour_done_count / stats.total_users) * 100)}% des inscrits` : ""} color="#b0d4f0" />
           <KpiCard icon={<Smartphone size={13} />} label="PWA installee" value={loading ? "..." : stats?.pwa_installed_count ?? 0} sub={stats && stats.total_users > 0 ? `${Math.round((stats.pwa_installed_count / stats.total_users) * 100)}% des inscrits` : ""} color="#d4b0f0" />
+        </div>
+
+        {/* ── Section tracking systeme.io ── */}
+        <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, padding: "16px 20px", marginBottom: 24 }}>
+          <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+            Page fiche produit — systeme.io
+          </div>
+          <div style={{ color: C.light, fontSize: 11, marginBottom: 14 }}>Visites et clics vers l'appli</div>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
+            <KpiCard
+              icon={<Eye size={13} />}
+              label="Visites 7 jours"
+              value={loading ? "..." : stats?.tracking_views_7d ?? 0}
+              sub={`${stats?.tracking_views_30d ?? "..."} ce mois`}
+              color="#b0d4f0"
+            />
+            <KpiCard
+              icon={<MousePointerClick size={13} />}
+              label="Clics CTA 7 jours"
+              value={loading ? "..." : stats?.tracking_clicks_7d ?? 0}
+              sub={`${stats?.tracking_clicks_30d ?? "..."} ce mois`}
+              color="#f0b0d4"
+            />
+            <KpiCard
+              icon={<TrendingUp size={13} />}
+              label="Taux de clic 7j"
+              value={loading ? "..." : (() => {
+                const v = stats?.tracking_views_7d;
+                const c = stats?.tracking_clicks_7d;
+                if (!v || v === 0) return "—";
+                return `${((c / v) * 100).toFixed(1)}%`;
+              })()}
+              sub="clics / visites"
+              color="#f0e0b0"
+            />
+          </div>
         </div>
 
         {!loading && evolutionData.length > 0 && (
