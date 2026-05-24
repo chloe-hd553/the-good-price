@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { supabase } from "./supabase";
 import { Users, CreditCard, TrendingUp, Activity, UserPlus, ArrowLeft, RefreshCw, BookOpen, Smartphone, Eye, MousePointerClick } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from "recharts";
@@ -9,6 +9,40 @@ const C = {
 };
 
 const ADMIN_EMAIL = "chloe-huissoud@hotmail.fr";
+
+const PERIODS = [
+  { key: "today",  label: "Aujourd'hui" },
+  { key: "7d",     label: "7 jours" },
+  { key: "30d",    label: "30 jours" },
+  { key: "month",  label: "Ce mois" },
+  { key: "custom", label: "Dates précises" },
+];
+
+function getPeriodDates(period) {
+  const now = new Date();
+  let start = new Date(now);
+  let end   = new Date(now);
+  end.setHours(23, 59, 59, 999);
+
+  if (period === "today") {
+    start.setHours(0, 0, 0, 0);
+  } else if (period === "7d") {
+    start = new Date(now - 7 * 24 * 3600 * 1000);
+    start.setHours(0, 0, 0, 0);
+  } else if (period === "30d") {
+    start = new Date(now - 30 * 24 * 3600 * 1000);
+    start.setHours(0, 0, 0, 0);
+  } else if (period === "month") {
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
+    start.setHours(0, 0, 0, 0);
+  }
+  return { start, end };
+}
+
+function fmtDay(dateStr) {
+  if (!dateStr) return "";
+  return new Date(dateStr).toLocaleDateString("fr-FR", { day: "2-digit", month: "short" });
+}
 
 function KpiCard({ icon, label, value, sub, color }) {
   return (
@@ -36,9 +70,19 @@ function fmtWeek(dateStr) {
 }
 
 export default function AdminPage({ user, onBack }) {
-  const [stats, setStats] = useState(null);
+  const [stats, setStats]   = useState(null);
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
+  const [error, setError]   = useState(null);
+
+  // ── Tracking ──────────────────────────────────────────────────────
+  const [period, setPeriod]         = useState("7d");
+  const [customStart, setCustomStart] = useState(() => {
+    const d = new Date(); d.setDate(d.getDate() - 7);
+    return d.toISOString().slice(0, 10);
+  });
+  const [customEnd, setCustomEnd] = useState(() => new Date().toISOString().slice(0, 10));
+  const [trackingData, setTrackingData]     = useState(null);
+  const [trackingLoading, setTrackingLoading] = useState(true);
 
   const load = async () => {
     setLoading(true);
@@ -49,10 +93,32 @@ export default function AdminPage({ user, onBack }) {
     setLoading(false);
   };
 
+  const loadTracking = useCallback(async () => {
+    setTrackingLoading(true);
+    let start, end;
+    if (period === "custom") {
+      start = new Date(customStart + "T00:00:00");
+      end   = new Date(customEnd   + "T23:59:59");
+    } else {
+      ({ start, end } = getPeriodDates(period));
+    }
+    const { data, error: e } = await supabase.rpc("tracking_stats", {
+      p_start: start.toISOString(),
+      p_end:   end.toISOString(),
+    });
+    if (!e) setTrackingData(data);
+    setTrackingLoading(false);
+  }, [period, customStart, customEnd]);
+
   useEffect(() => {
     if (!user || user.email !== ADMIN_EMAIL) return;
     load();
   }, [user]); // eslint-disable-line
+
+  useEffect(() => {
+    if (!user || user.email !== ADMIN_EMAIL) return;
+    loadTracking();
+  }, [loadTracking, user]);
 
   if (!user || user.email !== ADMIN_EMAIL) {
     return (
@@ -62,8 +128,8 @@ export default function AdminPage({ user, onBack }) {
     );
   }
 
-  const conversion = stats ? ((stats.paid_users / Math.max(stats.total_users, 1)) * 100).toFixed(1) : "—";
-  const weekData = stats?.signups_by_week?.map(w => ({ week: fmtWeek(w.week), count: Number(w.count) })) || [];
+  const conversion  = stats ? ((stats.paid_users / Math.max(stats.total_users, 1)) * 100).toFixed(1) : "—";
+  const weekData    = stats?.signups_by_week?.map(w => ({ week: fmtWeek(w.week), count: Number(w.count) })) || [];
 
   const evolutionData = (() => {
     if (!stats) return [];
@@ -85,10 +151,24 @@ export default function AdminPage({ user, onBack }) {
     });
   })();
 
+  const byDayData = (trackingData?.by_day || []).map(d => ({
+    day: fmtDay(d.day),
+    Visites: Number(d.views),
+    Clics: Number(d.clicks),
+  }));
+
+  const tRate = (() => {
+    const v = trackingData?.views;
+    const c = trackingData?.clicks;
+    if (!v || v === 0) return "—";
+    return `${((c / v) * 100).toFixed(1)}%`;
+  })();
+
   return (
     <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "'Instrument Sans', sans-serif", padding: "24px 20px 60px" }}>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
 
+        {/* ── En-tête ── */}
         <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 28 }}>
           <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
             <button onClick={onBack} style={{ background: "none", border: `1px solid ${C.med}`, borderRadius: 8, color: C.light, padding: "7px 12px", cursor: "pointer", display: "flex", alignItems: "center", gap: 6, fontSize: 13 }}>
@@ -109,6 +189,7 @@ export default function AdminPage({ user, onBack }) {
           </div>
         )}
 
+        {/* ── KPIs utilisateurs ── */}
         <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(150px, 1fr))", gap: 12, marginBottom: 24 }}>
           <KpiCard icon={<Users size={13} />} label="Total inscrits" value={loading ? "..." : stats?.total_users ?? 0} />
           <KpiCard icon={<CreditCard size={13} />} label="Payantes actives" value={loading ? "..." : stats?.paid_users ?? 0} color="#a8f0b0" />
@@ -121,40 +202,90 @@ export default function AdminPage({ user, onBack }) {
 
         {/* ── Section tracking systeme.io ── */}
         <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, padding: "16px 20px", marginBottom: 24 }}>
-          <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
+          <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, marginBottom: 2 }}>
             Page fiche produit — systeme.io
           </div>
           <div style={{ color: C.light, fontSize: 11, marginBottom: 14 }}>Visites et clics vers l'appli</div>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 12 }}>
-            <KpiCard
-              icon={<Eye size={13} />}
-              label="Visites 7 jours"
-              value={loading ? "..." : stats?.tracking_views_7d ?? 0}
-              sub={`${stats?.tracking_views_30d ?? "..."} ce mois`}
-              color="#b0d4f0"
-            />
-            <KpiCard
-              icon={<MousePointerClick size={13} />}
-              label="Clics CTA 7 jours"
-              value={loading ? "..." : stats?.tracking_clicks_7d ?? 0}
-              sub={`${stats?.tracking_clicks_30d ?? "..."} ce mois`}
-              color="#f0b0d4"
-            />
-            <KpiCard
-              icon={<TrendingUp size={13} />}
-              label="Taux de clic 7j"
-              value={loading ? "..." : (() => {
-                const v = stats?.tracking_views_7d;
-                const c = stats?.tracking_clicks_7d;
-                if (!v || v === 0) return "—";
-                return `${((c / v) * 100).toFixed(1)}%`;
-              })()}
-              sub="clics / visites"
-              color="#f0e0b0"
-            />
+
+          {/* Onglets de période */}
+          <div style={{ display: "flex", flexWrap: "wrap", gap: 6, marginBottom: 14 }}>
+            {PERIODS.map(p => (
+              <button
+                key={p.key}
+                onClick={() => setPeriod(p.key)}
+                style={{
+                  background: period === p.key ? C.med : "transparent",
+                  border: `1px solid ${period === p.key ? C.light : C.med}`,
+                  borderRadius: 8,
+                  color: period === p.key ? C.yellow : C.light,
+                  padding: "5px 12px",
+                  fontSize: 12,
+                  cursor: "pointer",
+                  fontFamily: "'Instrument Sans', sans-serif",
+                }}
+              >
+                {p.label}
+              </button>
+            ))}
           </div>
+
+          {/* Sélecteur de dates personnalisées */}
+          {period === "custom" && (
+            <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 14, flexWrap: "wrap" }}>
+              <input
+                type="date"
+                value={customStart}
+                onChange={e => setCustomStart(e.target.value)}
+                style={{ background: C.bg, border: `1px solid ${C.med}`, borderRadius: 8, color: C.beige, padding: "5px 10px", fontSize: 12, fontFamily: "'Instrument Sans', sans-serif" }}
+              />
+              <span style={{ color: C.light, fontSize: 12 }}>→</span>
+              <input
+                type="date"
+                value={customEnd}
+                onChange={e => setCustomEnd(e.target.value)}
+                style={{ background: C.bg, border: `1px solid ${C.med}`, borderRadius: 8, color: C.beige, padding: "5px 10px", fontSize: 12, fontFamily: "'Instrument Sans', sans-serif" }}
+              />
+              <button
+                onClick={loadTracking}
+                style={{ background: C.med, border: "none", borderRadius: 8, color: C.yellow, padding: "5px 14px", fontSize: 12, cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif" }}
+              >
+                OK
+              </button>
+            </div>
+          )}
+
+          {/* KPIs de la période */}
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 16 }}>
+            <KpiCard icon={<Eye size={13} />} label="Visites" value={trackingLoading ? "..." : trackingData?.views ?? 0} color="#b0d4f0" />
+            <KpiCard icon={<MousePointerClick size={13} />} label="Clics CTA" value={trackingLoading ? "..." : trackingData?.clicks ?? 0} color="#f0b0d4" />
+            <KpiCard icon={<TrendingUp size={13} />} label="Taux de clic" value={trackingLoading ? "..." : tRate} sub="clics / visites" color="#f0e0b0" />
+          </div>
+
+          {/* Graphique par jour */}
+          {!trackingLoading && byDayData.length > 0 && (
+            <ResponsiveContainer width="100%" height={140}>
+              <LineChart data={byDayData} margin={{ top: 4, right: 12, left: 0, bottom: 0 }}>
+                <XAxis dataKey="day" tick={{ fill: C.light, fontSize: 11 }} axisLine={false} tickLine={false} />
+                <YAxis tick={{ fill: C.light, fontSize: 11 }} axisLine={false} tickLine={false} allowDecimals={false} width={24} />
+                <Tooltip
+                  contentStyle={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 8, fontSize: 12, color: C.beige }}
+                  cursor={{ stroke: C.med, strokeWidth: 1 }}
+                />
+                <Legend formatter={v => <span style={{ color: C.light, fontSize: 11 }}>{v}</span>} />
+                <Line type="monotone" dataKey="Visites" stroke="#b0d4f0" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+                <Line type="monotone" dataKey="Clics"   stroke="#f0b0d4" strokeWidth={2} dot={false} activeDot={{ r: 4 }} />
+              </LineChart>
+            </ResponsiveContainer>
+          )}
+
+          {!trackingLoading && byDayData.length === 0 && (
+            <div style={{ color: C.light, fontSize: 12, textAlign: "center", padding: "16px 0" }}>
+              Aucune donnée sur cette période.
+            </div>
+          )}
         </div>
 
+        {/* ── Graphique évolution cumulée ── */}
         {!loading && evolutionData.length > 0 && (
           <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, padding: "20px", marginBottom: 24 }}>
             <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>
@@ -178,6 +309,7 @@ export default function AdminPage({ user, onBack }) {
           </div>
         )}
 
+        {/* ── Inscriptions par semaine ── */}
         {!loading && weekData.length > 0 && (
           <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, padding: "20px", marginBottom: 24 }}>
             <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, marginBottom: 4 }}>Nouvelles inscriptions par semaine</div>
@@ -200,6 +332,7 @@ export default function AdminPage({ user, onBack }) {
           </div>
         )}
 
+        {/* ── Dernières inscrites ── */}
         <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, overflow: "hidden" }}>
           <div style={{ padding: "16px 20px", borderBottom: `1px solid ${C.med}`, color: C.beige, fontSize: 13, fontWeight: 600 }}>
             Dernières inscrites
