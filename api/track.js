@@ -1,5 +1,5 @@
 // /api/track.js
-// Vercel serverless function — enregistre un événement de tracking (page_view / cta_click)
+// Vercel serverless function — enregistre un événement de tracking
 // Appelée depuis le snippet HTML sur systeme.io
 
 import { createClient } from '@supabase/supabase-js';
@@ -21,18 +21,21 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { event, source, medium, campaign, referrer } = req.body || {};
+    const { event, source, medium, campaign, referrer, label, destination, session_id } = req.body || {};
 
     if (!event || !ALLOWED_EVENTS.includes(event)) {
       return res.status(400).json({ error: 'Invalid event' });
     }
 
     const { error } = await supabase.from('tracking_events').insert({
-      event_type: event,
-      source:     source   || null,
-      medium:     medium   || null,
-      campaign:   campaign || null,
-      referrer:   referrer || null,
+      event_type:  event,
+      source:      source      || null,
+      medium:      medium      || null,
+      campaign:    campaign    || null,
+      referrer:    referrer    || null,
+      label:       label       || null,
+      destination: destination || null,
+      session_id:  session_id  || null,
     });
 
     if (error) throw error;

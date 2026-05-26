@@ -164,6 +164,12 @@ export default function AdminPage({ user, onBack }) {
     return `${((c / v) * 100).toFixed(1)}%`;
   })();
 
+  const bounceRate = trackingData?.bounce_rate != null ? `${trackingData.bounce_rate}%` : "—";
+  const byLabel    = trackingData?.by_label       || [];
+  const byDest     = trackingData?.by_destination || [];
+
+  const totalClicks = byLabel.reduce((s, r) => s + Number(r.clicks), 0);
+
   return (
     <div style={{ background: C.bg, minHeight: "100vh", fontFamily: "'Instrument Sans', sans-serif", padding: "24px 20px 60px" }}>
       <div style={{ maxWidth: 800, margin: "0 auto" }}>
@@ -255,10 +261,11 @@ export default function AdminPage({ user, onBack }) {
           )}
 
           {/* KPIs de la période */}
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))", gap: 10, marginBottom: 16 }}>
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(130px, 1fr))", gap: 10, marginBottom: 16 }}>
             <KpiCard icon={<Eye size={13} />} label="Visites" value={trackingLoading ? "..." : trackingData?.views ?? 0} color="#b0d4f0" />
             <KpiCard icon={<MousePointerClick size={13} />} label="Clics CTA" value={trackingLoading ? "..." : trackingData?.clicks ?? 0} color="#f0b0d4" />
             <KpiCard icon={<TrendingUp size={13} />} label="Taux de clic" value={trackingLoading ? "..." : tRate} sub="clics / visites" color="#f0e0b0" />
+            <KpiCard icon={<Activity size={13} />} label="Taux de rebond" value={trackingLoading ? "..." : bounceRate} sub="sans aucun clic" color="#f0c4a0" />
           </div>
 
           {/* Graphique par jour */}
@@ -281,6 +288,52 @@ export default function AdminPage({ user, onBack }) {
           {!trackingLoading && byDayData.length === 0 && (
             <div style={{ color: C.light, fontSize: 12, textAlign: "center", padding: "16px 0" }}>
               Aucune donnée sur cette période.
+            </div>
+          )}
+
+          {/* Breakdown : boutons cliqués */}
+          {!trackingLoading && byLabel.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 10 }}>Clics par bouton</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {byLabel.map((row, i) => {
+                  const pct = totalClicks > 0 ? Math.round((Number(row.clicks) / totalClicks) * 100) : 0;
+                  return (
+                    <div key={i}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span style={{ color: C.beige, fontSize: 12, maxWidth: "70%", overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}>{row.label}</span>
+                        <span style={{ color: C.light, fontSize: 12 }}>{row.clicks} clics · {pct}%</span>
+                      </div>
+                      <div style={{ background: C.bg, borderRadius: 4, height: 6, overflow: "hidden" }}>
+                        <div style={{ background: "#f0b0d4", width: `${pct}%`, height: "100%", borderRadius: 4, transition: "width 0.4s" }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Breakdown : destinations */}
+          {!trackingLoading && byDest.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 10 }}>Clics par destination</div>
+              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
+                {byDest.map((row, i) => {
+                  const pct = totalClicks > 0 ? Math.round((Number(row.clicks) / totalClicks) * 100) : 0;
+                  return (
+                    <div key={i}>
+                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                        <span style={{ color: C.beige, fontSize: 12, fontFamily: "monospace" }}>{row.destination}</span>
+                        <span style={{ color: C.light, fontSize: 12 }}>{row.clicks} clics · {pct}%</span>
+                      </div>
+                      <div style={{ background: C.bg, borderRadius: 4, height: 6, overflow: "hidden" }}>
+                        <div style={{ background: "#b0d4f0", width: `${pct}%`, height: "100%", borderRadius: 4, transition: "width 0.4s" }} />
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           )}
         </div>

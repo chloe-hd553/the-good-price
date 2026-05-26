@@ -1,21 +1,22 @@
 <!--
   ════════════════════════════════════════════════════════════
-  SNIPPET DE TRACKING — À coller dans le champ HTML de systeme.io
-  (footer ou section "code personnalisé" de la page fiche produit)
+  SNIPPET DE TRACKING V2 — À coller dans systeme.io
+  (remplace l'ancienne version)
   ════════════════════════════════════════════════════════════
 
-  Ce script :
-    1) enregistre une visite (page_view) à chaque chargement de page
-    2) enregistre un clic CTA (cta_click) quand quelqu'un clique
-       sur un lien vers the-good-price.vercel.app
-    3) transmet la source UTM si elle est dans l'URL
-       (ex: ?utm_source=meta&utm_medium=paid&utm_campaign=lancement)
+  Ce script enregistre :
+    - La visite de la page (page_view) avec source UTM
+    - Chaque clic CTA : texte du bouton + URL de destination
+    - Un session_id pour calculer le taux de rebond
 -->
 <script>
 (function () {
   var API_URL = 'https://the-good-price.vercel.app/api/track';
 
-  // Lire les paramètres UTM dans l'URL de la page systeme.io
+  // ── Session ID unique par visite ──────────────────────────────────
+  var sessionId = (Math.random().toString(36).slice(2) + Date.now().toString(36));
+
+  // ── Paramètres UTM dans l'URL ─────────────────────────────────────
   function getUTM() {
     try {
       var p = new URLSearchParams(window.location.search);
@@ -30,35 +31,64 @@
     }
   }
 
-  // Envoyer un événement à l'API (sans bloquer la page)
-  function track(eventName) {
+  // ── Envoi à l'API (sans bloquer la page) ─────────────────────────
+  function track(payload) {
     try {
-      var utm = getUTM();
       fetch(API_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          event:    eventName,
-          source:   utm.source,
-          medium:   utm.medium,
-          campaign: utm.campaign,
-          referrer: utm.referrer
-        }),
+        body: JSON.stringify(payload),
         keepalive: true
-      }).catch(function () { /* silencieux si erreur réseau */ });
-    } catch (e) { /* silencieux */ }
+      }).catch(function () {});
+    } catch (e) {}
+  }
+
+  // ── Texte lisible d'un élément (nettoie les espaces) ─────────────
+  function getLabel(el) {
+    try {
+      return (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+    } catch (e) { return ''; }
   }
 
   // ── 1. Visite de la page ──────────────────────────────────────────
-  track('page_view');
+  var utm = getUTM();
+  track({
+    event:      'page_view',
+    session_id: sessionId,
+    source:     utm.source,
+    medium:     utm.medium,
+    campaign:   utm.campaign,
+    referrer:   utm.referrer
+  });
 
-  // ── 2. Clic sur le bouton CTA (lien vers l'appli) ────────────────
+  // ── 2. Clic sur un lien vers l'appli ─────────────────────────────
   document.addEventListener('click', function (e) {
-    // Remonte jusqu'au <a> le plus proche du clic
+    // Remonte jusqu'au <a> le plus proche
     var el = e.target;
     while (el && el.tagName !== 'A') el = el.parentElement;
+
     if (el && el.href && el.href.indexOf('the-good-price') !== -1) {
-      track('cta_click');
+      // Cherche le texte du bouton dans le lien ou son enfant direct
+      var labelEl = el.querySelector('button, span, div') || el;
+      var label   = getLabel(labelEl) || getLabel(el) || '(bouton)';
+
+      // Extrait juste le chemin de l'URL (ex: "/choix-plan")
+      var dest = '';
+      try {
+        var url  = new URL(el.href);
+        dest = url.pathname + (url.search || '');
+      } catch (e) { dest = el.href; }
+
+      track({
+        event:       'cta_click',
+        session_id:  sessionId,
+        label:       label,
+        destination: dest,
+        source:      utm.source,
+        medium:      utm.medium,
+        campaign:    utm.campaign,
+        referrer:    utm.referrer
+      });
     }
   }, true);
 
