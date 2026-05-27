@@ -144,6 +144,20 @@ export default async function handler(req, res) {
           const ml = await addToMailerLiteGroup(email);
           if (!ml.ok) console.warn('MailerLite sync failed for', email, ml.error);
         }
+
+        // Tracking funnel : paiement complété
+        const trackingSid = session.metadata?.tracking_sid;
+        if (trackingSid) {
+          try {
+            await supabase.from('tracking_events').insert({
+              event_type: 'payment_completed',
+              session_id: trackingSid,
+              label: session.metadata?.plan || null,
+            });
+          } catch (trackErr) {
+            console.warn('Tracking payment_completed failed:', trackErr);
+          }
+        }
         break;
       }
 

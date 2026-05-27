@@ -1616,6 +1616,27 @@ export default function App() {
     return () => clearTimeout(t);
   }, [demoMode, user]); // eslint-disable-line
 
+  // ── Tracking funnel : lit le session_id depuis l'URL (passé par systeme.io) ──
+  useEffect(() => {
+    try {
+      const params = new URLSearchParams(window.location.search);
+      const sid = params.get("sid");
+      if (sid) {
+        sessionStorage.setItem("tgp-tracking-sid", sid);
+        // Fire app_landing — confirme que la visiteuse est arrivée dans l'app
+        fetch("/api/track", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ event: "app_landing", session_id: sid }),
+          keepalive: true,
+        }).catch(() => {});
+        // Nettoie l'URL sans recharger la page
+        const cleanUrl = window.location.pathname + window.location.hash;
+        window.history.replaceState(null, "", cleanUrl);
+      }
+    } catch {}
+  }, []); // eslint-disable-line
+
   // Retour depuis Stripe via bouton "précédent" du navigateur (bfcache) → recharge proprement
   useEffect(() => {
     const handler = (e) => {

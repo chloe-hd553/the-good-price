@@ -167,6 +167,8 @@ export default function AdminPage({ user, onBack }) {
   const bounceRate = trackingData?.bounce_rate != null ? `${trackingData.bounce_rate}%` : "—";
   const byLabel    = trackingData?.by_label       || [];
   const byDest     = trackingData?.by_destination || [];
+  const byPlan     = trackingData?.by_plan        || [];
+  const funnel     = trackingData?.funnel         || {};
 
   const totalClicks = byLabel.reduce((s, r) => s + Number(r.clicks), 0);
 
@@ -334,6 +336,56 @@ export default function AdminPage({ user, onBack }) {
                   );
                 })}
               </div>
+            </div>
+          )}
+
+          {/* Funnel complet */}
+          {!trackingLoading && funnel.page_views > 0 && (
+            <div style={{ marginTop: 24, paddingTop: 20, borderTop: `1px solid ${C.med}` }}>
+              <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 14 }}>Tunnel complet</div>
+              {[
+                { label: "Visites page",       value: funnel.page_views,         color: "#b0d4f0" },
+                { label: "Clics CTA",          value: funnel.cta_clicks,         color: "#f0b0d4" },
+                { label: "Arrivées dans l'app",value: funnel.app_landings,       color: "#f0e0b0" },
+                { label: "Plan sélectionné",   value: funnel.plan_selected,      color: "#c4f0b0" },
+                { label: "Paiement complété",  value: funnel.payment_completed,  color: "#a8f0b0" },
+              ].map((step, i) => {
+                const base  = funnel.page_views || 1;
+                const pct   = Math.round(((step.value || 0) / base) * 100);
+                return (
+                  <div key={i} style={{ marginBottom: 10 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ color: C.beige, fontSize: 12 }}>{step.label}</span>
+                      <span style={{ color: C.light, fontSize: 12 }}>{step.value ?? 0} · {pct}%</span>
+                    </div>
+                    <div style={{ background: C.bg, borderRadius: 4, height: 8, overflow: "hidden" }}>
+                      <div style={{ background: step.color, width: `${pct}%`, height: "100%", borderRadius: 4, transition: "width 0.5s" }} />
+                    </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+
+          {/* Plan sélectionné : oneshot vs monthly */}
+          {!trackingLoading && byPlan.length > 0 && (
+            <div style={{ marginTop: 20 }}>
+              <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 10 }}>Plan choisi</div>
+              {byPlan.map((row, i) => {
+                const total = byPlan.reduce((s, r) => s + Number(r.count), 0);
+                const pct   = total > 0 ? Math.round((Number(row.count) / total) * 100) : 0;
+                return (
+                  <div key={i} style={{ marginBottom: 8 }}>
+                    <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
+                      <span style={{ color: C.beige, fontSize: 12 }}>{row.plan === "oneshot" ? "Paiement unique (97€)" : row.plan === "monthly" ? "Mensuel (9,99€/mois)" : row.plan}</span>
+                      <span style={{ color: C.light, fontSize: 12 }}>{row.count} · {pct}%</span>
+                    </div>
+                    <div style={{ background: C.bg, borderRadius: 4, height: 6, overflow: "hidden" }}>
+                      <div style={{ background: i === 0 ? C.yellow : "#b0d4f0", width: `${pct}%`, height: "100%", borderRadius: 4, transition: "width 0.4s" }} />
+                    </div>
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>

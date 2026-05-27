@@ -13,7 +13,7 @@ export default async function handler(req, res) {
   }
 
   try {
-    const { plan, userId, email, demoMode } = req.body;
+    const { plan, userId, email, demoMode, trackingSid } = req.body;
 
     if (!plan || !email) {
       return res.status(400).json({ error: 'Missing plan or email' });
@@ -41,7 +41,7 @@ export default async function handler(req, res) {
       customer_email: email,
       // En mode démo : l'email sert de référence (le compte sera créé par le webhook)
       client_reference_id: userId || email,
-      metadata: { userId: userId || '', email, plan, demoMode: demoMode ? 'true' : 'false' },
+      metadata: { userId: userId || '', email, plan, demoMode: demoMode ? 'true' : 'false', tracking_sid: trackingSid || '' },
       allow_promotion_codes: true,
       success_url: `${appUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: demoMode ? `${appUrl}/choix-plan` : `${appUrl}/annule`,

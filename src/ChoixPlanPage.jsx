@@ -34,11 +34,23 @@ export default function ChoixPlanPage({ onBack }) {
     }
     setPlanLoading(plan);
     setError(null);
+
+    // Tracking : plan sélectionné
+    const trackingSid = sessionStorage.getItem("tgp-tracking-sid") || null;
+    if (trackingSid) {
+      fetch("/api/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ event: "plan_selected", session_id: trackingSid, label: plan }),
+        keepalive: true,
+      }).catch(() => {});
+    }
+
     try {
       const res = await fetch("/api/create-checkout", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ plan, email, demoMode: true }),
+        body: JSON.stringify({ plan, email, demoMode: true, trackingSid }),
       });
       const data = await res.json();
       if (!res.ok || !data.url) {

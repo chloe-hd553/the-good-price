@@ -1,13 +1,14 @@
 <!--
   ════════════════════════════════════════════════════════════
-  SNIPPET DE TRACKING V2 — À coller dans systeme.io
-  (remplace l'ancienne version)
+  SNIPPET DE TRACKING V3 — À coller dans systeme.io
+  (remplace toutes les versions précédentes)
   ════════════════════════════════════════════════════════════
 
   Ce script enregistre :
     - La visite de la page (page_view) avec source UTM
-    - Chaque clic CTA : texte du bouton + URL de destination
-    - Un session_id pour calculer le taux de rebond
+    - Le clic CTA : texte du bouton + URL de destination
+    - Passe le session_id dans l'URL → permet de tracer
+      la suite du parcours dans l'app (choix plan → paiement)
 -->
 <script>
 (function () {
@@ -43,7 +44,7 @@
     } catch (e) {}
   }
 
-  // ── Texte lisible d'un élément (nettoie les espaces) ─────────────
+  // ── Texte lisible d'un élément ────────────────────────────────────
   function getLabel(el) {
     try {
       return (el.innerText || el.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80);
@@ -63,21 +64,27 @@
 
   // ── 2. Clic sur un lien vers l'appli ─────────────────────────────
   document.addEventListener('click', function (e) {
-    // Remonte jusqu'au <a> le plus proche
     var el = e.target;
     while (el && el.tagName !== 'A') el = el.parentElement;
 
     if (el && el.href && el.href.indexOf('the-good-price') !== -1) {
-      // Cherche le texte du bouton dans le lien ou son enfant direct
+      // Ajoute le session_id dans l'URL AVANT que le navigateur suive le lien
+      try {
+        var url = new URL(el.href);
+        url.searchParams.set('sid', sessionId);
+        el.href = url.toString();
+      } catch (e2) {}
+
+      // Texte du bouton
       var labelEl = el.querySelector('button, span, div') || el;
       var label   = getLabel(labelEl) || getLabel(el) || '(bouton)';
 
-      // Extrait juste le chemin de l'URL (ex: "/choix-plan")
+      // Chemin de destination
       var dest = '';
       try {
-        var url  = new URL(el.href);
-        dest = url.pathname + (url.search || '');
-      } catch (e) { dest = el.href; }
+        var destUrl = new URL(el.href);
+        dest = destUrl.pathname + (destUrl.search ? destUrl.search.replace(/[?&]sid=[^&]*/g, '').replace(/^&/, '?') : '');
+      } catch (e3) { dest = el.href; }
 
       track({
         event:       'cta_click',
