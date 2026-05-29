@@ -35,11 +35,11 @@ const DIAG = {
     { min: 0,  dot: "#F44336", phrase: "Elles s'inscrivent mais ne paient pas", tip: "Séquence email urgente — creuser pourquoi" },
   ],
   global: [
-    { min: 4,   dot: "#4CAF50", phrase: "Funnel très performant 🔥", tip: "Scaler agressivement" },
-    { min: 2,   dot: "#8BC34A", phrase: "Bon funnel pour cette offre", tip: "Augmenter le budget ads" },
-    { min: 1,   dot: "#FFC107", phrase: "Dans la norme — à optimiser", tip: "Identifier l'étape qui coince le plus" },
-    { min: 0.5, dot: "#FF9800", phrase: "En dessous des standards", tip: "Optimiser PDV et parcours en priorité" },
-    { min: 0,   dot: "#F44336", phrase: "Le funnel perd trop de monde", tip: "Retravailler chaque étape avant de scaler" },
+    { min: 3,   dot: "#4CAF50", phrase: "Funnel excellent 🔥", tip: "Scaler agressivement" },
+    { min: 1.5, dot: "#8BC34A", phrase: "Bon funnel pour cette offre", tip: "Augmenter le budget ads progressivement" },
+    { min: 0.8, dot: "#C49B2E", phrase: "Dans la norme — à optimiser", tip: "Identifier l'étape qui coince le plus" },
+    { min: 0.3, dot: "#C4692E", phrase: "En dessous des standards", tip: "Optimiser PDV et parcours en priorité" },
+    { min: 0,   dot: "#B84040", phrase: "Le funnel ne convertit pas", tip: "Retravailler avant de scaler" },
   ],
 };
 
@@ -66,7 +66,7 @@ function ConversionRow({ label, value, diagKey, suffix = "%" }) {
 
       {/* Pourcentage */}
       <div style={{
-        minWidth: 56, color: level?.dot || C.light,
+        minWidth: 56, color: C.yellow,
         fontSize: 22, fontWeight: 700,
         fontFamily: "'Cormorant Garamond', serif", lineHeight: 1,
         flexShrink: 0,
