@@ -20,19 +20,19 @@ const DIAG = {
     { min: 1,  dot: "#FF9800", phrase: "L'offre ne parle pas assez", tip: "Retravailler l'accroche et la promesse" },
     { min: 0,  dot: "#F44336", phrase: "La page ne convertit pas", tip: "Revoir le titre, le CTA et la structure" },
   ],
-  app_to_plan: [
-    { min: 50, dot: "#4CAF50", phrase: "Très forte intention d'achat 🔥", tip: "Optimiser le checkout, elles sont prêtes" },
-    { min: 35, dot: "#8BC34A", phrase: "La page de plans convainc bien", tip: "Tester une garantie satisfait/remboursé" },
-    { min: 20, dot: "#FFC107", phrase: "La moitié repart sans choisir", tip: "Mettre en avant un plan recommandé" },
-    { min: 10, dot: "#FF9800", phrase: "La page de choix ne convainc pas", tip: "Simplifier les options, réduire la friction" },
-    { min: 0,  dot: "#F44336", phrase: "Elles partent sans regarder les plans", tip: "Retravailler la page /choix-plan entièrement" },
+  click_to_signup: [
+    { min: 50, dot: "#4CAF50", phrase: "L'app convainc immédiatement 🔥", tip: "Le parcours d'entrée est excellent" },
+    { min: 30, dot: "#8BC34A", phrase: "Bon taux d'inscription", tip: "Continuer — optimiser les emails de bienvenue" },
+    { min: 15, dot: "#FFC107", phrase: "Correct — marge de progression", tip: "Tester un message d'accueil plus percutant" },
+    { min: 5,  dot: "#FF9800", phrase: "Beaucoup repartent sans s'inscrire", tip: "Simplifier l'entrée dans l'app" },
+    { min: 0,  dot: "#F44336", phrase: "Presque personne ne s'inscrit", tip: "Revoir la première impression dans l'app" },
   ],
-  plan_to_pay: [
-    { min: 85, dot: "#4CAF50", phrase: "Checkout très performant 🔥", tip: "Ne rien changer — ça tourne" },
-    { min: 75, dot: "#8BC34A", phrase: "Bon passage à la caisse", tip: "Tester une garantie 7 jours pour gagner 5-10%" },
-    { min: 60, dot: "#FFC107", phrase: "Correct — marge de progression", tip: "Ajouter une ligne de réassurance au checkout" },
-    { min: 40, dot: "#FF9800", phrase: "Trop d'hésitation au paiement", tip: "Vérifier la friction technique + ajouter une garantie" },
-    { min: 0,  dot: "#F44336", phrase: "Elles abandonnent au paiement", tip: "Problème technique ou de confiance — à investiguer" },
+  signup_to_pay: [
+    { min: 50, dot: "#4CAF50", phrase: "La démo convainc très bien 🔥", tip: "Scaler — le produit parle de lui-même" },
+    { min: 35, dot: "#8BC34A", phrase: "Bon taux d'activation", tip: "Optimiser les relances email post-inscription" },
+    { min: 20, dot: "#FFC107", phrase: "Correct pour ce type d'offre", tip: "Travailler les emails de nurturing" },
+    { min: 10, dot: "#FF9800", phrase: "Peu d'inscrites passent à l'achat", tip: "Retravailler le pitch de l'offre payante" },
+    { min: 0,  dot: "#F44336", phrase: "Elles s'inscrivent mais ne paient pas", tip: "Séquence email urgente — creuser pourquoi" },
   ],
   global: [
     { min: 4,   dot: "#4CAF50", phrase: "Funnel très performant 🔥", tip: "Scaler agressivement" },
@@ -426,19 +426,19 @@ export default function AdminPage({ user, onBack }) {
 
           {/* ── Diagnostic de conversion ── */}
           {!trackingLoading && funnel.page_views > 0 && (() => {
-            const pdvToClick  = funnel.page_views  > 0 ? parseFloat(((funnel.cta_clicks        / funnel.page_views)  * 100).toFixed(1)) : null;
-            const appToPlan   = funnel.app_landings > 0 ? parseFloat(((funnel.plan_selected     / funnel.app_landings) * 100).toFixed(1)) : null;
-            const planToPay   = funnel.plan_selected > 0 ? parseFloat(((funnel.payment_completed / funnel.plan_selected) * 100).toFixed(1)) : null;
-            const globalRate  = funnel.page_views  > 0 ? parseFloat(((funnel.payment_completed  / funnel.page_views)  * 100).toFixed(2)) : null;
+            const pdvToClick    = funnel.page_views  > 0 ? parseFloat(((funnel.cta_clicks   / funnel.page_views)  * 100).toFixed(1)) : null;
+            const clickToSignup = funnel.cta_clicks  > 0 ? parseFloat(((funnel.new_signups  / funnel.cta_clicks)  * 100).toFixed(1)) : null;
+            const signupToPay   = funnel.new_signups > 0 ? parseFloat(((funnel.new_paid     / funnel.new_signups) * 100).toFixed(1)) : null;
+            const globalRate    = funnel.page_views  > 0 ? parseFloat(((funnel.new_paid     / funnel.page_views)  * 100).toFixed(2)) : null;
 
             return (
               <div style={{ marginTop: 24, paddingTop: 20, borderTop: `1px solid ${C.med}` }}>
                 <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Diagnostic de conversion</div>
                 <div style={{ color: C.light, fontSize: 11, marginBottom: 14 }}>Ce qui tourne, ce qui coince</div>
-                <ConversionRow label="Page de vente → Clic CTA"      value={pdvToClick} diagKey="pdv_to_click" />
-                <ConversionRow label="Arrivée app → Plan sélectionné" value={appToPlan}  diagKey="app_to_plan"  />
-                <ConversionRow label="Plan sélectionné → Paiement"    value={planToPay}  diagKey="plan_to_pay"  />
-                <div style={{ marginTop: 4 }}>
+                <ConversionRow label="Page de vente → Clic CTA"   value={pdvToClick}    diagKey="pdv_to_click"    />
+                <ConversionRow label="Clic CTA → Inscription"      value={clickToSignup} diagKey="click_to_signup" />
+                <ConversionRow label="Inscription → Achat"         value={signupToPay}   diagKey="signup_to_pay"   />
+                <div style={{ marginTop: 4, paddingTop: 4, borderTop: `1px solid ${C.med}33` }}>
                   <ConversionRow label="Conversion globale PDV → Achat" value={globalRate} diagKey="global" />
                 </div>
               </div>
@@ -450,11 +450,10 @@ export default function AdminPage({ user, onBack }) {
             <div style={{ marginTop: 24, paddingTop: 20, borderTop: `1px solid ${C.med}` }}>
               <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 14 }}>Tunnel complet</div>
               {[
-                { label: "Visites page",       value: funnel.page_views,         color: "#b0d4f0" },
-                { label: "Clics CTA",          value: funnel.cta_clicks,         color: "#f0b0d4" },
-                { label: "Arrivées dans l'app",value: funnel.app_landings,       color: "#f0e0b0" },
-                { label: "Plan sélectionné",   value: funnel.plan_selected,      color: "#c4f0b0" },
-                { label: "Paiement complété",  value: funnel.payment_completed,  color: "#a8f0b0" },
+                { label: "Visites page de vente", value: funnel.page_views,  color: "#b0d4f0" },
+                { label: "Clics CTA",             value: funnel.cta_clicks,  color: "#f0b0d4" },
+                { label: "Inscriptions",          value: funnel.new_signups, color: "#f0e0b0" },
+                { label: "Achats",                value: funnel.new_paid,    color: "#a8f0b0" },
               ].map((step, i) => {
                 const base  = funnel.page_views || 1;
                 const pct   = Math.round(((step.value || 0) / base) * 100);
