@@ -10,6 +10,91 @@ const C = {
 
 const ADMIN_EMAIL = "chloe-huissoud@hotmail.fr";
 
+// ── Seuils de diagnostic conversion ──────────────────────────────────────────
+// Calibrés pour un produit à 97€ sur trafic froid, audience coiffeuses indé.
+const DIAG = {
+  pdv_to_click: [
+    { min: 10, dot: "#4CAF50", phrase: "Page de vente excellente 🔥", tip: "Scaler le budget ads sans hésiter" },
+    { min: 5,  dot: "#8BC34A", phrase: "Bonne accroche", tip: "Augmenter progressivement le budget" },
+    { min: 3,  dot: "#FFC107", phrase: "Dans la moyenne — peut mieux faire", tip: "A/B tester le CTA principal" },
+    { min: 1,  dot: "#FF9800", phrase: "L'offre ne parle pas assez", tip: "Retravailler l'accroche et la promesse" },
+    { min: 0,  dot: "#F44336", phrase: "La page ne convertit pas", tip: "Revoir le titre, le CTA et la structure" },
+  ],
+  app_to_plan: [
+    { min: 50, dot: "#4CAF50", phrase: "Très forte intention d'achat 🔥", tip: "Optimiser le checkout, elles sont prêtes" },
+    { min: 35, dot: "#8BC34A", phrase: "La page de plans convainc bien", tip: "Tester une garantie satisfait/remboursé" },
+    { min: 20, dot: "#FFC107", phrase: "La moitié repart sans choisir", tip: "Mettre en avant un plan recommandé" },
+    { min: 10, dot: "#FF9800", phrase: "La page de choix ne convainc pas", tip: "Simplifier les options, réduire la friction" },
+    { min: 0,  dot: "#F44336", phrase: "Elles partent sans regarder les plans", tip: "Retravailler la page /choix-plan entièrement" },
+  ],
+  plan_to_pay: [
+    { min: 85, dot: "#4CAF50", phrase: "Checkout très performant 🔥", tip: "Ne rien changer — ça tourne" },
+    { min: 75, dot: "#8BC34A", phrase: "Bon passage à la caisse", tip: "Tester une garantie 7 jours pour gagner 5-10%" },
+    { min: 60, dot: "#FFC107", phrase: "Correct — marge de progression", tip: "Ajouter une ligne de réassurance au checkout" },
+    { min: 40, dot: "#FF9800", phrase: "Trop d'hésitation au paiement", tip: "Vérifier la friction technique + ajouter une garantie" },
+    { min: 0,  dot: "#F44336", phrase: "Elles abandonnent au paiement", tip: "Problème technique ou de confiance — à investiguer" },
+  ],
+  global: [
+    { min: 4,   dot: "#4CAF50", phrase: "Funnel très performant 🔥", tip: "Scaler agressivement" },
+    { min: 2,   dot: "#8BC34A", phrase: "Bon funnel pour cette offre", tip: "Augmenter le budget ads" },
+    { min: 1,   dot: "#FFC107", phrase: "Dans la norme — à optimiser", tip: "Identifier l'étape qui coince le plus" },
+    { min: 0.5, dot: "#FF9800", phrase: "En dessous des standards", tip: "Optimiser PDV et parcours en priorité" },
+    { min: 0,   dot: "#F44336", phrase: "Le funnel perd trop de monde", tip: "Retravailler chaque étape avant de scaler" },
+  ],
+};
+
+function getDiagLevel(value, key) {
+  if (value === null || value === undefined || isNaN(value)) return null;
+  const levels = DIAG[key];
+  return levels.find(l => value >= l.min) || levels[levels.length - 1];
+}
+
+function ConversionRow({ label, value, diagKey, suffix = "%" }) {
+  const level = getDiagLevel(value, diagKey);
+  const display = value !== null && value !== undefined && !isNaN(value)
+    ? `${typeof value === "number" && !Number.isInteger(value) ? value.toFixed(1) : value}${suffix}`
+    : "—";
+
+  return (
+    <div style={{
+      display: "flex", alignItems: "center", gap: 10,
+      padding: "11px 0", borderBottom: `1px solid ${C.med}22`,
+      flexWrap: "wrap",
+    }}>
+      {/* Étape */}
+      <div style={{ minWidth: 170, color: C.light, fontSize: 12, flexShrink: 0 }}>{label}</div>
+
+      {/* Pourcentage */}
+      <div style={{
+        minWidth: 56, color: level?.dot || C.light,
+        fontSize: 22, fontWeight: 700,
+        fontFamily: "'Cormorant Garamond', serif", lineHeight: 1,
+        flexShrink: 0,
+      }}>
+        {display}
+      </div>
+
+      {/* Point coloré + phrase */}
+      {level && (
+        <div style={{ display: "flex", alignItems: "center", gap: 7, flex: 1, minWidth: 160 }}>
+          <div style={{ width: 10, height: 10, borderRadius: "50%", background: level.dot, flexShrink: 0 }} />
+          <span style={{ color: C.beige, fontSize: 12, fontWeight: 600 }}>{level.phrase}</span>
+        </div>
+      )}
+
+      {/* Action suggérée */}
+      {level && (
+        <div style={{
+          color: C.light, fontSize: 11, textAlign: "right",
+          maxWidth: 220, lineHeight: 1.4, fontStyle: "italic",
+        }}>
+          → {level.tip}
+        </div>
+      )}
+    </div>
+  );
+}
+
 const PERIODS = [
   { key: "today",  label: "Aujourd'hui" },
   { key: "7d",     label: "7 jours" },
@@ -338,6 +423,27 @@ export default function AdminPage({ user, onBack }) {
               </div>
             </div>
           )}
+
+          {/* ── Diagnostic de conversion ── */}
+          {!trackingLoading && funnel.page_views > 0 && (() => {
+            const pdvToClick  = funnel.page_views  > 0 ? parseFloat(((funnel.cta_clicks        / funnel.page_views)  * 100).toFixed(1)) : null;
+            const appToPlan   = funnel.app_landings > 0 ? parseFloat(((funnel.plan_selected     / funnel.app_landings) * 100).toFixed(1)) : null;
+            const planToPay   = funnel.plan_selected > 0 ? parseFloat(((funnel.payment_completed / funnel.plan_selected) * 100).toFixed(1)) : null;
+            const globalRate  = funnel.page_views  > 0 ? parseFloat(((funnel.payment_completed  / funnel.page_views)  * 100).toFixed(2)) : null;
+
+            return (
+              <div style={{ marginTop: 24, paddingTop: 20, borderTop: `1px solid ${C.med}` }}>
+                <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Diagnostic de conversion</div>
+                <div style={{ color: C.light, fontSize: 11, marginBottom: 14 }}>Ce qui tourne, ce qui coince</div>
+                <ConversionRow label="Page de vente → Clic CTA"      value={pdvToClick} diagKey="pdv_to_click" />
+                <ConversionRow label="Arrivée app → Plan sélectionné" value={appToPlan}  diagKey="app_to_plan"  />
+                <ConversionRow label="Plan sélectionné → Paiement"    value={planToPay}  diagKey="plan_to_pay"  />
+                <div style={{ marginTop: 4 }}>
+                  <ConversionRow label="Conversion globale PDV → Achat" value={globalRate} diagKey="global" />
+                </div>
+              </div>
+            );
+          })()}
 
           {/* Funnel complet */}
           {!trackingLoading && funnel.page_views > 0 && (
