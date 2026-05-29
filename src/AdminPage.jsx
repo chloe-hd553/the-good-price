@@ -35,11 +35,11 @@ const DIAG = {
     { min: 0,  dot: "#F44336", phrase: "Elles s'inscrivent mais ne paient pas", tip: "Séquence email urgente — creuser pourquoi" },
   ],
   global: [
-    { min: 3,   dot: "#4CAF50", phrase: "Funnel excellent 🔥", tip: "Scaler agressivement" },
-    { min: 1.5, dot: "#8BC34A", phrase: "Bon funnel pour cette offre", tip: "Augmenter le budget ads progressivement" },
-    { min: 0.8, dot: "#C49B2E", phrase: "Dans la norme — à optimiser", tip: "Identifier l'étape qui coince le plus" },
-    { min: 0.3, dot: "#C4692E", phrase: "En dessous des standards", tip: "Optimiser PDV et parcours en priorité" },
-    { min: 0,   dot: "#B84040", phrase: "Le funnel ne convertit pas", tip: "Retravailler avant de scaler" },
+    { min: 5,   dot: "#4CAF50", phrase: "Funnel excellent 🔥", tip: "Ta page cartonne — scaler sans hésiter" },
+    { min: 2,   dot: "#8BC34A", phrase: "Bon funnel pour ce prix", tip: "Augmenter le budget ads progressivement" },
+    { min: 1,   dot: "#C49B2E", phrase: "Frein à identifier — sous la norme", tip: "En dessous de 2% : chercher où ça coince" },
+    { min: 0.5, dot: "#C4692E", phrase: "En dessous des standards", tip: "Optimiser PDV et parcours en priorité" },
+    { min: 0,   dot: "#B84040", phrase: "Le funnel ne convertit pas", tip: "Retravailler avant tout investissement ads" },
   ],
 };
 
