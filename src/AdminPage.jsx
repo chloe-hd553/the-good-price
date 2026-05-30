@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import { supabase } from "./supabase";
-import { Users, CreditCard, TrendingUp, Activity, UserPlus, ArrowLeft, RefreshCw, BookOpen, Smartphone, Eye, MousePointerClick } from "lucide-react";
+import { Users, CreditCard, TrendingUp, Activity, UserPlus, ArrowLeft, RefreshCw, BookOpen, Smartphone, Eye, MousePointerClick, Megaphone } from "lucide-react";
 import { LineChart, Line, BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell, Legend } from "recharts";
 
 const C = {
@@ -169,6 +169,11 @@ export default function AdminPage({ user, onBack }) {
   const [trackingData, setTrackingData]     = useState(null);
   const [trackingLoading, setTrackingLoading] = useState(true);
 
+  // ── Meta Ads ──────────────────────────────────────────────────────
+  const [metaData, setMetaData]       = useState(null);
+  const [metaLoading, setMetaLoading] = useState(false);
+  const [metaError, setMetaError]     = useState(null);
+
   const load = async () => {
     setLoading(true);
     setError(null);
@@ -195,6 +200,33 @@ export default function AdminPage({ user, onBack }) {
     setTrackingLoading(false);
   }, [period, customStart, customEnd]);
 
+  const loadMeta = useCallback(async () => {
+    setMetaLoading(true);
+    setMetaError(null);
+    try {
+      let startStr, endStr;
+      if (period === "custom") {
+        startStr = customStart;
+        endStr   = customEnd;
+      } else {
+        const { start, end } = getPeriodDates(period);
+        startStr = start.toISOString().slice(0, 10);
+        endStr   = end.toISOString().slice(0, 10);
+      }
+      const res = await fetch(`/api/meta-insights?date_start=${startStr}&date_end=${endStr}`);
+      const json = await res.json();
+      if (!res.ok) {
+        setMetaError(json.error || "Erreur Meta API");
+        setMetaData(null);
+      } else {
+        setMetaData(json);
+      }
+    } catch (err) {
+      setMetaError(err.message);
+    }
+    setMetaLoading(false);
+  }, [period, customStart, customEnd]);
+
   useEffect(() => {
     if (!user || user.email !== ADMIN_EMAIL) return;
     load();
@@ -203,7 +235,8 @@ export default function AdminPage({ user, onBack }) {
   useEffect(() => {
     if (!user || user.email !== ADMIN_EMAIL) return;
     loadTracking();
-  }, [loadTracking, user]);
+    loadMeta();
+  }, [loadTracking, loadMeta, user]);
 
   if (!user || user.email !== ADMIN_EMAIL) {
     return (
@@ -491,6 +524,74 @@ export default function AdminPage({ user, onBack }) {
                   </div>
                 );
               })}
+            </div>
+          )}
+        </div>
+
+        {/* ── Section Meta Ads ── */}
+        <div style={{ background: C.dark, border: `1px solid ${C.med}`, borderRadius: 14, padding: "16px 20px", marginBottom: 24 }}>
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 2 }}>
+            <div>
+              <div style={{ color: C.beige, fontSize: 13, fontWeight: 600, display: "flex", alignItems: "center", gap: 8 }}>
+                <Megaphone size={14} color={C.light} />
+                Meta Ads
+              </div>
+              <div style={{ color: C.light, fontSize: 11, marginTop: 2 }}>Même période que le tracking</div>
+            </div>
+            <button
+              onClick={loadMeta}
+              title="Rafraîchir Meta"
+              style={{ background: "none", border: `1px solid ${C.med}`, borderRadius: 8, color: C.light, padding: "5px 10px", cursor: "pointer", display: "flex", alignItems: "center" }}
+            >
+              <RefreshCw size={12} />
+            </button>
+          </div>
+
+          {metaLoading && (
+            <div style={{ color: C.light, fontSize: 12, textAlign: "center", padding: "20px 0" }}>Chargement Meta Ads...</div>
+          )}
+
+          {!metaLoading && metaError && (
+            <div style={{ background: "#3d2020", border: "1px solid #7a3030", borderRadius: 8, padding: "10px 14px", color: "#f0b0b0", fontSize: 12, marginTop: 12 }}>
+              {metaError.includes("not configured")
+                ? "⚠️ Token Meta non configuré — ajouter META_ACCESS_TOKEN et META_AD_ACCOUNT_ID dans les variables d'environnement Vercel."
+                : `Erreur : ${metaError}`}
+            </div>
+          )}
+
+          {!metaLoading && metaData && !metaError && (
+            <>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))", gap: 10, marginTop: 14 }}>
+                <KpiCard icon={<TrendingUp size={13} />} label="Budget dépensé"   value={`${metaData.spend}€`}           color="#f0d0a8" />
+                <KpiCard icon={<Eye size={13} />}        label="Impressions"       value={metaData.impressions.toLocaleString("fr-FR")} color="#b0d4f0" />
+                <KpiCard icon={<MousePointerClick size={13} />} label="Clics (all)" value={metaData.clicks.toLocaleString("fr-FR")} color="#f0b0d4" />
+                <KpiCard icon={<Activity size={13} />}   label="CTR"               value={`${metaData.ctr}%`}             color="#d4f0b0" />
+                <KpiCard icon={<CreditCard size={13} />} label="CPM"               value={`${metaData.cpm}€`}             color="#e0b0f0" sub="Coût pour 1000 vues" />
+                <KpiCard icon={<CreditCard size={13} />} label="CPC"               value={`${metaData.cpc}€`}             color="#f0e0b0" sub="Coût par clic" />
+                {metaData.link_clicks > 0 && (
+                  <KpiCard icon={<MousePointerClick size={13} />} label="Clics liens"  value={metaData.link_clicks.toLocaleString("fr-FR")} color="#b0f0e4" sub="vers ta PDV" />
+                )}
+                {metaData.reach > 0 && (
+                  <KpiCard icon={<Users size={13} />}    label="Portée"            value={metaData.reach.toLocaleString("fr-FR")}          color="#f0c8b0" sub={`Fréq. ${metaData.frequency}x`} />
+                )}
+              </div>
+
+              {/* Coût par achat estimé */}
+              {metaData.spend > 0 && metaData.link_clicks > 0 && (
+                <div style={{ marginTop: 14, padding: "12px 14px", background: C.bg, borderRadius: 10 }}>
+                  <div style={{ color: C.light, fontSize: 11, marginBottom: 6 }}>Coût estimé par visite PDV</div>
+                  <div style={{ color: C.yellow, fontSize: 20, fontWeight: 700, fontFamily: "'Cormorant Garamond', serif" }}>
+                    {(parseFloat(metaData.spend) / metaData.link_clicks).toFixed(2)}€
+                  </div>
+                  <div style={{ color: C.light, fontSize: 11, marginTop: 2 }}>Budget ÷ clics liens</div>
+                </div>
+              )}
+            </>
+          )}
+
+          {!metaLoading && !metaData && !metaError && (
+            <div style={{ color: C.light, fontSize: 12, textAlign: "center", padding: "16px 0" }}>
+              Aucune donnée publicitaire sur cette période.
             </div>
           )}
         </div>
