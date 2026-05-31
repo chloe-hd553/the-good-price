@@ -15,11 +15,14 @@ export default async function handler(req, res) {
   try {
     const { plan, userId, email, demoMode, trackingSid } = req.body;
 
-    if (!plan || !email) {
-      return res.status(400).json({ error: 'Missing plan or email' });
+    if (!plan) {
+      return res.status(400).json({ error: 'Missing plan' });
     }
     if (!demoMode && !userId) {
       return res.status(400).json({ error: 'Missing userId' });
+    }
+    if (!demoMode && !email) {
+      return res.status(400).json({ error: 'Missing email' });
     }
 
     if (plan !== 'oneshot' && plan !== 'monthly') {
@@ -38,10 +41,10 @@ export default async function handler(req, res) {
       mode,
       payment_method_types: ['card'],
       line_items: [{ price: priceId, quantity: 1 }],
-      customer_email: email,
-      // En mode démo : l'email sert de référence (le compte sera créé par le webhook)
-      client_reference_id: userId || email,
-      metadata: { userId: userId || '', email, plan, demoMode: demoMode ? 'true' : 'false', tracking_sid: trackingSid || '' },
+      // En mode démo sans email pré-collecté : Stripe collecte l'email pendant le paiement
+      ...(email ? { customer_email: email } : {}),
+      client_reference_id: userId || email || `demo-${Date.now()}`,
+      metadata: { userId: userId || '', email: email || '', plan, demoMode: demoMode ? 'true' : 'false', tracking_sid: trackingSid || '' },
       allow_promotion_codes: true,
       success_url: `${appUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: demoMode ? `${appUrl}/choix-plan` : `${appUrl}/annule`,
