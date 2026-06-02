@@ -1690,7 +1690,10 @@ export default function App() {
       setUser(session?.user || null);
       setAuthLoading(false);
     });
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "PASSWORD_RECOVERY") {
+        setIsRecovery(true);
+      }
       setUser(session?.user || null);
     });
     return () => subscription.unsubscribe();
