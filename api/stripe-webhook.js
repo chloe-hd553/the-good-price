@@ -184,6 +184,10 @@ export default async function handler(req, res) {
         const user = await findUserByCustomerId(customerId);
         if (!user) break;
         console.log('Payment failed for', user.email);
+        await setUserPaid(user.id, {
+          paid: false,
+          expiresAt: new Date().toISOString(),
+        });
         break;
       }
 
