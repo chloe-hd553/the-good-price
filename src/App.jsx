@@ -1561,6 +1561,8 @@ export default function App() {
   const [tar, setTar] = useState(dTar);
   const [ok, setOk] = useState(false);
   const [sv, setSv] = useState(false);
+  const [saveError, setSaveError] = useState(false);
+  const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
   const [started, setStarted] = useState(false);
   const [user, setUser] = useState(null);
   const [authLoading, setAuthLoading] = useState(true);
@@ -1771,6 +1773,18 @@ export default function App() {
     }
   }, [user]);
 
+  // Détection réseau
+  useEffect(() => {
+    const goOffline = () => setIsOffline(true);
+    const goOnline  = () => setIsOffline(false);
+    window.addEventListener("offline", goOffline);
+    window.addEventListener("online",  goOnline);
+    return () => {
+      window.removeEventListener("offline", goOffline);
+      window.removeEventListener("online",  goOnline);
+    };
+  }, []);
+
   // Load data from Supabase when user logs in
   useEffect(() => {
     if (!user) { setOk(true); return; }
@@ -1822,14 +1836,16 @@ export default function App() {
     if (!ok || !user) return;
     const t = setTimeout(async () => {
       setSv(true);
+      setSaveError(false);
       try {
-        await supabase.from("user_data").upsert({
+        const { error: saveErr } = await supabase.from("user_data").upsert({
           id: user.id,
           email: user.email,
           sal, pro, tar,
           updated_at: new Date().toISOString(),
         });
-      } catch (err) { console.error("Save error:", err); }
+        if (saveErr) { console.error("Save error:", saveErr); setSaveError(true); }
+      } catch (err) { console.error("Save error:", err); setSaveError(true); }
       setTimeout(() => setSv(false), 800);
     }, 1500);
     return () => clearTimeout(t);
@@ -1988,6 +2004,76 @@ export default function App() {
   return (
     <div className={`tgp${theme === "light" ? " light" : ""}`}>
       <style>{styles}</style>
+
+      {/* Popup hors-ligne */}
+      {isOffline && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 9999,
+          background: "rgba(0,0,0,0.75)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: 24,
+        }}>
+          <div style={{
+            background: "#2C1F12", border: "1px solid #a05020",
+            borderRadius: 16, padding: "32px 28px", maxWidth: 380, width: "100%",
+            textAlign: "center", fontFamily: "'Instrument Sans', sans-serif",
+          }}>
+            <div style={{ fontSize: 40, marginBottom: 16 }}>📡</div>
+            <div style={{ color: "#fef4b0", fontSize: 18, fontWeight: 700, marginBottom: 12, fontFamily: "'Cormorant Garamond', serif" }}>
+              Pas de connexion internet
+            </div>
+            <div style={{ color: "#c9a97a", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+              Tes données ne peuvent pas être sauvegardées sans connexion. Ne quitte pas l'appli avant d'être reconnectée — tu risques de perdre ta progression.
+            </div>
+            <button
+              onClick={() => { if (navigator.onLine) setIsOffline(false); }}
+              style={{
+                background: "#fef4b0", color: "#2C1F12",
+                border: "none", borderRadius: 10,
+                padding: "12px 28px", fontSize: 14, fontWeight: 700,
+                cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif",
+              }}
+            >
+              Réessayer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Popup erreur Supabase */}
+      {saveError && !isOffline && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 9999,
+          background: "rgba(0,0,0,0.75)",
+          display: "flex", alignItems: "center", justifyContent: "center",
+          padding: 24,
+        }}>
+          <div style={{
+            background: "#2C1F12", border: "1px solid #a03030",
+            borderRadius: 16, padding: "32px 28px", maxWidth: 380, width: "100%",
+            textAlign: "center", fontFamily: "'Instrument Sans', sans-serif",
+          }}>
+            <div style={{ fontSize: 40, marginBottom: 16 }}>⚠️</div>
+            <div style={{ color: "#fef4b0", fontSize: 18, fontWeight: 700, marginBottom: 12, fontFamily: "'Cormorant Garamond', serif" }}>
+              Erreur de sauvegarde
+            </div>
+            <div style={{ color: "#c9a97a", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+              Tes données n'ont pas été enregistrées. Ne quitte pas l'appli et réessaie. Si le problème persiste, contacte le support.
+            </div>
+            <button
+              onClick={() => setSaveError(false)}
+              style={{
+                background: "#fef4b0", color: "#2C1F12",
+                border: "none", borderRadius: 10,
+                padding: "12px 28px", fontSize: 14, fontWeight: 700,
+                cursor: "pointer", fontFamily: "'Instrument Sans', sans-serif",
+              }}
+            >
+              OK, j'ai compris
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* Bannière mode démo */}
       {demoMode && !user && (
