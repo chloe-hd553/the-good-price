@@ -46,6 +46,15 @@ export default async function handler(req, res) {
       client_reference_id: userId || email || `demo-${Date.now()}`,
       metadata: { userId: userId || '', email: email || '', plan, demoMode: demoMode ? 'true' : 'false', tracking_sid: trackingSid || '' },
       allow_promotion_codes: true,
+      billing_address_collection: 'required',
+      custom_fields: [
+        {
+          key: 'nom_entreprise',
+          label: { type: 'custom', custom: "Nom de l'entreprise" },
+          type: 'text',
+          optional: true,
+        },
+      ],
       success_url: `${appUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
       cancel_url: demoMode ? `${appUrl}/choix-plan` : `${appUrl}/annule`,
       locale: 'fr',
