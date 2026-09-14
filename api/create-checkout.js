@@ -2,10 +2,16 @@
 // Vercel serverless function — crée une Stripe Checkout Session
 
 import Stripe from 'stripe';
+import { createClient } from '@supabase/supabase-js';
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY, {
   apiVersion: '2024-06-20',
 });
+
+const supabase = createClient(
+  process.env.SUPABASE_URL,
+  process.env.SUPABASE_SERVICE_ROLE_KEY
+);
 
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
@@ -67,6 +73,18 @@ export default async function handler(req, res) {
     }
 
     const session = await stripe.checkout.sessions.create(sessionParams);
+
+    // Tracking : session Stripe créée (= arrivée sur la page carte)
+    try {
+      await supabase.from('tracking_events').insert({
+        event_type: 'checkout_started',
+        session_id: trackingSid || null,
+        label: plan,
+      });
+    } catch (trackErr) {
+      console.warn('Tracking checkout_started failed:', trackErr);
+    }
+
     return res.status(200).json({ url: session.url });
   } catch (err) {
     console.error('create-checkout error:', err);
