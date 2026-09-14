@@ -13,6 +13,12 @@ const ADMIN_EMAIL = "chloe-huissoud@hotmail.fr";
 // ── Seuils de diagnostic conversion ──────────────────────────────────────────
 // Calibrés pour un produit à 97€ sur trafic froid, audience coiffeuses indé.
 const DIAG = {
+  click_to_checkout: [
+    { min: 70, dot: "#4CAF50", phrase: "Très peu d'abandons sur le choix de plan 🔥", tip: "La page de choix convertit bien" },
+    { min: 50, dot: "#8BC34A", phrase: "Bon passage vers Stripe", tip: "La majorité clique sur Payer" },
+    { min: 30, dot: "#FFC107", phrase: "Quelques hésitations sur le plan", tip: "Retravailler la présentation des offres" },
+    { min: 0,  dot: "#F44336", phrase: "Beaucoup abandonnent sur le choix de plan", tip: "Simplifier ou clarifier les options tarifaires" },
+  ],
   pdv_to_click: [
     { min: 10, dot: "#4CAF50", phrase: "Page de vente excellente 🔥", tip: "Scaler le budget ads sans hésiter" },
     { min: 5,  dot: "#8BC34A", phrase: "Bonne accroche", tip: "Augmenter progressivement le budget" },
@@ -459,18 +465,26 @@ export default function AdminPage({ user, onBack }) {
 
           {/* ── Diagnostic de conversion ── */}
           {!trackingLoading && funnel.page_views > 0 && (() => {
-            const pdvToClick    = funnel.page_views  > 0 ? parseFloat(((funnel.cta_clicks   / funnel.page_views)  * 100).toFixed(1)) : null;
-            const clickToSignup = funnel.cta_clicks  > 0 ? parseFloat(((funnel.new_signups  / funnel.cta_clicks)  * 100).toFixed(1)) : null;
-            const signupToPay   = funnel.new_signups > 0 ? parseFloat(((funnel.new_paid     / funnel.new_signups) * 100).toFixed(1)) : null;
-            const globalRate    = funnel.page_views  > 0 ? parseFloat(((funnel.new_paid     / funnel.page_views)  * 100).toFixed(2)) : null;
+            const pdvToClick      = funnel.page_views       > 0 ? parseFloat(((funnel.cta_clicks        / funnel.page_views)       * 100).toFixed(1)) : null;
+            const clickToCheckout = funnel.cta_clicks       > 0 && funnel.checkout_started != null ? parseFloat(((funnel.checkout_started / funnel.cta_clicks)       * 100).toFixed(1)) : null;
+            const clickToSignup   = funnel.cta_clicks       > 0 ? parseFloat(((funnel.new_signups      / funnel.cta_clicks)       * 100).toFixed(1)) : null;
+            const signupToPay     = funnel.new_signups      > 0 ? parseFloat(((funnel.new_paid          / funnel.new_signups)      * 100).toFixed(1)) : null;
+            const checkoutToPay   = funnel.checkout_started > 0 ? parseFloat(((funnel.new_paid          / funnel.checkout_started) * 100).toFixed(1)) : null;
+            const globalRate      = funnel.page_views       > 0 ? parseFloat(((funnel.new_paid          / funnel.page_views)       * 100).toFixed(2)) : null;
 
             return (
               <div style={{ marginTop: 24, paddingTop: 20, borderTop: `1px solid ${C.med}` }}>
                 <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Diagnostic de conversion</div>
                 <div style={{ color: C.light, fontSize: 11, marginBottom: 14 }}>Ce qui tourne, ce qui coince</div>
-                <ConversionRow label="Page de vente → Clic CTA"   value={pdvToClick}    diagKey="pdv_to_click"    />
-                <ConversionRow label="Clic CTA → Inscription"      value={clickToSignup} diagKey="click_to_signup" />
-                <ConversionRow label="Inscription → Achat"         value={signupToPay}   diagKey="signup_to_pay"   />
+                <ConversionRow label="Page de vente → Clic CTA"     value={pdvToClick}      diagKey="pdv_to_click"       />
+                {clickToCheckout !== null && (
+                  <ConversionRow label="Clic CTA → Stripe ouvert"   value={clickToCheckout} diagKey="click_to_checkout"  />
+                )}
+                {checkoutToPay !== null && (
+                  <ConversionRow label="Stripe ouvert → Achat"      value={checkoutToPay}   diagKey="signup_to_pay"      />
+                )}
+                <ConversionRow label="Clic CTA → Inscription"        value={clickToSignup}   diagKey="click_to_signup"    />
+                <ConversionRow label="Inscription → Achat"           value={signupToPay}     diagKey="signup_to_pay"      />
                 <div style={{ marginTop: 4, paddingTop: 4, borderTop: `1px solid ${C.med}33` }}>
                   <ConversionRow label="Conversion globale PDV → Achat" value={globalRate} diagKey="global" />
                 </div>
@@ -483,10 +497,11 @@ export default function AdminPage({ user, onBack }) {
             <div style={{ marginTop: 24, paddingTop: 20, borderTop: `1px solid ${C.med}` }}>
               <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 14 }}>Tunnel complet</div>
               {[
-                { label: "Visites page de vente", value: funnel.page_views,  color: "#b0d4f0" },
-                { label: "Clics CTA",             value: funnel.cta_clicks,  color: "#f0b0d4" },
-                { label: "Inscriptions",          value: funnel.new_signups, color: "#f0e0b0" },
-                { label: "Achats",                value: funnel.new_paid,    color: "#a8f0b0" },
+                { label: "Visites page de vente",      value: funnel.page_views,        color: "#b0d4f0" },
+                { label: "Clics CTA",                  value: funnel.cta_clicks,        color: "#f0b0d4" },
+                ...(funnel.checkout_started != null ? [{ label: "Stripe ouvert (page carte)", value: funnel.checkout_started, color: "#c4f0d4" }] : []),
+                { label: "Inscriptions",               value: funnel.new_signups,       color: "#f0e0b0" },
+                { label: "Achats",                     value: funnel.new_paid,          color: "#a8f0b0" },
               ].map((step, i) => {
                 const base  = funnel.page_views || 1;
                 const pct   = Math.round(((step.value || 0) / base) * 100);
