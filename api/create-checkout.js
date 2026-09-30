@@ -90,14 +90,18 @@ export default async function handler(req, res) {
     const session = await stripe.checkout.sessions.create(sessionParams);
 
     // Tracking : session Stripe créée (= arrivée sur la page carte)
-    try {
-      await supabase.from('tracking_events').insert({
-        event_type: 'checkout_started',
-        session_id: trackingSid || null,
-        label: plan,
-      });
-    } catch (trackErr) {
-      console.warn('Tracking checkout_started failed:', trackErr);
+    // Pas pour le formulaire intégré : il se charge tout seul à chaque visite,
+    // ça gonflerait artificiellement le chiffre.
+    if (!embedded) {
+      try {
+        await supabase.from('tracking_events').insert({
+          event_type: 'checkout_started',
+          session_id: trackingSid || null,
+          label: plan,
+        });
+      } catch (trackErr) {
+        console.warn('Tracking checkout_started failed:', trackErr);
+      }
     }
 
     if (embedded) {

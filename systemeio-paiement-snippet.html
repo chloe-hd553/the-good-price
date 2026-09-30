@@ -103,11 +103,15 @@
   }
 
   // ── 97€ : formulaire de carte intégré dans la page ────────────────
-  function payOneshot() {
+  var started = false;
+
+  function payOneshot(auto) {
     var box = document.getElementById('tgp-checkout');
     if (!box) { showError("Zone de paiement introuvable sur la page."); return; }
+    if (started) { box.scrollIntoView({ behavior: 'smooth', block: 'center' }); return; }
+    started = true;
 
-    trackClick('Paiement intégré 97€', '/paiement-integre');
+    if (auto !== true) trackClick('Paiement intégré 97€', '/paiement-integre');
     box.innerHTML = '<p style="text-align:center;padding:16px;font-family:sans-serif;">Chargement du paiement sécurisé…</p>';
 
     Promise.all([createSession('oneshot', true), loadStripeJs()])
@@ -124,11 +128,31 @@
       .then(function (checkout) {
         checkoutInstance = checkout;
         checkout.mount('#tgp-checkout');
-        box.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        if (auto !== true) box.scrollIntoView({ behavior: 'smooth', block: 'center' });
       })
       .catch(function (err) {
+        started = false;
         showError(err.message || 'Une erreur est survenue. Réessaie.');
       });
+  }
+
+  // ── Affichage automatique du formulaire quand la zone devient visible ──
+  function autoStart() {
+    var box = document.getElementById('tgp-checkout');
+    if (!box) return;
+    if ('IntersectionObserver' in window) {
+      var io = new IntersectionObserver(function (entries) {
+        if (entries[0].isIntersecting) { io.disconnect(); payOneshot(true); }
+      }, { rootMargin: '400px' });
+      io.observe(box);
+    } else {
+      payOneshot(true);
+    }
+  }
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', autoStart);
+  } else {
+    autoStart();
   }
 
   // ── 9,99€/mois : redirection vers la page Stripe ──────────────────
