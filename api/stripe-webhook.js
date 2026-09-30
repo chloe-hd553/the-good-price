@@ -56,6 +56,31 @@ async function findUserByCustomerId(customerId) {
   return data;
 }
 
+// Retrouve la cliente liée à un paiement remboursé (abonnement OU paiement unique)
+async function findUserForCharge(charge) {
+  if (charge.customer) {
+    const byCustomer = await findUserByCustomerId(charge.customer);
+    if (byCustomer) return byCustomer;
+  }
+  if (charge.payment_intent) {
+    const sessions = await stripe.checkout.sessions.list({
+      payment_intent: charge.payment_intent,
+      limit: 1,
+    });
+    const session = sessions.data[0];
+    if (session) {
+      const { data, error } = await supabase
+        .from('user_data')
+        .select('id, email')
+        .eq('stripe_session_id', session.id)
+        .maybeSingle();
+      if (error) console.error('Supabase lookup error:', error);
+      if (data) return data;
+    }
+  }
+  return null;
+}
+
 export default async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
@@ -196,6 +221,41 @@ export default async function handler(req, res) {
         const customerId = sub.customer;
         const user = await findUserByCustomerId(customerId);
         if (!user) break;
+        await setUserPaid(user.id, {
+          paid: false,
+          expiresAt: new Date().toISOString(),
+          subscriptionId: null,
+        });
+        break;
+      }
+
+      case 'charge.refunded': {
+        const charge = event.data.object;
+        // Remboursement TOTAL uniquement (charge.refunded = true). Un remboursement
+        // partiel (geste commercial) ne coupe rien.
+        if (!charge.refunded) break;
+
+        const user = await findUserForCharge(charge);
+        if (!user) {
+          console.warn('charge.refunded : aucune cliente trouvée pour', charge.id);
+          break;
+        }
+        console.log('Full refund for', user.email, '- cutting access');
+
+        // Annule l'abonnement éventuel pour éviter une nouvelle facturation
+        if (charge.customer) {
+          try {
+            const subs = await stripe.subscriptions.list({ customer: charge.customer, status: 'all', limit: 10 });
+            for (const s of subs.data) {
+              if (['active', 'trialing', 'past_due', 'unpaid'].includes(s.status)) {
+                await stripe.subscriptions.cancel(s.id);
+              }
+            }
+          } catch (e) {
+            console.error('Failed to cancel subscription after refund', e.message);
+          }
+        }
+
         await setUserPaid(user.id, {
           paid: false,
           expiresAt: new Date().toISOString(),
