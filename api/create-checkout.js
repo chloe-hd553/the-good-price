@@ -57,7 +57,8 @@ export default async function handler(req, res) {
       ...(email ? { customer_email: email } : {}),
       client_reference_id: userId || email || `demo-${Date.now()}`,
       metadata: { userId: userId || '', email: email || '', plan, demoMode: demoMode ? 'true' : 'false', tracking_sid: trackingSid || '' },
-      allow_promotion_codes: true,
+      // Pas de champ code promo dans le formulaire intégré (page de vente)
+      allow_promotion_codes: !embedded,
       billing_address_collection: 'required',
       custom_fields: [
         {
