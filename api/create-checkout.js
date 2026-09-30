@@ -14,12 +14,18 @@ const supabase = createClient(
 );
 
 export default async function handler(req, res) {
+  // CORS ouvert — appelé aussi depuis la page de vente systeme.io (domaine externe)
+  res.setHeader('Access-Control-Allow-Origin', '*');
+  res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
+  res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+
+  if (req.method === 'OPTIONS') return res.status(200).end();
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   try {
-    const { plan, userId, email, demoMode, trackingSid } = req.body;
+    const { plan, userId, email, demoMode, trackingSid, embedded, cancelUrl } = req.body;
 
     if (!plan) {
       return res.status(400).json({ error: 'Missing plan' });
@@ -61,10 +67,19 @@ export default async function handler(req, res) {
           optional: true,
         },
       ],
-      success_url: `${appUrl}/merci?session_id={CHECKOUT_SESSION_ID}`,
-      cancel_url: demoMode ? `${appUrl}/choix-plan` : `${appUrl}/annule`,
       locale: 'fr',
     };
+
+    if (embedded) {
+      // Formulaire de paiement intégré dans la page (systeme.io) — paiement unique
+      sessionParams.ui_mode = 'embedded';
+      sessionParams.return_url = `${appUrl}/merci?session_id={CHECKOUT_SESSION_ID}`;
+    } else {
+      sessionParams.success_url = `${appUrl}/merci?session_id={CHECKOUT_SESSION_ID}`;
+      // Retour sur la page de vente si l'appel vient de systeme.io (https uniquement)
+      const safeCancel = typeof cancelUrl === 'string' && /^https:\/\//.test(cancelUrl) ? cancelUrl : null;
+      sessionParams.cancel_url = safeCancel || (demoMode ? `${appUrl}/choix-plan` : `${appUrl}/annule`);
+    }
 
     if (mode === 'subscription') {
       sessionParams.subscription_data = {
@@ -85,6 +100,12 @@ export default async function handler(req, res) {
       console.warn('Tracking checkout_started failed:', trackErr);
     }
 
+    if (embedded) {
+      return res.status(200).json({
+        clientSecret: session.client_secret,
+        publishableKey: process.env.STRIPE_PUBLISHABLE_KEY || null,
+      });
+    }
     return res.status(200).json({ url: session.url });
   } catch (err) {
     console.error('create-checkout error:', err);
