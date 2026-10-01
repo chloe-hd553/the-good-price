@@ -236,7 +236,7 @@ export default function AdminPage({ user, onBack }) {
   }));
 
   const byLabel    = trackingData?.by_label       || [];
-  const bySource   = trackingData?.by_source      || [];
+  const byPage     = trackingData?.by_page        || [];
   const funnel     = trackingData?.funnel         || {};
 
   const totalClicks = byLabel.reduce((s, r) => s + Number(r.clicks), 0);
@@ -383,28 +383,30 @@ export default function AdminPage({ user, onBack }) {
             </div>
           )}
 
-          {/* Breakdown : sources de trafic */}
-          {!trackingLoading && bySource.length > 0 && (
+          {/* Par page de vente */}
+          {!trackingLoading && byPage.length > 0 && (
             <div style={{ marginTop: 20 }}>
-              <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Visites par source</div>
-              <div style={{ color: C.light, fontSize: 11, marginBottom: 10 }}>Se met à jour automatiquement quand tu ajoutes une nouvelle page</div>
-              <div style={{ display: "flex", flexDirection: "column", gap: 8 }}>
-                {bySource.map((row, i) => {
-                  const totalViews = bySource.reduce((s, r) => s + Number(r.views), 0);
-                  const pct = totalViews > 0 ? Math.round((Number(row.views) / totalViews) * 100) : 0;
-                  const colors = ["#b0d4f0", "#f0b0d4", "#f0e0b0", "#a8f0b0", "#e0b0f0", "#f0c4a0", "#b0f0e4"];
-                  return (
-                    <div key={i}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                        <span style={{ color: C.beige, fontSize: 12 }}>{row.source}</span>
-                        <span style={{ color: C.light, fontSize: 12 }}>{row.views} visites · {pct}%</span>
-                      </div>
-                      <div style={{ background: C.bg, borderRadius: 4, height: 6, overflow: "hidden" }}>
-                        <div style={{ background: colors[i % colors.length], width: `${pct}%`, height: "100%", borderRadius: 4, transition: "width 0.4s" }} />
-                      </div>
-                    </div>
-                  );
-                })}
+              <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 10 }}>Par page de vente</div>
+              <div style={{ overflowX: "auto" }}>
+                <table style={{ width: "100%", borderCollapse: "collapse", fontSize: 12 }}>
+                  <thead>
+                    <tr style={{ borderBottom: `1px solid ${C.med}` }}>
+                      {["Page", "Visites", "Formulaire vu", "Clics"].map((h, i) => (
+                        <th key={h} style={{ padding: "6px 8px", textAlign: i === 0 ? "left" : "right", color: C.light, fontWeight: 600, whiteSpace: "nowrap" }}>{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {byPage.map((row, i) => (
+                      <tr key={i} style={{ borderBottom: `1px solid ${C.med}22` }}>
+                        <td style={{ padding: "8px", color: C.beige, fontFamily: "monospace" }}>{row.page}</td>
+                        <td style={{ padding: "8px", color: "#b0d4f0", textAlign: "right" }}>{row.views}</td>
+                        <td style={{ padding: "8px", color: "#c4f0d4", textAlign: "right" }}>{row.forms}</td>
+                        <td style={{ padding: "8px", color: "#f0b0d4", textAlign: "right" }}>{row.clicks}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
             </div>
           )}

@@ -21,7 +21,7 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   try {
-    const { event, source, medium, campaign, referrer, label, destination, session_id } = req.body || {};
+    const { event, source, medium, campaign, referrer, label, destination, session_id, page } = req.body || {};
 
     if (!event || !ALLOWED_EVENTS.includes(event)) {
       return res.status(400).json({ error: 'Invalid event' });
@@ -36,6 +36,7 @@ export default async function handler(req, res) {
       label:       label       || null,
       destination: destination || null,
       session_id:  session_id  || null,
+      page:        typeof page === 'string' ? page.split('?')[0].slice(0, 200) : null,
     });
 
     if (error) throw error;
