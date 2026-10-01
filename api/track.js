@@ -9,7 +9,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const ALLOWED_EVENTS = ['page_view', 'cta_click'];
+const ALLOWED_EVENTS = ['page_view', 'cta_click', 'form_view'];
 
 export default async function handler(req, res) {
   // CORS ouvert — appelé depuis systeme.io (domaine externe)
