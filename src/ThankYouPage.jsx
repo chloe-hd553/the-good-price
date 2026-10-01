@@ -299,7 +299,7 @@ export default function ThankYouPage({ onContinue }) {
         )}
 
         {/* Footer */}
-        <div style={{ marginTop: 32, color: C.light, fontSize: 12, lineHeight: 1.7, textAlign: "left" }}>
+        <div style={{ marginTop: 32, color: C.light, fontSize: 12, lineHeight: 1.7, textAlign: "center" }}>
           <p style={{ marginBottom: 10 }}>
             Tu vas aussi recevoir par email ton reçu de paiement et ton accès, de quelques secondes à 30 minutes.
           </p>
