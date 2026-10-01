@@ -299,8 +299,18 @@ export default function ThankYouPage({ onContinue }) {
         )}
 
         {/* Footer */}
-        <div style={{ marginTop: 32, color: C.light, fontSize: 12, lineHeight: 1.5 }}>
-          Tu reçois aussi un email de confirmation de Stripe avec ton reçu.
+        <div style={{ marginTop: 32, color: C.light, fontSize: 12, lineHeight: 1.7, textAlign: "left" }}>
+          <p style={{ marginBottom: 10 }}>
+            Tu vas aussi recevoir par email ton reçu de paiement et ton accès, de quelques secondes à 30 minutes.
+          </p>
+          <p style={{ marginBottom: 10 }}>
+            Si tu as une adresse Gmail, regarde bien l'onglet « Promotions ». Pense aussi à vérifier tes dossiers « Spams » ou « Courriers indésirables » au cas où l'email s'y serait glissé.
+          </p>
+          <p style={{ marginBottom: 10 }}>
+            Un souci avec ta commande ou une question ? Écris-moi à{" "}
+            <a href="mailto:hello.chezchloe@outlook.com" style={{ color: C.beige }}>hello.chezchloe@outlook.com</a>
+          </p>
+          <p>Merci encore pour ta confiance !</p>
         </div>
 
         {/* Logo */}
