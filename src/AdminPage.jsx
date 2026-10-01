@@ -15,25 +15,25 @@ const ADMIN_EMAIL = "chloe-huissoud@hotmail.fr";
 const DIAG = {
   // Seuils estimés (à ajuster avec tes propres chiffres)
   pdv_to_form: [
-    { min: 40, dot: "#4CAF50", phrase: "Beaucoup arrivent jusqu'au paiement 🔥", tip: "La page donne envie d'aller au bout" },
-    { min: 25, dot: "#8BC34A", phrase: "Bon taux", tip: "Continuer et augmenter le budget" },
-    { min: 15, dot: "#FFC107", phrase: "Dans la moyenne", tip: "Tester une page plus courte ou le formulaire plus haut" },
-    { min: 5,  dot: "#FF9800", phrase: "Peu de monde arrive au formulaire", tip: "Retravailler l'accroche et le haut de page" },
-    { min: 0,  dot: "#F44336", phrase: "Presque personne n'arrive au paiement", tip: "Revoir le titre et le début de la page" },
+    { min: 40, dot: "#a8d8b0", phrase: "Beaucoup arrivent jusqu'au paiement 🔥", tip: "La page donne envie d'aller au bout" },
+    { min: 25, dot: "#cfe3a6", phrase: "Bon taux", tip: "Continuer et augmenter le budget" },
+    { min: 15, dot: "#f5e3a0", phrase: "Dans la moyenne", tip: "Tester une page plus courte ou le formulaire plus haut" },
+    { min: 5,  dot: "#f5cfa0", phrase: "Peu de monde arrive au formulaire", tip: "Retravailler l'accroche et le haut de page" },
+    { min: 0,  dot: "#f2b0b0", phrase: "Presque personne n'arrive au paiement", tip: "Revoir le titre et le début de la page" },
   ],
   form_to_pay: [
-    { min: 10, dot: "#4CAF50", phrase: "Excellent 🔥", tip: "Scaler sans hésiter" },
-    { min: 5,  dot: "#8BC34A", phrase: "Bon taux", tip: "Augmenter progressivement le budget" },
-    { min: 2,  dot: "#FFC107", phrase: "Correct", tip: "Rassurer : preuves, garantie, avis" },
-    { min: 1,  dot: "#FF9800", phrase: "Faible", tip: "Revoir l'offre, le prix et la garantie" },
-    { min: 0,  dot: "#F44336", phrase: "Presque personne ne paie", tip: "Vérifier que le formulaire fonctionne bien" },
+    { min: 10, dot: "#a8d8b0", phrase: "Excellent 🔥", tip: "Scaler sans hésiter" },
+    { min: 5,  dot: "#cfe3a6", phrase: "Bon taux", tip: "Augmenter progressivement le budget" },
+    { min: 2,  dot: "#f5e3a0", phrase: "Correct", tip: "Rassurer : preuves, garantie, avis" },
+    { min: 1,  dot: "#f5cfa0", phrase: "Faible", tip: "Revoir l'offre, le prix et la garantie" },
+    { min: 0,  dot: "#f2b0b0", phrase: "Presque personne ne paie", tip: "Vérifier que le formulaire fonctionne bien" },
   ],
   global: [
-    { min: 5,   dot: "#4CAF50", phrase: "Funnel excellent 🔥", tip: "Ta page cartonne — scaler sans hésiter" },
-    { min: 2,   dot: "#8BC34A", phrase: "Bon funnel pour ce prix", tip: "Augmenter le budget ads progressivement" },
-    { min: 1,   dot: "#C49B2E", phrase: "Frein à identifier — sous la norme", tip: "En dessous de 2% : chercher où ça coince" },
-    { min: 0.5, dot: "#C4692E", phrase: "En dessous des standards", tip: "Optimiser PDV et parcours en priorité" },
-    { min: 0,   dot: "#B84040", phrase: "Le funnel ne convertit pas", tip: "Retravailler avant tout investissement ads" },
+    { min: 5,   dot: "#a8d8b0", phrase: "Funnel excellent 🔥", tip: "Ta page cartonne — scaler sans hésiter" },
+    { min: 2,   dot: "#cfe3a6", phrase: "Bon funnel pour ce prix", tip: "Augmenter le budget ads progressivement" },
+    { min: 1,   dot: "#ecd9a0", phrase: "Frein à identifier — sous la norme", tip: "En dessous de 2% : chercher où ça coince" },
+    { min: 0.5, dot: "#f0c4a0", phrase: "En dessous des standards", tip: "Optimiser PDV et parcours en priorité" },
+    { min: 0,   dot: "#eeb0b0", phrase: "Le funnel ne convertit pas", tip: "Retravailler avant tout investissement ads" },
   ],
 };
 
@@ -448,30 +448,11 @@ export default function AdminPage({ user, onBack }) {
             const pdvToForm  = pct(funnel.form_views, funnel.page_views);
             const formToPay  = pct(funnel.new_paid, funnel.form_views);
             const globalRate = funnel.page_views > 0 ? parseFloat(((funnel.new_paid / funnel.page_views) * 100).toFixed(2)) : null;
-            const steps = [
-              { label: "Visites page de vente", value: funnel.page_views, color: "#b0d4f0" },
-              { label: "Formulaire vu",         value: funnel.form_views || 0, color: "#c4f0d4" },
-              { label: "Achats",                value: funnel.new_paid || 0, color: "#a8f0b0" },
-            ];
             return (
               <div style={{ marginTop: 24, paddingTop: 20, borderTop: `1px solid ${C.med}` }}>
-                <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 14 }}>Tunnel</div>
-                {steps.map((step, i) => {
-                  const p = Math.round((step.value / (funnel.page_views || 1)) * 100);
-                  return (
-                    <div key={i} style={{ marginBottom: 10 }}>
-                      <div style={{ display: "flex", justifyContent: "space-between", marginBottom: 4 }}>
-                        <span style={{ color: C.beige, fontSize: 12 }}>{step.label}</span>
-                        <span style={{ color: C.light, fontSize: 12 }}>{step.value} · {p}%</span>
-                      </div>
-                      <div style={{ background: C.bg, borderRadius: 4, height: 8, overflow: "hidden" }}>
-                        <div style={{ background: step.color, width: `${p}%`, height: "100%", borderRadius: 4, transition: "width 0.5s" }} />
-                      </div>
-                    </div>
-                  );
-                })}
-
-                <div style={{ marginTop: 16 }}>
+                <div style={{ color: C.beige, fontSize: 12, fontWeight: 600, marginBottom: 4 }}>Diagnostic de conversion</div>
+                <div style={{ color: C.light, fontSize: 11, marginBottom: 6 }}>Ce qui tourne, ce qui coince</div>
+                <div>
                   <ConversionRow label="Page de vente → Formulaire vu" value={pdvToForm} diagKey="pdv_to_form" />
                   <ConversionRow label="Formulaire vu → Achat"         value={formToPay} diagKey="form_to_pay" />
                   <ConversionRow label="Page de vente → Achat"         value={globalRate} diagKey="global" />
