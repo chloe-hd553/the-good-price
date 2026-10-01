@@ -3,7 +3,7 @@
 // Mode démo : affiche un formulaire "crée ton mot de passe" puis connecte automatiquement
 // Mode connecté : bouton direct vers l'app
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Scissors, Check, ArrowRight, Eye, EyeOff, Loader2 } from "lucide-react";
 import { supabase } from "./supabase.js";
 
@@ -16,8 +16,29 @@ const C = {
   beige: "#f4e9d6",
 };
 
+// Envoie l'achat au pixel Meta, une seule fois par paiement.
+// eventID = identifiant de session Stripe : identique à celui envoyé par le serveur
+// (API de conversion), donc Meta ne compte l'achat qu'une fois.
+// Valeur : 97 € (paiement unique) ou 119,88 € (12 x 9,99 €).
+function firePurchase(sessionId, info) {
+  if (!window.fbq) return;
+  const sentKey = sessionId ? `tgp-purchase-sent-${sessionId}` : null;
+  if (sentKey && localStorage.getItem(sentKey)) return;
+
+  const plan = info?.plan || localStorage.getItem("tgp-pending-plan");
+  const value = info?.value ?? (plan === "monthly" ? 119.88 : 97.0);
+  if (sessionId) {
+    window.fbq("track", "Purchase", { value, currency: "EUR" }, { eventID: sessionId });
+    localStorage.setItem(sentKey, "1");
+  } else {
+    window.fbq("track", "Purchase", { value, currency: "EUR" });
+  }
+  localStorage.removeItem("tgp-pending-plan");
+}
+
 export default function ThankYouPage({ onContinue }) {
   const sessionId = new URLSearchParams(window.location.search).get("session_id");
+  const sessionInfo = useRef(null);
 
   // Détection mode démo : pas de session Supabase active
   const [isDemo, setIsDemo] = useState(null); // null = loading
@@ -37,12 +58,13 @@ export default function ThankYouPage({ onContinue }) {
       if (session) {
         // Déjà connectée — mode normal
         setIsDemo(false);
-        // Meta Pixel
-        if (window.fbq) {
-          const plan = localStorage.getItem("tgp-pending-plan");
-          const value = plan === "monthly" ? 9.99 : 97.00;
-          window.fbq("track", "Purchase", { value, currency: "EUR" });
-          localStorage.removeItem("tgp-pending-plan");
+        // Meta Pixel : uniquement si on arrive d'un vrai paiement (session_id présent)
+        if (sessionId) {
+          try {
+            const res = await fetch(`/api/get-session-email?session_id=${sessionId}`);
+            if (res.ok) sessionInfo.current = await res.json();
+          } catch { /* on garde les valeurs par défaut */ }
+          firePurchase(sessionId, sessionInfo.current);
         }
       } else {
         // Mode démo — récupérer l'email depuis Stripe
@@ -51,6 +73,7 @@ export default function ThankYouPage({ onContinue }) {
           try {
             const res = await fetch(`/api/get-session-email?session_id=${sessionId}`);
             const data = await res.json();
+            sessionInfo.current = data;
             if (data.email) {
               setDemoEmail(data.email);
               localStorage.setItem("tgp-demo-email", data.email);
@@ -100,12 +123,7 @@ export default function ThankYouPage({ onContinue }) {
         }
 
         // Meta Pixel Purchase
-        if (window.fbq) {
-          const plan = localStorage.getItem("tgp-pending-plan");
-          const value = plan === "monthly" ? 9.99 : 97.00;
-          window.fbq("track", "Purchase", { value, currency: "EUR" });
-          localStorage.removeItem("tgp-pending-plan");
-        }
+        firePurchase(sessionId, sessionInfo.current);
 
         setDone(true);
         setTimeout(() => onContinue(), 1200);

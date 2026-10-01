@@ -4,6 +4,7 @@
 import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { addToMailerLiteGroup } from './_mailerlite.js';
+import { sendMetaPurchase } from './_meta-capi.js';
 
 export const config = {
   api: { bodyParser: false },
@@ -168,6 +169,18 @@ export default async function handler(req, res) {
         if (email) {
           const ml = await addToMailerLiteGroup(email);
           if (!ml.ok) console.warn('MailerLite sync failed for', email, ml.error);
+        }
+
+        // Meta API de conversion : achat envoyé côté serveur (valeur 97 € ou 12 x 9,99 €)
+        try {
+          const capi = await sendMetaPurchase({
+            eventId: session.id,
+            email,
+            plan: session.metadata?.plan,
+          });
+          if (!capi.ok) console.warn('Meta CAPI non envoyé pour', session.id, capi.error);
+        } catch (capiErr) {
+          console.warn('Meta CAPI exception:', capiErr);
         }
 
         // Tracking funnel : paiement complété

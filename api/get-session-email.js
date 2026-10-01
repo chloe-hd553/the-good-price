@@ -23,7 +23,9 @@ export default async function handler(req, res) {
     if (!email) {
       return res.status(404).json({ error: 'No email found in session' });
     }
-    return res.status(200).json({ email });
+    const plan = session.metadata?.plan || null;
+    const value = plan === 'monthly' ? 119.88 : 97;
+    return res.status(200).json({ email, plan, value });
   } catch (err) {
     console.error('get-session-email error:', err);
     return res.status(500).json({ error: err.message });
