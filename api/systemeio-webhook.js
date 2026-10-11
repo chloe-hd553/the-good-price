@@ -70,12 +70,15 @@ export default async function handler(req, res) {
     console.log('SYSTEMEIO WEBHOOK body:', JSON.stringify(body));
 
     // Tag retiré (remboursement / annulation) : on retire 1 an d'accès
-    if (body.type === 'contact.tag.removed') {
+    // ...ou vente annulée / remboursée (le message n'a pas de tag : on lit l'e-mail du client)
+    const isTagRemoved = body.type === 'contact.tag.removed';
+    const isSaleCancelled = !isTagRemoved && /cancel|refund/i.test(String(body.type || ''));
+    if (isTagRemoved || isSaleCancelled) {
       const rTagName = body.data?.tag?.name;
-      const rTagId = body.data?.tag?.id;
-      const rContact = body.data?.contact;
+      const rTagId = body.data?.tag?.id || body.data?.order?.id || body.data?.id || '';
+      const rContact = body.data?.contact || body.data?.customer || body.data;
       const rEmail = (rContact?.email || '').trim().toLowerCase();
-      const rPlan = planFromTagName(rTagName);
+      const rPlan = isTagRemoved ? planFromTagName(rTagName) : 'cancelled';
       if (!rPlan) return res.status(200).json({ ignored: 'tag', tag: rTagName || null });
       if (!rEmail || !rEmail.includes('@')) return res.status(200).json({ ignored: 'no-email' });
 
