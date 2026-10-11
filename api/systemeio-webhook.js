@@ -69,6 +69,48 @@ export default async function handler(req, res) {
     const body = req.body || {};
     console.log('SYSTEMEIO WEBHOOK body:', JSON.stringify(body));
 
+    // Tag retiré (remboursement / annulation) : on retire 1 an d'accès
+    if (body.type === 'contact.tag.removed') {
+      const rTagName = body.data?.tag?.name;
+      const rTagId = body.data?.tag?.id;
+      const rContact = body.data?.contact;
+      const rEmail = (rContact?.email || '').trim().toLowerCase();
+      const rPlan = planFromTagName(rTagName);
+      if (!rPlan) return res.status(200).json({ ignored: 'tag', tag: rTagName || null });
+      if (!rEmail || !rEmail.includes('@')) return res.status(200).json({ ignored: 'no-email' });
+
+      const rKey = `sio-removed-${rContact?.id || rEmail}-${rTagId}-${body.created_at || ''}`;
+      const { data: rAlready } = await supabase
+        .from('tracking_events').select('id')
+        .eq('event_type', 'systemeio_refund').eq('session_id', rKey).limit(1);
+      if (rAlready && rAlready.length > 0) return res.status(200).json({ ignored: 'duplicate' });
+
+      const { data: rUser } = await supabase
+        .from('user_data').select('id, paid, expires_at').eq('email', rEmail).maybeSingle();
+      if (!rUser) return res.status(200).json({ ignored: 'unknown-user' });
+
+      const rExpiry = rUser.expires_at ? new Date(rUser.expires_at).getTime() : 0;
+      if (rExpiry >= LIFETIME_FROM) {
+        return res.status(200).json({ ignored: 'lifetime' }); // accès à vie : on n'y touche pas
+      }
+      const reduced = new Date(rExpiry || Date.now());
+      reduced.setFullYear(reduced.getFullYear() - 1);
+      const stillActive = reduced.getTime() > Date.now();
+      const rUpdate = stillActive
+        ? { expires_at: reduced.toISOString(), updated_at: new Date().toISOString() }
+        : { paid: false, expires_at: new Date().toISOString(), updated_at: new Date().toISOString() };
+      const { error: rErr } = await supabase.from('user_data').update(rUpdate).eq('id', rUser.id);
+      if (rErr) {
+        console.error('SYSTEMEIO WEBHOOK : retrait accès échoué', rErr);
+        return res.status(500).json({ error: 'update failed' });
+      }
+      await supabase.from('tracking_events').insert({
+        event_type: 'systemeio_refund', session_id: rKey, label: rPlan,
+      });
+      console.log('SYSTEMEIO WEBHOOK : accès retiré', rEmail, stillActive ? 'prolongation réduite' : 'accès coupé');
+      return res.status(200).json({ ok: true, removed: rPlan, active: stillActive });
+    }
+
     if (body.type !== 'contact.tag.added') {
       return res.status(200).json({ ignored: 'type', type: body.type || null });
     }
