@@ -15,7 +15,15 @@ function sha256(value) {
   return crypto.createHash('sha256').update(String(value).trim().toLowerCase()).digest('hex');
 }
 
-export async function sendMetaPurchase({ eventId, email, plan }) {
+export async function sendMetaPurchase({
+  eventId,
+  email,
+  plan,
+  firstName,
+  lastName,
+  country,
+  sourceUrl = 'https://the-good-price.vercel.app/merci',
+}) {
   const token = process.env.META_CAPI_TOKEN;
   if (!token) {
     console.warn('META_CAPI_TOKEN manquant : évènement Purchase non envoyé à Meta');
@@ -29,8 +37,13 @@ export async function sendMetaPurchase({ eventId, email, plan }) {
         event_time: Math.floor(Date.now() / 1000),
         event_id: eventId, // même identifiant que le pixel de /merci → pas de double comptage
         action_source: 'website',
-        event_source_url: 'https://the-good-price.vercel.app/merci',
-        user_data: email ? { em: [sha256(email)] } : {},
+        event_source_url: sourceUrl,
+        user_data: {
+          ...(email ? { em: [sha256(email)] } : {}),
+          ...(firstName ? { fn: [sha256(firstName)] } : {}),
+          ...(lastName ? { ln: [sha256(lastName)] } : {}),
+          ...(country ? { country: [sha256(country)] } : {}),
+        },
         custom_data: {
           currency: 'EUR',
           value: purchaseValue(plan),

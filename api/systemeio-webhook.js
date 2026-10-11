@@ -11,6 +11,7 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { addToMailerLiteGroup } from './_mailerlite.js';
+import { sendMetaPurchase } from './_meta-capi.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -165,6 +166,23 @@ export default async function handler(req, res) {
       session_id: eventKey,
       label: plan,
     });
+
+    // 5 bis) Achat envoyé à Meta (API de conversion) : 97 € ou 119,88 € (12 x 9,99 €)
+    try {
+      const capi = await sendMetaPurchase({
+        eventId: eventKey,
+        email,
+        plan,
+        firstName: contact?.fields?.first_name,
+        lastName: contact?.fields?.surname,
+        country: contact?.fields?.country,
+        sourceUrl: 'https://yourhairbusiness.systeme.io/',
+      });
+      if (!capi.ok) console.warn('SYSTEMEIO WEBHOOK : Meta CAPI non envoyé', capi.error);
+      else console.log('SYSTEMEIO WEBHOOK : achat envoyé à Meta', plan);
+    } catch (capiErr) {
+      console.warn('SYSTEMEIO WEBHOOK : Meta CAPI exception', capiErr);
+    }
 
     // 6) E-mail de bienvenue
     //    - nouvelle cliente : déjà envoyé à la création du compte (étape 3)
