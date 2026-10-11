@@ -766,7 +766,7 @@ function AuthPage({ onAuth }) {
 }
 
 /* ── RESET PASSWORD SCREEN ── */
-function ResetPasswordScreen({ onDone }) {
+function ResetPasswordScreen({ onDone, welcome = false }) {
   const [password, setPassword] = useState("");
   const [confirm, setConfirm] = useState("");
   const [showPw, setShowPw] = useState(false);
@@ -799,9 +799,13 @@ function ResetPasswordScreen({ onDone }) {
           <div className="hdr-name" style={{ fontSize: 28, marginBottom: 4, color: C.beige }}>The Good Price</div>
           <div style={{ textAlign: "left", marginTop: 24 }}>
             <div style={{ color: C.beige, fontSize: 20, fontWeight: 600, marginBottom: 4, fontFamily: "'Cormorant Garamond',serif" }}>
-              Nouveau mot de passe
+              {welcome ? "Crée ton mot de passe" : "Nouveau mot de passe"}
             </div>
-            <div style={{ color: C.light, fontSize: 14, marginBottom: 24 }}>Choisis un nouveau mot de passe pour ton compte</div>
+            <div style={{ color: C.light, fontSize: 14, marginBottom: 24 }}>
+              {welcome
+                ? "Bienvenue dans The Good Price ! Choisis ton mot de passe pour accéder à ton application."
+                : "Choisis un nouveau mot de passe pour ton compte"}
+            </div>
             {error && <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>{error}</div>}
             {success && <div style={{ color: C.greenText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(45,59,40,0.3)", borderRadius: 8 }}>Mot de passe mis a jour ! Connexion en cours...</div>}
             {!success && (
@@ -818,7 +822,7 @@ function ResetPasswordScreen({ onDone }) {
                   <input className="auth-input" type={showPw ? "text" : "password"} placeholder="Confirme le mot de passe" value={confirm} onChange={e => setConfirm(e.target.value)} required minLength={6} style={{ paddingLeft: 42 }} />
                 </div>
                 <button className="auth-btn" type="submit" disabled={loading} style={{ marginTop: 4 }}>
-                  {loading ? "Mise a jour..." : "Enregistrer le nouveau mot de passe"}
+                  {loading ? "Mise a jour..." : (welcome ? "Créer mon mot de passe" : "Enregistrer le nouveau mot de passe")}
                 </button>
               </form>
             )}
@@ -1577,9 +1581,15 @@ export default function App() {
     const hash = window.location.hash;
     return hash.includes("type=signup") || hash.includes("type=email_change");
   });
+  // Lien "mot de passe oublié" (type=recovery) OU lien de bienvenue après achat (type=invite)
   const [isRecovery, setIsRecovery] = useState(() => {
     if (typeof window === "undefined") return false;
-    return window.location.hash.includes("type=recovery");
+    const h = window.location.hash;
+    return h.includes("type=recovery") || h.includes("type=invite");
+  });
+  const [isWelcomeLink] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return window.location.hash.includes("type=invite");
   });
   const [showInstall, setShowInstall] = useState(false);
   const [showInstallIOS, setShowInstallIOS] = useState(false);
@@ -1937,7 +1947,7 @@ export default function App() {
 
   // Reset mot de passe (lien email type=recovery)
   if (isRecovery && user) {
-    return <ResetPasswordScreen onDone={() => { window.history.replaceState({}, "/", "/"); setIsRecovery(false); }} />;
+    return <ResetPasswordScreen welcome={isWelcomeLink} onDone={() => { window.history.replaceState({}, "/", "/"); setIsRecovery(false); }} />;
   }
 
   // Confirmation email

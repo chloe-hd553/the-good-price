@@ -99,8 +99,10 @@ export default async function handler(req, res) {
     }
 
     // 3) Compte existant ?
+    const appUrl = process.env.APP_URL || 'https://the-good-price.vercel.app';
     let userId = null;
     let currentExpiry = null;
+    let welcomeSent = false; // e-mail de bienvenue (modèle "Invite user" de Supabase)
     const { data: existing } = await supabase
       .from('user_data')
       .select('id, paid, expires_at')
@@ -111,20 +113,21 @@ export default async function handler(req, res) {
       userId = existing.id;
       currentExpiry = existing.paid && existing.expires_at ? new Date(existing.expires_at).getTime() : null;
     } else {
-      const { data: created, error: createErr } = await supabase.auth.admin.createUser({
-        email,
-        email_confirm: true,
+      // Nouvelle cliente : création du compte + e-mail de bienvenue en une seule étape
+      const { data: invited, error: inviteErr } = await supabase.auth.admin.inviteUserByEmail(email, {
+        redirectTo: appUrl,
       });
-      if (createErr) {
+      if (inviteErr) {
         // Compte Auth déjà présent sans ligne user_data : on le retrouve
         const authUser = await findAuthUserByEmail(email);
         if (!authUser) {
-          console.error('SYSTEMEIO WEBHOOK : création compte impossible', createErr);
+          console.error('SYSTEMEIO WEBHOOK : création compte impossible', inviteErr);
           return res.status(500).json({ error: 'create user failed' });
         }
         userId = authUser.id;
       } else {
-        userId = created.user.id;
+        userId = invited.user.id;
+        welcomeSent = true;
       }
       await supabase.from('user_data').upsert({
         id: userId,
@@ -163,10 +166,21 @@ export default async function handler(req, res) {
       label: plan,
     });
 
-    // 6) E-mail pour créer / réinitialiser le mot de passe
-    const appUrl = process.env.APP_URL || 'https://the-good-price.vercel.app';
-    const { error: resetErr } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: appUrl });
-    if (resetErr) console.warn('SYSTEMEIO WEBHOOK : e-mail mot de passe non envoyé', resetErr.message);
+    // 6) E-mail de bienvenue
+    //    - nouvelle cliente : déjà envoyé à la création du compte (étape 3)
+    //    - cliente qui rachète : aucun e-mail (elle a déjà son mot de passe)
+    //    - compte créé mais jamais connecté (lien de bienvenue expiré ou perdu) : on renvoie un lien
+    if (!welcomeSent && existing) {
+      const { data: authData } = await supabase.auth.admin.getUserById(userId);
+      const neverSignedIn = authData?.user && !authData.user.last_sign_in_at;
+      if (neverSignedIn) {
+        const { error: reInviteErr } = await supabase.auth.admin.inviteUserByEmail(email, { redirectTo: appUrl });
+        if (reInviteErr) {
+          const { error: resetErr } = await supabase.auth.resetPasswordForEmail(email, { redirectTo: appUrl });
+          if (resetErr) console.warn('SYSTEMEIO WEBHOOK : e-mail non renvoyé', resetErr.message);
+        }
+      }
+    }
 
     // 7) MailerLite
     const ml = await addToMailerLiteGroup(email);
