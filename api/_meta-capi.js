@@ -66,6 +66,7 @@ export async function sendMetaPurchase({
       console.error('Meta CAPI error:', json);
       return { ok: false, error: json?.error?.message || 'Meta error' };
     }
+    console.log('Meta CAPI réponse:', JSON.stringify(json));
     return { ok: true };
   } catch (err) {
     console.error('Meta CAPI exception:', err);

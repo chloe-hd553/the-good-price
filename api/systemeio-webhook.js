@@ -176,7 +176,6 @@ export default async function handler(req, res) {
         firstName: contact?.fields?.first_name,
         lastName: contact?.fields?.surname,
         country: contact?.fields?.country,
-        sourceUrl: 'https://yourhairbusiness.systeme.io/',
       });
       if (!capi.ok) console.warn('SYSTEMEIO WEBHOOK : Meta CAPI non envoyé', capi.error);
       else console.log('SYSTEMEIO WEBHOOK : achat envoyé à Meta', plan);
