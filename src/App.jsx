@@ -1566,6 +1566,7 @@ export default function App() {
   const [ok, setOk] = useState(false);
   const [sv, setSv] = useState(false);
   const [saveError, setSaveError] = useState(false);
+  const [loadError, setLoadError] = useState(false);
   const [isOffline, setIsOffline] = useState(() => !navigator.onLine);
   const [started, setStarted] = useState(false);
   const [user, setUser] = useState(null);
@@ -1800,7 +1801,19 @@ export default function App() {
     if (!user) { setOk(true); return; }
     (async () => {
       try {
-        const { data } = await supabase.from("user_data").select("*").eq("id", user.id).single();
+        // Chargement avec nouvelles tentatives : on ne doit JAMAIS sauvegarder
+        // des valeurs vides par-dessus les vraies données si le chargement échoue.
+        let data = null;
+        let loaded = false;
+        for (let i = 0; i < 4 && !loaded; i++) {
+          const res = await supabase.from("user_data").select("*").eq("id", user.id).maybeSingle();
+          if (!res.error) { data = res.data; loaded = true; }
+          else {
+            console.error("Load error:", res.error);
+            await new Promise(r => setTimeout(r, 1500 * (i + 1)));
+          }
+        }
+        if (!loaded) { setLoadError(true); return; } // ok reste false → aucune sauvegarde
         if (data) {
           setUserData(data);
           if (data.sal) setSal(data.sal);
@@ -1836,7 +1849,11 @@ export default function App() {
             setIsPaid(true);
           }
         }
-      } catch {} // No data yet = new user
+      } catch (e) {
+        console.error("Load exception:", e);
+        setLoadError(true);
+        return; // on ne sauvegarde rien tant que le chargement n'a pas réussi
+      }
       setOk(true);
     })();
   }, [user]);
@@ -2045,6 +2062,36 @@ export default function App() {
               }}
             >
               Réessayer
+            </button>
+          </div>
+        </div>
+      )}
+
+      {/* Chargement impossible : on protège les données (aucune sauvegarde) */}
+      {loadError && (
+        <div style={{
+          position: "fixed", inset: 0, zIndex: 9999, background: "rgba(0,0,0,0.75)",
+          display: "flex", alignItems: "center", justifyContent: "center", padding: 24,
+        }}>
+          <div style={{
+            background: "#2C1F12", border: "1px solid #a03030", borderRadius: 16,
+            padding: "32px 28px", maxWidth: 380, width: "100%", textAlign: "center",
+            fontFamily: "'Instrument Sans', sans-serif",
+          }}>
+            <div style={{ color: "#fef4b0", fontSize: 18, fontWeight: 700, marginBottom: 12, fontFamily: "'Cormorant Garamond', serif" }}>
+              Impossible de charger tes données
+            </div>
+            <div style={{ color: "#c9a97a", fontSize: 14, lineHeight: 1.6, marginBottom: 24 }}>
+              Tes données sont en sécurité : rien n'a été modifié. Vérifie ta connexion puis recharge la page.
+            </div>
+            <button
+              onClick={() => window.location.reload()}
+              style={{
+                background: "#fef4b0", color: "#2C1F12", border: "none", borderRadius: 10,
+                padding: "12px 28px", fontSize: 14, fontWeight: 700, cursor: "pointer",
+              }}
+            >
+              Recharger
             </button>
           </div>
         </div>
