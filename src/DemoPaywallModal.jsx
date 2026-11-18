@@ -6,6 +6,7 @@
 import { useState } from "react";
 import { X, Check, Loader2, ArrowRight, Mail, Eye, EyeOff } from "lucide-react";
 import { supabase } from "./supabase.js";
+import { cleanEmail, isRepeatedSignup, sendResetEmail, logAuthEvent, logProblem } from "./authHelpers.js";
 
 const C = {
   bg: "#2C1F12", dark: "#3D2D1A", med: "#553F24",
@@ -24,21 +25,33 @@ export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "s
   const [loading, setLoading] = useState(false);
   const [planLoading, setPlanLoading] = useState(null);
   const [error, setError] = useState(null);
+  const [info, setInfo] = useState(null);
 
   // ── Inscription gratuite ──
   async function handleSignup(e) {
     e.preventDefault();
-    if (!email || !email.includes("@")) { setError("Entre une adresse email valide."); return; }
+    const mail = cleanEmail(email);
+    if (!mail || !mail.includes("@")) { setError("Entre une adresse email valide."); return; }
     if (password.length < 6) { setError("Le mot de passe doit faire au moins 6 caractères."); return; }
-    setLoading(true); setError(null);
-    const { error: err } = await supabase.auth.signUp({ email, password });
+    setLoading(true); setError(null); setInfo(null);
+    const { data, error: err } = await supabase.auth.signUp({ email: mail, password });
     if (err) {
       if (err.message.includes("already")) {
-        setError("Tu as déjà un compte.");
+        logAuthEvent("signup_existing");
+        setError("Ce compte existe déjà. Connecte-toi, ou crée ton mot de passe avec « Mot de passe oublié ».");
         setAuthTab("login");
         setLoading(false); return;
       }
+      logAuthEvent("signup_failed", err.message);
       setError(err.message);
+      setLoading(false); return;
+    }
+    // Compte déjà existant : Supabase répond "succès" sans rien faire → on le dit clairement
+    if (isRepeatedSignup(data)) {
+      logAuthEvent("signup_existing");
+      setEmail(mail);
+      setAuthTab("login");
+      setError("Ce compte existe déjà (par exemple après ton achat). Clique sur « Première connexion ou mot de passe oublié » pour créer ton mot de passe.");
       setLoading(false); return;
     }
     setLoading(false);
@@ -48,23 +61,43 @@ export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "s
   // ── Connexion ──
   async function handleLogin(e) {
     e.preventDefault();
-    if (!email || !email.includes("@")) { setError("Entre une adresse email valide."); return; }
+    const mail = cleanEmail(email);
+    if (!mail || !mail.includes("@")) { setError("Entre une adresse email valide."); return; }
     if (!password) { setError("Entre ton mot de passe."); return; }
-    setLoading(true); setError(null);
-    const { error: err } = await supabase.auth.signInWithPassword({ email, password });
+    setLoading(true); setError(null); setInfo(null);
+    const { error: err } = await supabase.auth.signInWithPassword({ email: mail, password });
     if (err) {
-      setError("Email ou mot de passe incorrect.");
+      logAuthEvent("login_failed", err.message);
+      setError("Email ou mot de passe incorrect. Si tu viens d'acheter ou si tu n'as pas encore de mot de passe, clique sur « Première connexion ou mot de passe oublié » ci-dessous.");
       setLoading(false); return;
     }
     setLoading(false);
     onSignedUp?.();
   }
 
+  // ── Mot de passe oublié / première connexion ──
+  async function handleForgot() {
+    const mail = cleanEmail(email);
+    if (!mail || !mail.includes("@")) { setError("Entre d'abord ton adresse email ci-dessus."); return; }
+    setLoading(true); setError(null); setInfo(null);
+    const { error: err } = await sendResetEmail(mail);
+    setLoading(false);
+    if (err) {
+      logAuthEvent("reset_failed", err.message);
+      setError("Impossible d'envoyer l'email pour le moment. Vérifie l'adresse et réessaie dans une minute.");
+      return;
+    }
+    logAuthEvent("reset_sent");
+    setInfo("C'est envoyé ! Ouvre l'email (pense aux spams et à Promotions) et clique sur le lien depuis ton navigateur habituel (Chrome ou Safari).");
+  }
+
   // ── Débloquer : étape email (pas de création de compte avant paiement)──
   async function handlePayEmail(e) {
     e.preventDefault();
-    if (!payEmail || !payEmail.includes("@")) { setError("Entre une adresse email valide."); return; }
-    localStorage.setItem("tgp-demo-email", payEmail.toLowerCase().trim());
+    const mail = cleanEmail(payEmail);
+    if (!mail || !mail.includes("@")) { setError("Entre une adresse email valide."); return; }
+    setPayEmail(mail);
+    localStorage.setItem("tgp-demo-email", mail);
     setStep("plan");
   }
 
@@ -77,7 +110,7 @@ export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "s
       body: JSON.stringify({ plan, email: payEmail, demoMode: true }),
     });
     const data = await res.json();
-    if (!res.ok || !data.url) { setError(data.error || "Erreur paiement"); setPlanLoading(null); return; }
+    if (!res.ok || !data.url) { logProblem("paiement_demarrage_impossible", data.error); setError(data.error || "Erreur paiement"); setPlanLoading(null); return; }
     localStorage.setItem("tgp-pending-plan", plan);
     sessionStorage.setItem("tgp-going-to-stripe", "1");
     window.location.href = data.url;
@@ -222,8 +255,13 @@ export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "s
                     </button>
                   </div>
                   {error && (
-                    <div style={{ padding: "10px 14px", background: "rgba(181,74,58,0.15)", border: "1px solid rgba(181,74,58,0.4)", borderRadius: 8, color: "#F4B8A8", fontSize: 13 }}>
+                    <div style={{ padding: "10px 14px", background: "rgba(181,74,58,0.15)", border: "1px solid rgba(181,74,58,0.4)", borderRadius: 8, color: "#F4B8A8", fontSize: 13, lineHeight: 1.5 }}>
                       {error}
+                    </div>
+                  )}
+                  {info && (
+                    <div style={{ padding: "10px 14px", background: "rgba(90,140,90,0.15)", border: "1px solid rgba(90,140,90,0.4)", borderRadius: 8, color: "#BFE0BF", fontSize: 13, lineHeight: 1.5 }}>
+                      {info}
                     </div>
                   )}
                   <button type="submit" disabled={loading} style={{
@@ -233,6 +271,12 @@ export default function DemoPaywallModal({ onClose, onSignedUp, initialStep = "s
                     display: "flex", alignItems: "center", justifyContent: "center", gap: 8, opacity: loading ? 0.7 : 1,
                   }}>
                     {loading ? <Loader2 size={18} className="dm-spin" /> : <>Se connecter <ArrowRight size={18} /></>}
+                  </button>
+                  <button type="button" onClick={handleForgot} disabled={loading} style={{
+                    background: "none", border: "none", color: C.beige, fontSize: 13,
+                    cursor: "pointer", textDecoration: "underline", fontFamily: "'Instrument Sans', sans-serif", padding: 4,
+                  }}>
+                    Première connexion ou mot de passe oublié ?
                   </button>
                 </form>
               </>

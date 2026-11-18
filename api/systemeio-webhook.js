@@ -12,6 +12,7 @@
 import { createClient } from '@supabase/supabase-js';
 import { addToMailerLiteGroup } from './_mailerlite.js';
 import { sendMetaPurchase } from './_meta-capi.js';
+import { logProblem } from './_problem.js';
 
 const supabase = createClient(
   process.env.SUPABASE_URL,
@@ -105,6 +106,7 @@ export default async function handler(req, res) {
       const { error: rErr } = await supabase.from('user_data').update(rUpdate).eq('id', rUser.id);
       if (rErr) {
         console.error('SYSTEMEIO WEBHOOK : retrait accès échoué', rErr);
+        await logProblem('webhook_retrait_acces_echoue', rErr.message);
         return res.status(500).json({ error: 'update failed' });
       }
       await supabase.from('tracking_events').insert({
@@ -168,6 +170,7 @@ export default async function handler(req, res) {
         const authUser = await findAuthUserByEmail(email);
         if (!authUser) {
           console.error('SYSTEMEIO WEBHOOK : création compte impossible', inviteErr);
+          await logProblem('webhook_creation_compte_impossible', inviteErr.message);
           return res.status(500).json({ error: 'create user failed' });
         }
         userId = authUser.id;
@@ -202,6 +205,7 @@ export default async function handler(req, res) {
     const { error: updErr } = await supabase.from('user_data').update(update).eq('id', userId);
     if (updErr) {
       console.error('SYSTEMEIO WEBHOOK : mise à jour user_data échouée', updErr);
+      await logProblem('webhook_acces_non_debloque', updErr.message);
       return res.status(500).json({ error: 'update failed' });
     }
 
@@ -222,7 +226,10 @@ export default async function handler(req, res) {
         lastName: contact?.fields?.surname,
         country: contact?.fields?.country,
       });
-      if (!capi.ok) console.warn('SYSTEMEIO WEBHOOK : Meta CAPI non envoyé', capi.error);
+      if (!capi.ok) {
+        console.warn('SYSTEMEIO WEBHOOK : Meta CAPI non envoyé', capi.error);
+        await logProblem('meta_achat_non_envoye', capi.error);
+      }
       else console.log('SYSTEMEIO WEBHOOK : achat envoyé à Meta', plan);
     } catch (capiErr) {
       console.warn('SYSTEMEIO WEBHOOK : Meta CAPI exception', capiErr);
@@ -246,12 +253,16 @@ export default async function handler(req, res) {
 
     // 7) MailerLite
     const ml = await addToMailerLiteGroup(email);
-    if (!ml.ok) console.warn('SYSTEMEIO WEBHOOK : MailerLite non synchronisé pour', email, ml.error);
+    if (!ml.ok) {
+      console.warn('SYSTEMEIO WEBHOOK : MailerLite non synchronisé pour', email, ml.error);
+      await logProblem('mailerlite_non_synchronise', ml.error);
+    }
 
     console.log('SYSTEMEIO WEBHOOK : accès débloqué', email, plan, newExpiry || 'à vie');
     return res.status(200).json({ ok: true, plan });
   } catch (err) {
     console.error('SYSTEMEIO WEBHOOK error:', err);
+    await logProblem('webhook_erreur_inattendue', err.message);
     return res.status(500).json({ error: err.message });
   }
 }

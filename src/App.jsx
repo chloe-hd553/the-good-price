@@ -11,6 +11,7 @@ import OnboardingTour from "./OnboardingTour.jsx";
 import AdminPage from "./AdminPage.jsx";
 import DemoPaywallModal from "./DemoPaywallModal.jsx";
 import ChoixPlanPage from "./ChoixPlanPage.jsx";
+import { cleanEmail, isRepeatedSignup, sendResetEmail, logAuthEvent, logProblem } from "./authHelpers.js";
 
 const TOUR_ENABLED = () => true;
 
@@ -634,13 +635,13 @@ function AuthPage({ onAuth }) {
   const handleReset = async (e) => {
     e.preventDefault();
     setLoading(true); setError(null); setSuccess(null);
-    const { error: err } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin,
-    });
+    const { error: err } = await sendResetEmail(email);
     if (err) {
+      logAuthEvent("reset_failed", err.message);
       setError("Impossible d'envoyer l'email. Vérifie l'adresse saisie.");
     } else {
-      setSuccess("Un lien de réinitialisation vient de t'être envoyé. Pense à vérifier tes spams !");
+      logAuthEvent("reset_sent");
+      setSuccess("Un lien vient de t'être envoyé. Pense à vérifier tes spams et l'onglet Promotions, et ouvre-le depuis ton navigateur habituel (Chrome ou Safari).");
     }
     setLoading(false);
   };
@@ -649,9 +650,19 @@ function AuthPage({ onAuth }) {
     e.preventDefault();
     setLoading(true); setError(null); setSuccess(null);
     try {
+      const mail = cleanEmail(email);
       if (mode === "signup") {
-        const { data, error: err } = await supabase.auth.signUp({ email, password });
+        const { data, error: err } = await supabase.auth.signUp({ email: mail, password });
         if (err) throw err;
+        if (isRepeatedSignup(data)) {
+          // Compte déjà existant : Supabase répond "succès" sans rien faire
+          logAuthEvent("signup_existing");
+          setEmail(mail);
+          setMode("login");
+          setError("Ce compte existe déjà (par exemple après ton achat). Clique sur « J'ai oublié mon mot de passe » pour créer ton mot de passe.");
+          setLoading(false);
+          return;
+        }
         if (data.user && !data.user.email_confirmed_at) {
           if (window.fbq) window.fbq('track', 'CompleteRegistration');
           setSuccess("Un email de confirmation vient de t'être envoyé. Clique sur le lien qu'il contient pour activer ton compte — pense à vérifier tes spams si tu ne le vois pas. Une fois confirmé, reviens ici pour te connecter.");
@@ -667,7 +678,7 @@ function AuthPage({ onAuth }) {
           onAuth(data.user);
         }
       } else {
-        const { data, error: err } = await supabase.auth.signInWithPassword({ email, password });
+        const { data, error: err } = await supabase.auth.signInWithPassword({ email: mail, password });
         if (err) throw err;
         if (remember) {
           localStorage.setItem("tgp-remember", "true");
@@ -678,7 +689,8 @@ function AuthPage({ onAuth }) {
         onAuth(data.user);
       }
     } catch (err) {
-      setError(mode === "login" ? "Email ou mot de passe incorrect." : err.message.includes("already") ? "Cet email est déjà utilisé. Connecte-toi." : "Erreur lors de l'inscription. Réessaie.");
+      logAuthEvent(mode === "login" ? "login_failed" : "signup_failed", err?.message);
+      setError(mode === "login" ? "Email ou mot de passe incorrect. Première connexion ou pas de mot de passe ? Clique sur « J'ai oublié mon mot de passe »." : err.message.includes("already") ? "Cet email est déjà utilisé. Connecte-toi." : "Erreur lors de l'inscription. Réessaie.");
     }
     setLoading(false);
   };
@@ -826,6 +838,75 @@ function ResetPasswordScreen({ onDone, welcome = false }) {
                 </button>
               </form>
             )}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── LIEN EXPIRÉ / DÉJÀ UTILISÉ ── */
+function LinkExpiredScreen({ onBack }) {
+  const [email, setEmail] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [success, setSuccess] = useState(false);
+
+  useEffect(() => { logAuthEvent("link_expired"); }, []);
+
+  const handleSend = async (e) => {
+    e.preventDefault();
+    const mail = cleanEmail(email);
+    if (!mail || !mail.includes("@")) { setError("Entre une adresse email valide."); return; }
+    setLoading(true); setError(null);
+    const { error: err } = await sendResetEmail(mail);
+    setLoading(false);
+    if (err) {
+      logAuthEvent("reset_failed", err.message);
+      setError("Impossible d'envoyer l'email pour le moment. Réessaie dans une minute.");
+      return;
+    }
+    logAuthEvent("reset_sent", "after_expired_link");
+    setSuccess(true);
+  };
+
+  return (
+    <div className="tgp" style={{ display: "flex", flexDirection: "column", minHeight: "100vh" }}>
+      <style>{styles}</style>
+      <div style={{ flex: 1, display: "flex", alignItems: "center", justifyContent: "center", padding: 24 }}>
+        <div style={{ maxWidth: 400, width: "100%", textAlign: "center" }}>
+          <div style={{ display: "flex", justifyContent: "center", marginBottom: 20 }}>
+            <div className="hdr-logo" style={{ width: 56, height: 56 }}>
+              <Scissors size={24} strokeWidth={2} />
+            </div>
+          </div>
+          <div className="hdr-name" style={{ fontSize: 28, marginBottom: 4, color: C.beige }}>The Good Price</div>
+          <div style={{ textAlign: "left", marginTop: 24 }}>
+            <div style={{ color: C.beige, fontSize: 20, fontWeight: 600, marginBottom: 4, fontFamily: "'Cormorant Garamond',serif" }}>
+              Ce lien n'est plus valable
+            </div>
+            <div style={{ color: C.light, fontSize: 14, marginBottom: 24, lineHeight: 1.5 }}>
+              Le lien a expiré ou a déjà été utilisé (cela arrive quand un lien est ouvert deux fois, ou par la messagerie avant toi). Pas de souci : entre ton email, je t'envoie un nouveau lien.
+            </div>
+            {error && <div style={{ color: C.redText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(181,74,58,0.1)", borderRadius: 8 }}>{error}</div>}
+            {success ? (
+              <div style={{ color: C.greenText, fontSize: 13, marginBottom: 12, padding: "10px 14px", background: "rgba(45,59,40,0.3)", borderRadius: 8, lineHeight: 1.5 }}>
+                Nouveau lien envoyé ! Ouvre l'email (spams et Promotions inclus) et clique dessus une seule fois, depuis Chrome ou Safari.
+              </div>
+            ) : (
+              <form onSubmit={handleSend} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+                <div style={{ position: "relative" }}>
+                  <Mail size={16} color={C.light} style={{ position: "absolute", left: 14, top: "50%", transform: "translateY(-50%)" }} />
+                  <input className="auth-input" type="email" placeholder="Ton email" value={email} onChange={e => setEmail(e.target.value)} required style={{ paddingLeft: 42 }} />
+                </div>
+                <button className="auth-btn" type="submit" disabled={loading} style={{ marginTop: 4 }}>
+                  {loading ? "Envoi..." : "Renvoyer un lien"}
+                </button>
+              </form>
+            )}
+            <div style={{ textAlign: "center", marginTop: 18 }}>
+              <button className="auth-link" onClick={onBack} style={{ fontSize: 13, color: C.light }}>Retour à l'application</button>
+            </div>
           </div>
         </div>
       </div>
@@ -1592,6 +1673,19 @@ export default function App() {
     if (typeof window === "undefined") return false;
     return window.location.hash.includes("type=invite");
   });
+  // L'utilisatrice arrive depuis un lien e-mail (bienvenue / mot de passe oublié / confirmation) :
+  // on ne la déconnecte surtout pas automatiquement (voir plus bas).
+  const [arrivedViaEmailLink] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return /type=(recovery|invite|signup|magiclink|email_change)/.test(window.location.hash);
+  });
+  // Lien expiré ou déjà utilisé : Supabase renvoie #error=access_denied&error_code=otp_expired…
+  const [linkError, setLinkError] = useState(() => {
+    if (typeof window === "undefined") return false;
+    const h = window.location.hash;
+    const q = window.location.search;
+    return /error_code=|error=access_denied/.test(h) || /error_code=|error=access_denied/.test(q);
+  });
   const [showInstall, setShowInstall] = useState(false);
   const [showInstallIOS, setShowInstallIOS] = useState(false);
   const [showTour, setShowTour] = useState(false);
@@ -1684,10 +1778,35 @@ export default function App() {
     setDemoMode(false);
   }, [user]); // eslint-disable-line
 
+  // Filet de sécurité : toute erreur inattendue de l'appli est tracée (anonymement) pour le résumé quotidien
+  useEffect(() => {
+    const ignore = (msg = "") =>
+      /ResizeObserver|Script error|chrome-extension|moz-extension|Failed to fetch|Load failed|NetworkError|AbortError|Non-Error/i.test(msg);
+    const onError = (e) => {
+      const msg = e?.message || "";
+      if (!msg || ignore(msg) || ignore(e?.filename || "")) return;
+      logProblem("erreur_appli", msg);
+    };
+    const onRejection = (e) => {
+      const msg = (e?.reason && (e.reason.message || String(e.reason))) || "";
+      if (!msg || ignore(msg)) return;
+      logProblem("promesse_rejetee", msg);
+    };
+    window.addEventListener("error", onError);
+    window.addEventListener("unhandledrejection", onRejection);
+    return () => {
+      window.removeEventListener("error", onError);
+      window.removeEventListener("unhandledrejection", onRejection);
+    };
+  }, []);
+
   // Check auth session on mount — gestion "rester connectée"
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
+        // Arrivée par un lien e-mail (bienvenue / reset) : on garde la session,
+        // sinon la cliente est déconnectée avant d'avoir pu créer son mot de passe.
+        if (arrivedViaEmailLink) sessionStorage.setItem("tgp-active", "1");
         const rememberMe = localStorage.getItem("tgp-remember") === "true";
         const sameSession = sessionStorage.getItem("tgp-active") === "1";
         if (!rememberMe && !sameSession) {
@@ -1705,6 +1824,7 @@ export default function App() {
     });
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
       if (event === "PASSWORD_RECOVERY") {
+        sessionStorage.setItem("tgp-active", "1"); // ne pas la déconnecter avant qu'elle crée son mot de passe
         setIsRecovery(true);
       }
       setUser(session?.user || null);
@@ -1805,15 +1925,21 @@ export default function App() {
         // des valeurs vides par-dessus les vraies données si le chargement échoue.
         let data = null;
         let loaded = false;
+        let lastErr = null;
         for (let i = 0; i < 4 && !loaded; i++) {
           const res = await supabase.from("user_data").select("*").eq("id", user.id).maybeSingle();
           if (!res.error) { data = res.data; loaded = true; }
           else {
+            lastErr = res.error;
             console.error("Load error:", res.error);
             await new Promise(r => setTimeout(r, 1500 * (i + 1)));
           }
         }
-        if (!loaded) { setLoadError(true); return; } // ok reste false → aucune sauvegarde
+        if (!loaded) {
+          logProblem("chargement_donnees_impossible", lastErr?.message);
+          setLoadError(true);
+          return; // ok reste false → aucune sauvegarde
+        }
         if (data) {
           setUserData(data);
           if (data.sal) setSal(data.sal);
@@ -1851,6 +1977,7 @@ export default function App() {
         }
       } catch (e) {
         console.error("Load exception:", e);
+        logProblem("chargement_donnees_exception", e?.message);
         setLoadError(true);
         return; // on ne sauvegarde rien tant que le chargement n'a pas réussi
       }
@@ -1871,8 +1998,8 @@ export default function App() {
           sal, pro, tar,
           updated_at: new Date().toISOString(),
         });
-        if (saveErr) { console.error("Save error:", saveErr); setSaveError(true); }
-      } catch (err) { console.error("Save error:", err); setSaveError(true); }
+        if (saveErr) { console.error("Save error:", saveErr); logProblem("sauvegarde_echouee", saveErr.message); setSaveError(true); }
+      } catch (err) { console.error("Save error:", err); logProblem("sauvegarde_exception", err?.message); setSaveError(true); }
       setTimeout(() => setSv(false), 800);
     }, 1500);
     return () => clearTimeout(t);
@@ -1961,6 +2088,11 @@ export default function App() {
   const handleInstallSnooze = () => { setShowInstall(false); setTimeout(triggerPendingTour, 100); };
   const handleInstallIOSDismiss = () => { if (user?.id) localStorage.setItem(`tgp-install-ios-dismissed-${user.id}`, "true"); setShowInstallIOS(false); setTimeout(triggerPendingTour, 100); };
   const handleInstallIOSSnooze = () => { setShowInstallIOS(false); setTimeout(triggerPendingTour, 100); };
+
+  // Lien e-mail expiré ou déjà utilisé → écran clair + bouton "Renvoyer un lien"
+  if (linkError && !user) {
+    return <LinkExpiredScreen onBack={() => { window.history.replaceState({}, "", "/"); setLinkError(false); }} />;
+  }
 
   // Reset mot de passe (lien email type=recovery)
   if (isRecovery && user) {

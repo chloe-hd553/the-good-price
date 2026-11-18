@@ -5,6 +5,7 @@ import Stripe from 'stripe';
 import { createClient } from '@supabase/supabase-js';
 import { addToMailerLiteGroup } from './_mailerlite.js';
 import { sendMetaPurchase } from './_meta-capi.js';
+import { logProblem } from './_problem.js';
 
 export const config = {
   api: { bodyParser: false },
@@ -146,6 +147,7 @@ export default async function handler(req, res) {
 
         if (!userId) {
           console.error('No userId resolved in session', session.id);
+          await logProblem('stripe_paiement_sans_compte', session.id);
           break;
         }
 
@@ -283,6 +285,7 @@ export default async function handler(req, res) {
     return res.status(200).json({ received: true });
   } catch (err) {
     console.error('Webhook handler error:', err);
+    await logProblem('stripe_webhook_erreur_inattendue', err.message);
     return res.status(500).json({ error: err.message });
   }
 }
