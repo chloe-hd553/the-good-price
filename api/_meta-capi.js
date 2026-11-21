@@ -6,9 +6,16 @@ import crypto from 'crypto';
 
 const PIXEL_ID = '1289328349935693';
 
-// Valeur envoyée à Meta : paiement unique = 97 €, mensuel = 12 x 9,99 € = 119,88 €
+// Valeur envoyée à Meta (à modifier ici quand les tarifs changent) :
+//   paiement unique = 97 €, mensuel = 12 x 9,99 € = 119,88 €, accès 6 mois = 34 €
+export const PURCHASE_VALUES = {
+  oneshot: 97,
+  monthly: 119.88,
+  sixmonths: 34,
+};
+
 export function purchaseValue(plan) {
-  return plan === 'monthly' ? 119.88 : 97;
+  return PURCHASE_VALUES[plan] ?? 97;
 }
 
 function sha256(value) {

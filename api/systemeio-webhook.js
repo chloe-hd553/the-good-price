@@ -7,6 +7,7 @@
 // Tags reconnus (par leur nom exact dans Systeme.io) :
 //   - "The Good Price - Appli (Paiement unique)"  -> accès 1 an
 //   - "The Good Price - Appli (12 mensualités)"   -> accès 1 an
+//   - "The Good Price - Appli (Accès 6 mois)"     -> accès 6 mois
 // Tout autre tag est ignoré (la requête est simplement enregistrée dans les logs).
 
 import { createClient } from '@supabase/supabase-js';
@@ -21,16 +22,22 @@ const supabase = createClient(
 
 const LIFETIME_FROM = new Date('2090-01-01').getTime(); // comptes "à vie" : on n'y touche pas
 
+// Tags reconnus : "The Good Price - Appli (Paiement unique)" / "(12 mensualités)" / "(Accès 6 mois)"
 function planFromTagName(name) {
   const n = String(name || '').toLowerCase();
   if (n.includes('paiement unique')) return 'oneshot';
   if (n.includes('12 mensualit')) return 'monthly';
+  if (n.includes('6 mois')) return 'sixmonths';
   return null;
 }
 
-function addOneYear(from) {
+// Durée d'accès par formule (en mois)
+const MONTHS_BY_PLAN = { oneshot: 12, monthly: 12, sixmonths: 6 };
+const monthsFor = (plan) => MONTHS_BY_PLAN[plan] || 12;
+
+function addMonths(from, months) {
   const d = new Date(from);
-  d.setFullYear(d.getFullYear() + 1);
+  d.setMonth(d.getMonth() + months);
   return d.toISOString();
 }
 
@@ -98,7 +105,8 @@ export default async function handler(req, res) {
         return res.status(200).json({ ignored: 'lifetime' }); // accès à vie : on n'y touche pas
       }
       const reduced = new Date(rExpiry || Date.now());
-      reduced.setFullYear(reduced.getFullYear() - 1);
+      // Tag retiré : on retire la durée de CE tag (6 ou 12 mois). Vente annulée sans tag : 12 mois par défaut.
+      reduced.setMonth(reduced.getMonth() - monthsFor(rPlan));
       const stillActive = reduced.getTime() > Date.now();
       const rUpdate = stillActive
         ? { expires_at: reduced.toISOString(), updated_at: new Date().toISOString() }
@@ -192,7 +200,7 @@ export default async function handler(req, res) {
       newExpiry = null; // accès à vie : on ne change pas la date
     } else {
       const base = Math.max(Date.now(), currentExpiry || 0);
-      newExpiry = addOneYear(base);
+      newExpiry = addMonths(base, monthsFor(plan));
     }
 
     const update = {
